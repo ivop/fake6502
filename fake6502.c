@@ -255,10 +255,9 @@ static void dey() {
 
 static void eor() {
     penaltyop = 1;
-    uint16_t result = A ^ getvalue();
-    zerocalc(result);
-    signcalc(result);
-    saveaccum(result);
+    A = A ^ getvalue();
+    zerocalc(A);
+    signcalc(A);
 }
 
 static void inc() {
