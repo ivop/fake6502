@@ -12,12 +12,20 @@
 ; Modified for Mad-Assembler by Ivo van Poorten
 ; On error, it hangs with jmp *. Use debugger to see what failed.
 
+; mads -l -o:bird6502.bin bird6502.asm
+;
+; or
+;
+; mads -d:ATARI=1 -o:bird6502.xex bird6502.asm
+
+.ifndef ATARI
     opt h-
     opt f+
 
     org $0
 
     .byte 0
+.endif
 
 data_ptr        equ     $08
 
@@ -956,9 +964,11 @@ roraok
     lda     #00
     clc
     pla                 ; doesn't affect flags
-    bmi     plaerr
-    bne     plaerr
-    bcs     plaerr
+;    bmi     plaerr
+    bpl     plaerr
+;    bne     plaerr
+    beq     plaerr
+    bcs     *
     bcc     plaok
 
 plaerr
@@ -974,5 +984,7 @@ n55
 nAA
     .byte $AA, 12, 34
 
+.ifndef ATARI
     org $fffa
     .word 0, run, 0
+.endif

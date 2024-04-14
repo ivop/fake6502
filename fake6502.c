@@ -33,6 +33,10 @@ uint64_t instructions, clockticks6502, clockgoal6502;
 static uint16_t ea;
 static uint8_t opcode, oldstatus;
 
+uint8_t getP(void) {
+    return makeP;
+}
+
 static inline void calcZ  (uint8_t  x) { Z = !x; }
 static inline void calcN  (uint8_t  x) { N = x & 0x80; }
 static inline void calcZN (uint8_t x)  { calcZ(x), calcN(x); }

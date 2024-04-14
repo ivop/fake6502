@@ -14,967 +14,979 @@ Source: bird6502.asm
     12 				; Modified for Mad-Assembler by Ivo van Poorten
     13 				; On error, it hangs with jmp *. Use debugger to see what failed.
     14
-    15 				    opt h-
-    16 				    opt f+
-    17
-    18 				    org $0
-    19
-    20 0000 00			    .byte 0
-    21
-    22 = 0008			data_ptr        equ     $08
-    23
-    24 0001			    org $8000
-    25
-    26 8000			run:
-    27
-    28 				; If the program gets here then we know at least the boot strap
-    29 				; worked okay, which is in itself a good test of processor health.
-    30
-    31 8000 EA			    nop
-    32
-    33 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    34 				; First thing to test is branches. If you can't branch reliably
-    35 				; then the validity of the remaining tests are in question.
-    36 				; Test branches and also simultaneously some other simple
-    37 				; instructions.
-    38 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    39
-    40 8001 78			    sei
-    41
-    42 8002 38			    sec
-    43 8003 B0 0D		    bcs     bcsok
-    44
-    45 8005 4C 05 80		    jmp *
-    46 8008 22 23 33 1A 26 21 +     .byte "BCS:FAILED"
+    15 				; mads -l -o:bird6502.bin bird6502.asm
+    16 				;
+    17 				; or
+    18 				;
+    19 				; mads -d:ATARI=1 -o:bird6502.xex bird6502.asm
+    20
+    21 				.ifndef ATARI
+    22 				    opt h-
+    23 				    opt f+
+    24
+    25 				    org $0
+    26
+    27 0000 00			    .byte 0
+    28 				.endif
+    29
+    30 = 0008			data_ptr        equ     $08
+    31
+    32 0001			    org $8000
+    33
+    34 8000			run:
+    35
+    36 				; If the program gets here then we know at least the boot strap
+    37 				; worked okay, which is in itself a good test of processor health.
+    38
+    39 8000 EA			    nop
+    40
+    41 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    42 				; First thing to test is branches. If you can't branch reliably
+    43 				; then the validity of the remaining tests are in question.
+    44 				; Test branches and also simultaneously some other simple
+    45 				; instructions.
+    46 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     47
-    48 8012			bcsok
-    49 8012 18			    clc
-    50 8013 90 0D		    bcc     bccok
-    51
-    52 8015 4C 15 80		    jmp *
-    53 8018 22 23 23 1A 26 21 +     .byte "BCC:FAILED"
-    54
-    55 8022			bccok
-    56 8022 A9 00		    lda     #$00
-    57 8024 F0 0D		    beq     beqok
-    58
-    59 8026 4C 26 80		    jmp *
-    60 8029 22 25 31 1A 26 21 +     .byte "BEQ:FAILED"
-    61 8033			beqok
-    62 8033 A9 80		    lda     #$80
-    63 8035 D0 0D		    bne     bneok
-    64
-    65 8037 4C 37 80		    jmp *
-    66 803A 22 2E 25 1A 26 21 +     .byte "BNE:FAILED"
-    67 8044			bneok
-    68 8044 09 00		    ora     #$00
-    69 8046 30 0D		    bmi     bmiok
-    70
-    71 8048 4C 48 80		    jmp *
-    72 804B 22 2D 29 1A 26 21 +     .byte "BMI:FAILED"
-    73 8055			bmiok
-    74 8055 49 80		    eor     #$80
-    75 8057 10 0D		    bpl     bplok
-    76
-    77 8059 4C 59 80		    jmp *
-    78 805C 22 30 2C 1A 26 21 +     .byte "BPL:FAILED"
-    79 8066			bplok
-    80 8066 A9 7F		    lda     #$7f
-    81 8068 18			    clc
-    82 8069 69 10		    adc     #$10        ; should give signed overflow
-    83 806B 70 0D		    bvs     bvsok
+    48 8001 78			    sei
+    49
+    50 8002 38			    sec
+    51 8003 B0 0D		    bcs     bcsok
+    52
+    53 8005 4C 05 80		    jmp *
+    54 8008 22 23 33 1A 26 21 +     .byte "BCS:FAILED"
+    55
+    56 8012			bcsok
+    57 8012 18			    clc
+    58 8013 90 0D		    bcc     bccok
+    59
+    60 8015 4C 15 80		    jmp *
+    61 8018 22 23 23 1A 26 21 +     .byte "BCC:FAILED"
+    62
+    63 8022			bccok
+    64 8022 A9 00		    lda     #$00
+    65 8024 F0 0D		    beq     beqok
+    66
+    67 8026 4C 26 80		    jmp *
+    68 8029 22 25 31 1A 26 21 +     .byte "BEQ:FAILED"
+    69 8033			beqok
+    70 8033 A9 80		    lda     #$80
+    71 8035 D0 0D		    bne     bneok
+    72
+    73 8037 4C 37 80		    jmp *
+    74 803A 22 2E 25 1A 26 21 +     .byte "BNE:FAILED"
+    75 8044			bneok
+    76 8044 09 00		    ora     #$00
+    77 8046 30 0D		    bmi     bmiok
+    78
+    79 8048 4C 48 80		    jmp *
+    80 804B 22 2D 29 1A 26 21 +     .byte "BMI:FAILED"
+    81 8055			bmiok
+    82 8055 49 80		    eor     #$80
+    83 8057 10 0D		    bpl     bplok
     84
-    85 806D 4C 6D 80		    jmp *
-    86 8070 22 36 33 1A 26 21 +     .byte "BVS:FAILED"
-    87 807A			bvsok
-    88 807A B8			    clv
-    89 807B 50 0D		    bvc     bvcok
-    90
-    91 807D 4C 7D 80		    jmp *
-    92 8080 22 36 23 1A 26 21 +     .byte "BVC:FAILED"
-    93 808A			bvcok
-    94
-    95 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-    96 				; Compare Instructions
-    97 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+    85 8059 4C 59 80		    jmp *
+    86 805C 22 30 2C 1A 26 21 +     .byte "BPL:FAILED"
+    87 8066			bplok
+    88 8066 A9 7F		    lda     #$7f
+    89 8068 18			    clc
+    90 8069 69 10		    adc     #$10        ; should give signed overflow
+    91 806B 70 0D		    bvs     bvsok
+    92
+    93 806D 4C 6D 80		    jmp *
+    94 8070 22 36 33 1A 26 21 +     .byte "BVS:FAILED"
+    95 807A			bvsok
+    96 807A B8			    clv
+    97 807B 50 0D		    bvc     bvcok
     98
-    99 808A A9 1B		    lda     #27         ; bit 7 = 0
-   100 808C 18			    clc
-   101 808D C9 1B		    cmp     #27
-   102 808F 90 1A		    bcc     cmperr
-   103 8091 D0 18		    bne     cmperr
-   104 8093 30 16		    bmi     cmperr
-   105 8095 A9 A1		    lda     #$A1
-   106 8097 C9 14		    cmp     #20
-   107 8099 10 10		    bpl     cmperr      ; should be neg.
-   108 809B 38			    sec
-   109 809C A9 0A		    lda     #10
-   110 809E C9 14		    cmp     #20         ; should be a borrow here
-   111 80A0 B0 09		    bcs     cmperr
-   112 80A2 B8			    clv
-   113 80A3 A9 80		    lda     #$80        ; -128 - 32 = -160 should overflow
-   114 80A5 C9 20		    cmp     #$20        ; compare doesn't affect overflow
-   115 80A7 70 02		    bvs     cmperr
-   116 80A9 50 0D		    bvc     cmpok
-   117
-   118 80AB			cmperr
-   119 80AB 4C AB 80		    jmp *
-   120 80AE 23 2D 30 1A 26 21 +     .byte "CMP:FAILED"
-   121
-   122 80B8			cmpok
-   123 80B8 A2 1B		    ldx     #27
-   124 80BA 18			    clc
-   125 80BB E0 1B		    cpx     #27
-   126 80BD 90 19		    bcc     cpxerr
-   127 80BF D0 17		    bne     cpxerr
-   128 80C1 30 15		    bmi     cpxerr
-   129 80C3 A2 A1		    ldx     #$A1
-   130 80C5 E0 14		    cpx     #20
-   131 80C7 10 0F		    bpl     cpxerr
-   132 80C9 A2 0A		    ldx     #10
-   133 80CB E0 14		    cpx     #20         ; should be a borrow here
-   134 80CD B0 09		    bcs     cpxerr
-   135 80CF B8			    clv
-   136 80D0 A2 80		    ldx     #$80        ; -128 - 32 = -160 should overflow
-   137 80D2 E0 20		    cpx     #$20        ; but cpx shouldn't change overflow
-   138 80D4 70 02		    bvs     cpxerr      
-   139 80D6 50 0D		    bvc     cpxok
-   140
-   141 80D8			cpxerr
-   142 80D8 4C D8 80		    jmp *
-   143 80DB 23 30 38 1A 26 21 +     .byte "CPX:FAILED"
-   144
-   145 80E5			cpxok
-   146 80E5 A0 1B		    ldy     #27
-   147 80E7 18			    clc
-   148 80E8 C0 1B		    cpy     #27
-   149 80EA 90 19		    bcc     cpyerr
-   150 80EC D0 17		    bne     cpyerr
-   151 80EE 30 15		    bmi     cpyerr
-   152 80F0 A0 B0		    ldy     #$B0
-   153 80F2 C0 14		    cpy     #20
-   154 80F4 10 0F		    bpl     cpyerr
-   155 80F6 A0 0A		    ldy     #10
-   156 80F8 C0 14		    cpy     #20         ; should be a borrow here
-   157 80FA B0 09		    bcs     cpyerr
-   158 80FC B8			    clv
-   159 80FD A0 80		    ldy     #$80        ; -128 - 32 = -160 should overflow
-   160 80FF C0 20		    cpy     #$20        ; but cpy shouldn't change overflow
-   161 8101 70 02		    bvs     cpyerr      
-   162 8103 50 0D		    bvc     cpyok
-   163
-   164 8105			cpyerr
-   165 8105 4C 05 81		    jmp *
-   166 8108 23 30 39 1A 26 21 +     .byte "CPY:FAILED"
-   167
-   168 8112			cpyok
-   169
-   170
-   171 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   172 				; Load
-   173 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   174
-   175 				; lda
-   176
-   177 8112 18			    clc
-   178 8113 A9 00		    lda     #0
-   179 8115 D0 3F		    bne     ldaerr
-   180 8117 30 3D		    bmi     ldaerr
-   181 8119 B0 3B		    bcs     ldaerr
-   182 811B A9 80		    lda     #$80
-   183 811D F0 37		    beq     ldaerr
-   184 811F 10 35		    bpl     ldaerr
-   185
-   186 8121 A9 00		    lda     #$00
-   187 8123 8D 00 08		    sta     $800
-   188 8126 D0 2E		    bne     ldaerr
-   189 8128 30 2C		    bmi     ldaerr
-   190 812A B0 2A		    bcs     ldaerr
-   191 				    
-   192 812C A9 FF		    lda     #$ff
-   193 812E AD 00 08		    lda     $800
-   194 8131 D0 23		    bne     ldaerr
-   195 8133 30 21		    bmi     ldaerr
-   196 8135 B0 1F		    bcs     ldaerr
-   197 				    
-   198 8137 C9 00		    cmp     #0
-   199 8139 D0 1B		    bne     ldaerr
-   200 				    
-   201 813B 38			    sec
-   202 813C A9 FF		    lda     #$ff
-   203 813E 8D 00 08		    sta     $800
-   204 8141 F0 13		    beq     ldaerr
-   205 8143 10 11		    bpl     ldaerr
-   206 8145 90 0F		    bcc     ldaerr
-   207 				    
-   208 8147 A9 00		    lda     #0
-   209 8149 AD 00 08		    lda     $800
-   210 814C F0 08		    beq     ldaerr
-   211 814E 10 06		    bpl     ldaerr
-   212 8150 90 04		    bcc     ldaerr
-   213 				    
-   214 8152 C9 FF		    cmp     #$ff
-   215 8154 F0 0D		    beq     ldaok
-   216
-   217 8156			ldaerr
-   218 8156 4C 56 81		    jmp *
-   219 8159 2C 24 21 1A 26 21 +     .byte "LDA:FAILED"
-   220
-   221 8163			ldaok
-   222
-   223
-   224 				; ldx
-   225
-   226 8163 18			    clc
-   227 8164 A9 80		    lda     #$80        ; z = 0, n = 1
-   228 8166 A2 00		    ldx     #0
-   229 8168 B0 37		    bcs     ldxerr
-   230 816A D0 35		    bne     ldxerr
-   231 816C 30 33		    bmi     ldxerr
-   232
-   233 816E 8E 00 08		    stx     $800
-   234 8171 D0 2E		    bne     ldxerr
-   235 8173 30 2C		    bmi     ldxerr
-   236 8175 B0 2A		    bcs     ldxerr
-   237 				    
-   238 8177 A2 FF		    ldx     #$ff
-   239 8179 AE 00 08		    ldx     $800
-   240 817C D0 23		    bne     ldxerr
-   241 817E 30 21		    bmi     ldxerr
-   242 8180 B0 1F		    bcs     ldxerr
-   243 				    
-   244 8182 E0 00		    cpx     #0
-   245 8184 D0 1B		    bne     ldxerr
-   246 				    
-   247 8186 38			    sec
-   248 8187 A2 FF		    ldx     #$ff
-   249 8189 8E 00 08		    stx     $800
-   250 818C F0 13		    beq     ldxerr
-   251 818E 10 11		    bpl     ldxerr
-   252 8190 90 0F		    bcc     ldxerr
-   253 				    
-   254 8192 A2 00		    ldx     #0
-   255 8194 AE 00 08		    ldx     $800
-   256 8197 F0 08		    beq     ldxerr
-   257 8199 10 06		    bpl     ldxerr
-   258 819B 90 04		    bcc     ldxerr
-   259 				    
-   260 819D E0 FF		    cpx     #$ff
-   261 819F F0 0D		    beq     ldxok
-   262
-   263 81A1			ldxerr
-   264 81A1 4C A1 81		    jmp *
-   265 81A4 2C 24 38 1A 26 21 +     .byte "LDX:FAILED"
-   266
-   267
-   268 				; ldy
-   269
-   270 81AE			ldxok
-   271 81AE 18			    clc
-   272 81AF A9 80		    lda     #$80        ; z = 0, n = 1
-   273 81B1 A0 00		    ldy     #0
-   274 81B3 B0 37		    bcs     ldyerr
-   275 81B5 D0 35		    bne     ldyerr
-   276 81B7 30 33		    bmi     ldyerr
+    99 807D 4C 7D 80		    jmp *
+   100 8080 22 36 23 1A 26 21 +     .byte "BVC:FAILED"
+   101 808A			bvcok
+   102
+   103 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   104 				; Compare Instructions
+   105 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   106
+   107 808A A9 1B		    lda     #27         ; bit 7 = 0
+   108 808C 18			    clc
+   109 808D C9 1B		    cmp     #27
+   110 808F 90 1A		    bcc     cmperr
+   111 8091 D0 18		    bne     cmperr
+   112 8093 30 16		    bmi     cmperr
+   113 8095 A9 A1		    lda     #$A1
+   114 8097 C9 14		    cmp     #20
+   115 8099 10 10		    bpl     cmperr      ; should be neg.
+   116 809B 38			    sec
+   117 809C A9 0A		    lda     #10
+   118 809E C9 14		    cmp     #20         ; should be a borrow here
+   119 80A0 B0 09		    bcs     cmperr
+   120 80A2 B8			    clv
+   121 80A3 A9 80		    lda     #$80        ; -128 - 32 = -160 should overflow
+   122 80A5 C9 20		    cmp     #$20        ; compare doesn't affect overflow
+   123 80A7 70 02		    bvs     cmperr
+   124 80A9 50 0D		    bvc     cmpok
+   125
+   126 80AB			cmperr
+   127 80AB 4C AB 80		    jmp *
+   128 80AE 23 2D 30 1A 26 21 +     .byte "CMP:FAILED"
+   129
+   130 80B8			cmpok
+   131 80B8 A2 1B		    ldx     #27
+   132 80BA 18			    clc
+   133 80BB E0 1B		    cpx     #27
+   134 80BD 90 19		    bcc     cpxerr
+   135 80BF D0 17		    bne     cpxerr
+   136 80C1 30 15		    bmi     cpxerr
+   137 80C3 A2 A1		    ldx     #$A1
+   138 80C5 E0 14		    cpx     #20
+   139 80C7 10 0F		    bpl     cpxerr
+   140 80C9 A2 0A		    ldx     #10
+   141 80CB E0 14		    cpx     #20         ; should be a borrow here
+   142 80CD B0 09		    bcs     cpxerr
+   143 80CF B8			    clv
+   144 80D0 A2 80		    ldx     #$80        ; -128 - 32 = -160 should overflow
+   145 80D2 E0 20		    cpx     #$20        ; but cpx shouldn't change overflow
+   146 80D4 70 02		    bvs     cpxerr      
+   147 80D6 50 0D		    bvc     cpxok
+   148
+   149 80D8			cpxerr
+   150 80D8 4C D8 80		    jmp *
+   151 80DB 23 30 38 1A 26 21 +     .byte "CPX:FAILED"
+   152
+   153 80E5			cpxok
+   154 80E5 A0 1B		    ldy     #27
+   155 80E7 18			    clc
+   156 80E8 C0 1B		    cpy     #27
+   157 80EA 90 19		    bcc     cpyerr
+   158 80EC D0 17		    bne     cpyerr
+   159 80EE 30 15		    bmi     cpyerr
+   160 80F0 A0 B0		    ldy     #$B0
+   161 80F2 C0 14		    cpy     #20
+   162 80F4 10 0F		    bpl     cpyerr
+   163 80F6 A0 0A		    ldy     #10
+   164 80F8 C0 14		    cpy     #20         ; should be a borrow here
+   165 80FA B0 09		    bcs     cpyerr
+   166 80FC B8			    clv
+   167 80FD A0 80		    ldy     #$80        ; -128 - 32 = -160 should overflow
+   168 80FF C0 20		    cpy     #$20        ; but cpy shouldn't change overflow
+   169 8101 70 02		    bvs     cpyerr      
+   170 8103 50 0D		    bvc     cpyok
+   171
+   172 8105			cpyerr
+   173 8105 4C 05 81		    jmp *
+   174 8108 23 30 39 1A 26 21 +     .byte "CPY:FAILED"
+   175
+   176 8112			cpyok
+   177
+   178
+   179 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   180 				; Load
+   181 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   182
+   183 				; lda
+   184
+   185 8112 18			    clc
+   186 8113 A9 00		    lda     #0
+   187 8115 D0 3F		    bne     ldaerr
+   188 8117 30 3D		    bmi     ldaerr
+   189 8119 B0 3B		    bcs     ldaerr
+   190 811B A9 80		    lda     #$80
+   191 811D F0 37		    beq     ldaerr
+   192 811F 10 35		    bpl     ldaerr
+   193
+   194 8121 A9 00		    lda     #$00
+   195 8123 8D 00 08		    sta     $800
+   196 8126 D0 2E		    bne     ldaerr
+   197 8128 30 2C		    bmi     ldaerr
+   198 812A B0 2A		    bcs     ldaerr
+   199 				    
+   200 812C A9 FF		    lda     #$ff
+   201 812E AD 00 08		    lda     $800
+   202 8131 D0 23		    bne     ldaerr
+   203 8133 30 21		    bmi     ldaerr
+   204 8135 B0 1F		    bcs     ldaerr
+   205 				    
+   206 8137 C9 00		    cmp     #0
+   207 8139 D0 1B		    bne     ldaerr
+   208 				    
+   209 813B 38			    sec
+   210 813C A9 FF		    lda     #$ff
+   211 813E 8D 00 08		    sta     $800
+   212 8141 F0 13		    beq     ldaerr
+   213 8143 10 11		    bpl     ldaerr
+   214 8145 90 0F		    bcc     ldaerr
+   215 				    
+   216 8147 A9 00		    lda     #0
+   217 8149 AD 00 08		    lda     $800
+   218 814C F0 08		    beq     ldaerr
+   219 814E 10 06		    bpl     ldaerr
+   220 8150 90 04		    bcc     ldaerr
+   221 				    
+   222 8152 C9 FF		    cmp     #$ff
+   223 8154 F0 0D		    beq     ldaok
+   224
+   225 8156			ldaerr
+   226 8156 4C 56 81		    jmp *
+   227 8159 2C 24 21 1A 26 21 +     .byte "LDA:FAILED"
+   228
+   229 8163			ldaok
+   230
+   231
+   232 				; ldx
+   233
+   234 8163 18			    clc
+   235 8164 A9 80		    lda     #$80        ; z = 0, n = 1
+   236 8166 A2 00		    ldx     #0
+   237 8168 B0 37		    bcs     ldxerr
+   238 816A D0 35		    bne     ldxerr
+   239 816C 30 33		    bmi     ldxerr
+   240
+   241 816E 8E 00 08		    stx     $800
+   242 8171 D0 2E		    bne     ldxerr
+   243 8173 30 2C		    bmi     ldxerr
+   244 8175 B0 2A		    bcs     ldxerr
+   245 				    
+   246 8177 A2 FF		    ldx     #$ff
+   247 8179 AE 00 08		    ldx     $800
+   248 817C D0 23		    bne     ldxerr
+   249 817E 30 21		    bmi     ldxerr
+   250 8180 B0 1F		    bcs     ldxerr
+   251 				    
+   252 8182 E0 00		    cpx     #0
+   253 8184 D0 1B		    bne     ldxerr
+   254 				    
+   255 8186 38			    sec
+   256 8187 A2 FF		    ldx     #$ff
+   257 8189 8E 00 08		    stx     $800
+   258 818C F0 13		    beq     ldxerr
+   259 818E 10 11		    bpl     ldxerr
+   260 8190 90 0F		    bcc     ldxerr
+   261 				    
+   262 8192 A2 00		    ldx     #0
+   263 8194 AE 00 08		    ldx     $800
+   264 8197 F0 08		    beq     ldxerr
+   265 8199 10 06		    bpl     ldxerr
+   266 819B 90 04		    bcc     ldxerr
+   267 				    
+   268 819D E0 FF		    cpx     #$ff
+   269 819F F0 0D		    beq     ldxok
+   270
+   271 81A1			ldxerr
+   272 81A1 4C A1 81		    jmp *
+   273 81A4 2C 24 38 1A 26 21 +     .byte "LDX:FAILED"
+   274
+   275
+   276 				; ldy
    277
-   278 81B9 8C 00 08		    sty     $800
-   279 81BC D0 2E		    bne     ldyerr
-   280 81BE 30 2C		    bmi     ldyerr
-   281 81C0 B0 2A		    bcs     ldyerr
-   282 				    
-   283 81C2 A0 FF		    ldy     #$ff
-   284 81C4 AC 00 08		    ldy     $800
-   285 81C7 D0 23		    bne     ldyerr
-   286 81C9 30 21		    bmi     ldyerr
-   287 81CB B0 1F		    bcs     ldyerr
-   288 				    
-   289 81CD C0 00		    cpy     #0
-   290 81CF D0 1B		    bne     ldyerr
-   291 				    
-   292 81D1 38			    sec
-   293 81D2 A0 FF		    ldy     #$ff
-   294 81D4 8C 00 08		    sty     $800
-   295 81D7 F0 13		    beq     ldyerr
-   296 81D9 10 11		    bpl     ldyerr
-   297 81DB 90 0F		    bcc     ldyerr
-   298 				    
-   299 81DD A0 00		    ldy     #0
-   300 81DF AC 00 08		    ldy     $800
-   301 81E2 F0 08		    beq     ldyerr
-   302 81E4 10 06		    bpl     ldyerr
-   303 81E6 90 04		    bcc     ldyerr
-   304 				    
-   305 81E8 C0 FF		    cpy     #$ff
-   306 81EA F0 0D		    beq     ldyok
-   307
-   308 81EC			ldyerr
-   309 81EC 4C EC 81		    jmp *
-   310 81EF 2C 24 39 1A 26 21 +     .byte "LDY:FAILED"
-   311
-   312 81F9			ldyok
-   313
-   314 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   315 				; Test register transfers
-   316 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   317
-   318 				; tax
+   278 81AE			ldxok
+   279 81AE 18			    clc
+   280 81AF A9 80		    lda     #$80        ; z = 0, n = 1
+   281 81B1 A0 00		    ldy     #0
+   282 81B3 B0 37		    bcs     ldyerr
+   283 81B5 D0 35		    bne     ldyerr
+   284 81B7 30 33		    bmi     ldyerr
+   285
+   286 81B9 8C 00 08		    sty     $800
+   287 81BC D0 2E		    bne     ldyerr
+   288 81BE 30 2C		    bmi     ldyerr
+   289 81C0 B0 2A		    bcs     ldyerr
+   290 				    
+   291 81C2 A0 FF		    ldy     #$ff
+   292 81C4 AC 00 08		    ldy     $800
+   293 81C7 D0 23		    bne     ldyerr
+   294 81C9 30 21		    bmi     ldyerr
+   295 81CB B0 1F		    bcs     ldyerr
+   296 				    
+   297 81CD C0 00		    cpy     #0
+   298 81CF D0 1B		    bne     ldyerr
+   299 				    
+   300 81D1 38			    sec
+   301 81D2 A0 FF		    ldy     #$ff
+   302 81D4 8C 00 08		    sty     $800
+   303 81D7 F0 13		    beq     ldyerr
+   304 81D9 10 11		    bpl     ldyerr
+   305 81DB 90 0F		    bcc     ldyerr
+   306 				    
+   307 81DD A0 00		    ldy     #0
+   308 81DF AC 00 08		    ldy     $800
+   309 81E2 F0 08		    beq     ldyerr
+   310 81E4 10 06		    bpl     ldyerr
+   311 81E6 90 04		    bcc     ldyerr
+   312 				    
+   313 81E8 C0 FF		    cpy     #$ff
+   314 81EA F0 0D		    beq     ldyok
+   315
+   316 81EC			ldyerr
+   317 81EC 4C EC 81		    jmp *
+   318 81EF 2C 24 39 1A 26 21 +     .byte "LDY:FAILED"
    319
-   320 81F9 18			    clc
-   321 81FA A9 00		    lda     #0
-   322 81FC A2 80		    ldx     #$80            ; z = 0, n = 1
-   323 81FE AA			    tax
-   324 81FF B0 18		    bcs     taxerr
-   325 8201 30 16		    bmi     taxerr
-   326 8203 D0 14		    bne     taxerr
-   327 				    
-   328 8205 8A			    txa
-   329 8206 D0 11		    bne     taxerr
-   330
-   331 8208 A9 FF		    lda     #$ff
-   332 820A 38			    sec
-   333 820B A2 00		    ldx     #0
-   334 820D AA			    tax
-   335 820E 90 09		    bcc     taxerr
-   336 8210 10 07		    bpl     taxerr
-   337 8212 F0 05		    beq     taxerr
-   338 				    
-   339 8214 8A			    txa
-   340 8215 C9 FF		    cmp     #$ff
-   341 8217 F0 0D		    beq     taxok
-   342
-   343 8219			taxerr
-   344 8219 4C 19 82		    jmp *
-   345 821C 34 21 38 1A 26 21 +     .byte "TAX:FAILED"
-   346 8226			taxok
-   347
-   348 				; tay
-   349
-   350 8226 18			    clc
-   351 8227 A9 00		    lda     #0
-   352 8229 A0 80		    ldy     #$80            ; z = 0, n = 1
-   353 822B A8			    tay
-   354 822C B0 18		    bcs     tayerr
-   355 822E 30 16		    bmi     tayerr
-   356 8230 D0 14		    bne     tayerr
-   357 				    
-   358 8232 98			    tya
-   359 8233 D0 11		    bne     tayerr
-   360
-   361 8235 A9 FF		    lda     #$ff
-   362 8237 38			    sec
-   363 8238 A0 00		    ldy     #0
-   364 823A A8			    tay
-   365 823B 90 09		    bcc     tayerr
-   366 823D 10 07		    bpl     tayerr
-   367 823F F0 05		    beq     tayerr
-   368 				    
-   369 8241 98			    tya
-   370 8242 C9 FF		    cmp     #$ff
-   371 8244 F0 0D		    beq     tayok
-   372
-   373 8246			tayerr
-   374 8246 4C 46 82		    jmp *
-   375 8249 34 21 39 1A 26 21 +     .byte "TAY:FAILED"
-   376
-   377 8253			tayok
-   378
-   379 				; txs
+   320 81F9			ldyok
+   321
+   322 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   323 				; Test register transfers
+   324 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   325
+   326 				; tax
+   327
+   328 81F9 18			    clc
+   329 81FA A9 00		    lda     #0
+   330 81FC A2 80		    ldx     #$80            ; z = 0, n = 1
+   331 81FE AA			    tax
+   332 81FF B0 18		    bcs     taxerr
+   333 8201 30 16		    bmi     taxerr
+   334 8203 D0 14		    bne     taxerr
+   335 				    
+   336 8205 8A			    txa
+   337 8206 D0 11		    bne     taxerr
+   338
+   339 8208 A9 FF		    lda     #$ff
+   340 820A 38			    sec
+   341 820B A2 00		    ldx     #0
+   342 820D AA			    tax
+   343 820E 90 09		    bcc     taxerr
+   344 8210 10 07		    bpl     taxerr
+   345 8212 F0 05		    beq     taxerr
+   346 				    
+   347 8214 8A			    txa
+   348 8215 C9 FF		    cmp     #$ff
+   349 8217 F0 0D		    beq     taxok
+   350
+   351 8219			taxerr
+   352 8219 4C 19 82		    jmp *
+   353 821C 34 21 38 1A 26 21 +     .byte "TAX:FAILED"
+   354 8226			taxok
+   355
+   356 				; tay
+   357
+   358 8226 18			    clc
+   359 8227 A9 00		    lda     #0
+   360 8229 A0 80		    ldy     #$80            ; z = 0, n = 1
+   361 822B A8			    tay
+   362 822C B0 18		    bcs     tayerr
+   363 822E 30 16		    bmi     tayerr
+   364 8230 D0 14		    bne     tayerr
+   365 				    
+   366 8232 98			    tya
+   367 8233 D0 11		    bne     tayerr
+   368
+   369 8235 A9 FF		    lda     #$ff
+   370 8237 38			    sec
+   371 8238 A0 00		    ldy     #0
+   372 823A A8			    tay
+   373 823B 90 09		    bcc     tayerr
+   374 823D 10 07		    bpl     tayerr
+   375 823F F0 05		    beq     tayerr
+   376 				    
+   377 8241 98			    tya
+   378 8242 C9 FF		    cmp     #$ff
+   379 8244 F0 0D		    beq     tayok
    380
-   381 8253 A2 0F		    ldx     #15
-   382 8255 9A			    txs
-   383 8256 A2 57		    ldx     #87
-   384 8258 BA			    tsx
-   385 8259 E0 0F		    cpx     #15
-   386 825B F0 0D		    beq     txsok
-   387
-   388 825D 4C 5D 82		    jmp *
-   389 8260 34 33 38 1A 26 21 +     .byte "TSX:FAILED"
-   390
-   391 826A			txsok
-   392 826A A2 57		    ldx     #87
-   393 826C 8A			    txa
-   394 826D C9 57		    cmp     #87
-   395 826F F0 0D		    beq     txaok
-   396
-   397 8271 4C 71 82		    jmp *
-   398 8274 34 38 21 1A 26 21 +     .byte "TXA:FAILED"
-   399
-   400 827E			txaok
-   401 827E A8			    tay
-   402 827F C0 57		    cpy     #87
-   403 8281 F0 0D		    beq     tayok1
+   381 8246			tayerr
+   382 8246 4C 46 82		    jmp *
+   383 8249 34 21 39 1A 26 21 +     .byte "TAY:FAILED"
+   384
+   385 8253			tayok
+   386
+   387 				; txs
+   388
+   389 8253 A2 0F		    ldx     #15
+   390 8255 9A			    txs
+   391 8256 A2 57		    ldx     #87
+   392 8258 BA			    tsx
+   393 8259 E0 0F		    cpx     #15
+   394 825B F0 0D		    beq     txsok
+   395
+   396 825D 4C 5D 82		    jmp *
+   397 8260 34 33 38 1A 26 21 +     .byte "TSX:FAILED"
+   398
+   399 826A			txsok
+   400 826A A2 57		    ldx     #87
+   401 826C 8A			    txa
+   402 826D C9 57		    cmp     #87
+   403 826F F0 0D		    beq     txaok
    404
-   405 8283 4C 83 82		    jmp *
-   406 8286 34 21 39 1A 26 21 +     .byte "TAY:FAILED"
+   405 8271 4C 71 82		    jmp *
+   406 8274 34 38 21 1A 26 21 +     .byte "TXA:FAILED"
    407
-   408 8290			tayok1
-   409 8290 98			    tya
-   410 8291 F0 06		    beq     tyaerr
-   411 8293 30 04		    bmi     tyaerr
-   412 8295 C9 57		    cmp     #87
-   413 8297 F0 0D		    beq     tyaok
-   414
-   415 8299			tyaerr
-   416 8299 4C 99 82		    jmp *
-   417 829C 34 39 21 1A 26 21 +     .byte "TYA:FAILED"
-   418
-   419 82A6			tyaok
-   420
-   421 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   422 				; Increment / Decrement
-   423 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   424
-   425 82A6 A2 FE		    ldx     #$FE
-   426 82A8 18			    clc
-   427 82A9 A9 00		    lda     #0
-   428 82AB E8			    inx
-   429 82AC B0 24		    bcs     inxerr
-   430 82AE F0 22		    beq     inxerr
-   431 82B0 10 20		    bpl     inxerr
-   432 				    
-   433 82B2 E0 FF		    cpx     #$ff
-   434 82B4 D0 1C		    bne     inxerr
-   435 				    
-   436 82B6 38			    sec
-   437 82B7 A9 80		    lda     #$80
-   438 82B9 E8			    inx
-   439 82BA 90 16		    bcc     inxerr
-   440 82BC D0 14		    bne     inxerr
-   441 82BE 30 12		    bmi     inxerr
-   442 				    
-   443 82C0 E0 00		    cpx     #0
-   444 82C2 D0 0E		    bne     inxerr
-   445 				    
-   446 82C4 18			    clc
-   447 82C5			inxl1               ; test loop
-   448 82C5 E8			    inx
-   449 82C6 B0 0A		    bcs     inxerr
-   450 82C8 D0 FB		    bne     inxl1
-   451 				    
-   452 82CA 38			    sec
-   453 82CB			inxl2
-   454 82CB E8			    inx
-   455 82CC 90 04		    bcc     inxerr
-   456 82CE D0 FB		    bne     inxl2
-   457 				    
-   458 82D0 F0 0D		    beq     inxok
+   408 827E			txaok
+   409 827E A8			    tay
+   410 827F C0 57		    cpy     #87
+   411 8281 F0 0D		    beq     tayok1
+   412
+   413 8283 4C 83 82		    jmp *
+   414 8286 34 21 39 1A 26 21 +     .byte "TAY:FAILED"
+   415
+   416 8290			tayok1
+   417 8290 98			    tya
+   418 8291 F0 06		    beq     tyaerr
+   419 8293 30 04		    bmi     tyaerr
+   420 8295 C9 57		    cmp     #87
+   421 8297 F0 0D		    beq     tyaok
+   422
+   423 8299			tyaerr
+   424 8299 4C 99 82		    jmp *
+   425 829C 34 39 21 1A 26 21 +     .byte "TYA:FAILED"
+   426
+   427 82A6			tyaok
+   428
+   429 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   430 				; Increment / Decrement
+   431 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   432
+   433 82A6 A2 FE		    ldx     #$FE
+   434 82A8 18			    clc
+   435 82A9 A9 00		    lda     #0
+   436 82AB E8			    inx
+   437 82AC B0 24		    bcs     inxerr
+   438 82AE F0 22		    beq     inxerr
+   439 82B0 10 20		    bpl     inxerr
+   440 				    
+   441 82B2 E0 FF		    cpx     #$ff
+   442 82B4 D0 1C		    bne     inxerr
+   443 				    
+   444 82B6 38			    sec
+   445 82B7 A9 80		    lda     #$80
+   446 82B9 E8			    inx
+   447 82BA 90 16		    bcc     inxerr
+   448 82BC D0 14		    bne     inxerr
+   449 82BE 30 12		    bmi     inxerr
+   450 				    
+   451 82C0 E0 00		    cpx     #0
+   452 82C2 D0 0E		    bne     inxerr
+   453 				    
+   454 82C4 18			    clc
+   455 82C5			inxl1               ; test loop
+   456 82C5 E8			    inx
+   457 82C6 B0 0A		    bcs     inxerr
+   458 82C8 D0 FB		    bne     inxl1
    459 				    
-   460 82D2			inxerr
-   461 82D2 4C D2 82		    jmp *
-   462 82D5 29 2E 38 1A 26 21 +     .byte "INX:FAILED"
-   463
-   464 82DF			inxok
-   465
-   466 				;   dex
-   467
-   468 82DF A2 02		    ldx     #2
-   469 82E1 18			    clc
-   470 82E2 A9 00		    lda     #0
-   471 82E4 CA			    dex
-   472 82E5 B0 2F		    bcs     dexerr
-   473 82E7 F0 2D		    beq     dexerr
-   474 82E9 30 2B		    bmi     dexerr
-   475 				    
-   476 82EB E0 01		    cpx     #1
-   477 82ED D0 27		    bne     dexerr
-   478 				    
-   479 82EF 38			    sec
-   480 82F0 A9 80		    lda     #$80
-   481 82F2 CA			    dex
-   482 82F3 90 21		    bcc     dexerr
-   483 82F5 D0 1F		    bne     dexerr
-   484 82F7 30 1D		    bmi     dexerr
-   485 				    
-   486 82F9 E0 00		    cpx     #0
-   487 82FB D0 19		    bne     dexerr
-   488 				    
-   489 82FD A9 00		    lda     #0
-   490 82FF CA			    dex
-   491 8300 F0 14		    beq     dexerr
-   492 8302 10 12		    bpl     dexerr
+   460 82CA 38			    sec
+   461 82CB			inxl2
+   462 82CB E8			    inx
+   463 82CC 90 04		    bcc     inxerr
+   464 82CE D0 FB		    bne     inxl2
+   465 				    
+   466 82D0 F0 0D		    beq     inxok
+   467 				    
+   468 82D2			inxerr
+   469 82D2 4C D2 82		    jmp *
+   470 82D5 29 2E 38 1A 26 21 +     .byte "INX:FAILED"
+   471
+   472 82DF			inxok
+   473
+   474 				;   dex
+   475
+   476 82DF A2 02		    ldx     #2
+   477 82E1 18			    clc
+   478 82E2 A9 00		    lda     #0
+   479 82E4 CA			    dex
+   480 82E5 B0 2F		    bcs     dexerr
+   481 82E7 F0 2D		    beq     dexerr
+   482 82E9 30 2B		    bmi     dexerr
+   483 				    
+   484 82EB E0 01		    cpx     #1
+   485 82ED D0 27		    bne     dexerr
+   486 				    
+   487 82EF 38			    sec
+   488 82F0 A9 80		    lda     #$80
+   489 82F2 CA			    dex
+   490 82F3 90 21		    bcc     dexerr
+   491 82F5 D0 1F		    bne     dexerr
+   492 82F7 30 1D		    bmi     dexerr
    493 				    
-   494 8304 E0 FF		    cpx     #$ff
-   495 8306 D0 0E		    bne     dexerr
+   494 82F9 E0 00		    cpx     #0
+   495 82FB D0 19		    bne     dexerr
    496 				    
-   497 8308 18			    clc
-   498 8309			dexl1
-   499 8309 CA			    dex
-   500 830A B0 0A		    bcs     dexerr
-   501 830C D0 FB		    bne     dexl1
-   502 				    
-   503 830E 38			    sec
-   504 830F			dexl2
-   505 830F CA			    dex
-   506 8310 90 04		    bcc     dexerr
-   507 8312 D0 FB		    bne     dexl2
-   508 				    
-   509 8314 F0 0D		    beq     dexok
+   497 82FD A9 00		    lda     #0
+   498 82FF CA			    dex
+   499 8300 F0 14		    beq     dexerr
+   500 8302 10 12		    bpl     dexerr
+   501 				    
+   502 8304 E0 FF		    cpx     #$ff
+   503 8306 D0 0E		    bne     dexerr
+   504 				    
+   505 8308 18			    clc
+   506 8309			dexl1
+   507 8309 CA			    dex
+   508 830A B0 0A		    bcs     dexerr
+   509 830C D0 FB		    bne     dexl1
    510 				    
-   511 8316			dexerr
-   512 8316 4C 16 83		    jmp *
-   513 8319 24 25 38 1A 26 21 +     .byte "DEX:FAILED"
-   514 				    
-   515 8323			dexok
-   516
-   517 				; iny
-   518
-   519 8323 A0 FE		    ldy     #$FE
-   520 8325 18			    clc
-   521 8326 69 00		    adc     #0
-   522 8328 C8			    iny
-   523 8329 B0 24		    bcs     inyerr
-   524 832B F0 22		    beq     inyerr
-   525 832D 10 20		    bpl     inyerr
-   526 				    
-   527 832F C0 FF		    cpy     #$ff
-   528 8331 D0 1C		    bne     inyerr
-   529 				    
-   530 8333 38			    sec
-   531 8334 A9 80		    lda     #$80
-   532 8336 C8			    iny
-   533 8337 90 16		    bcc     inyerr
-   534 8339 D0 14		    bne     inyerr
-   535 833B 30 12		    bmi     inyerr
-   536 				    
-   537 833D C0 00		    cpy     #0
-   538 833F D0 0E		    bne     inyerr
-   539 				    
-   540 8341 18			    clc
-   541 8342			inyl1               ; test loop
-   542 8342 C8			    iny
-   543 8343 B0 0A		    bcs     inyerr
-   544 8345 D0 FB		    bne     inyl1
-   545 				    
-   546 8347 38			    sec
-   547 8348			inyl2
-   548 8348 C8			    iny
-   549 8349 90 04		    bcc     inyerr
-   550 834B D0 FB		    bne     inyl2
-   551 				    
-   552 834D F0 0D		    beq     inyok
+   511 830E 38			    sec
+   512 830F			dexl2
+   513 830F CA			    dex
+   514 8310 90 04		    bcc     dexerr
+   515 8312 D0 FB		    bne     dexl2
+   516 				    
+   517 8314 F0 0D		    beq     dexok
+   518 				    
+   519 8316			dexerr
+   520 8316 4C 16 83		    jmp *
+   521 8319 24 25 38 1A 26 21 +     .byte "DEX:FAILED"
+   522 				    
+   523 8323			dexok
+   524
+   525 				; iny
+   526
+   527 8323 A0 FE		    ldy     #$FE
+   528 8325 18			    clc
+   529 8326 69 00		    adc     #0
+   530 8328 C8			    iny
+   531 8329 B0 24		    bcs     inyerr
+   532 832B F0 22		    beq     inyerr
+   533 832D 10 20		    bpl     inyerr
+   534 				    
+   535 832F C0 FF		    cpy     #$ff
+   536 8331 D0 1C		    bne     inyerr
+   537 				    
+   538 8333 38			    sec
+   539 8334 A9 80		    lda     #$80
+   540 8336 C8			    iny
+   541 8337 90 16		    bcc     inyerr
+   542 8339 D0 14		    bne     inyerr
+   543 833B 30 12		    bmi     inyerr
+   544 				    
+   545 833D C0 00		    cpy     #0
+   546 833F D0 0E		    bne     inyerr
+   547 				    
+   548 8341 18			    clc
+   549 8342			inyl1               ; test loop
+   550 8342 C8			    iny
+   551 8343 B0 0A		    bcs     inyerr
+   552 8345 D0 FB		    bne     inyl1
    553 				    
-   554 834F			inyerr
-   555 834F 4C 4F 83		    jmp *
-   556 8352 29 2E 39 1A 26 21 +     .byte "INY:FAILED"
-   557
-   558
-   559 				;   dey
-   560
-   561 835C			inyok
-   562
-   563 835C A0 02		    ldy     #2
-   564 835E 18			    clc
-   565 835F A9 00		    lda     #0
-   566 8361 88			    dey
-   567 8362 B0 2F		    bcs     deyerr
-   568 8364 F0 2D		    beq     deyerr
-   569 8366 30 2B		    bmi     deyerr
-   570 				    
-   571 8368 C0 01		    cpy     #1
-   572 836A D0 27		    bne     deyerr
-   573 				    
-   574 836C 38			    sec
-   575 836D A9 80		    lda     #$80
-   576 836F 88			    dey
-   577 8370 90 21		    bcc     deyerr
-   578 8372 D0 1F		    bne     deyerr
-   579 8374 30 1D		    bmi     deyerr
-   580 				    
-   581 8376 C0 00		    cpy     #0
-   582 8378 D0 19		    bne     deyerr
-   583 				    
-   584 837A A9 00		    lda     #0
-   585 837C 88			    dey
-   586 837D F0 14		    beq     deyerr
-   587 837F 10 12		    bpl     deyerr
+   554 8347 38			    sec
+   555 8348			inyl2
+   556 8348 C8			    iny
+   557 8349 90 04		    bcc     inyerr
+   558 834B D0 FB		    bne     inyl2
+   559 				    
+   560 834D F0 0D		    beq     inyok
+   561 				    
+   562 834F			inyerr
+   563 834F 4C 4F 83		    jmp *
+   564 8352 29 2E 39 1A 26 21 +     .byte "INY:FAILED"
+   565
+   566
+   567 				;   dey
+   568
+   569 835C			inyok
+   570
+   571 835C A0 02		    ldy     #2
+   572 835E 18			    clc
+   573 835F A9 00		    lda     #0
+   574 8361 88			    dey
+   575 8362 B0 2F		    bcs     deyerr
+   576 8364 F0 2D		    beq     deyerr
+   577 8366 30 2B		    bmi     deyerr
+   578 				    
+   579 8368 C0 01		    cpy     #1
+   580 836A D0 27		    bne     deyerr
+   581 				    
+   582 836C 38			    sec
+   583 836D A9 80		    lda     #$80
+   584 836F 88			    dey
+   585 8370 90 21		    bcc     deyerr
+   586 8372 D0 1F		    bne     deyerr
+   587 8374 30 1D		    bmi     deyerr
    588 				    
-   589 8381 C0 FF		    cpy     #$ff
-   590 8383 D0 0E		    bne     deyerr
+   589 8376 C0 00		    cpy     #0
+   590 8378 D0 19		    bne     deyerr
    591 				    
-   592 8385 18			    clc
-   593 8386			deyl1
-   594 8386 88			    dey
-   595 8387 B0 0A		    bcs     deyerr
-   596 8389 D0 FB		    bne     deyl1
-   597 				    
-   598 838B 38			    sec
-   599 838C			deyl2
-   600 838C 88			    dey
-   601 838D 90 04		    bcc     deyerr
-   602 838F D0 FB		    bne     deyl2
-   603 				    
-   604 8391 F0 0D		    beq     deyok
+   592 837A A9 00		    lda     #0
+   593 837C 88			    dey
+   594 837D F0 14		    beq     deyerr
+   595 837F 10 12		    bpl     deyerr
+   596 				    
+   597 8381 C0 FF		    cpy     #$ff
+   598 8383 D0 0E		    bne     deyerr
+   599 				    
+   600 8385 18			    clc
+   601 8386			deyl1
+   602 8386 88			    dey
+   603 8387 B0 0A		    bcs     deyerr
+   604 8389 D0 FB		    bne     deyl1
    605 				    
-   606 8393			deyerr
-   607 8393 4C 93 83		    jmp *
-   608 8396 24 25 39 1A 26 21 +     .byte "DEY:FAILED"
-   609 				    
-   610 83A0			deyok
-   611
-   612
-   613 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   614 				; Stores
-   615 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   616
-   617 				; sta
-   618
-   619 83A0 A9 00		    lda     #0
-   620 83A2 18			    clc
-   621 83A3 85 00		    sta     $00
-   622 83A5 D0 15		    bne     staerr
-   623 83A7 30 13		    bmi     staerr
-   624 83A9 B0 11		    bcs     staerr
-   625 				    
-   626 83AB A5 00		    lda     $00
-   627 83AD D0 0D		    bne     staerr
-   628 				    
-   629 83AF A9 FF		    lda     #$ff
-   630 83B1 38			    sec
-   631 83B2 85 00		    sta     $00
-   632 83B4 F0 06		    beq     staerr
-   633 83B6 10 04		    bpl     staerr
-   634 83B8 90 02		    bcc     staerr
-   635 83BA B0 0D		    bcs     staok
-   636
-   637 83BC			staerr
-   638 83BC 4C BC 83		    jmp *
-   639 83BF 33 34 21 1A 26 21 +     .byte "STA:FAILED"
-   640 83C9			staok
-   641
-   642 				; stx
-   643
-   644 83C9 A2 00		    ldx     #0
-   645 83CB 18			    clc
-   646 83CC 86 00		    stx     $00
-   647 83CE D0 15		    bne     stxerr
-   648 83D0 30 13		    bmi     stxerr
-   649 83D2 B0 11		    bcs     stxerr
-   650 				    
-   651 83D4 A6 00		    ldx     $00
-   652 83D6 D0 0D		    bne     stxerr
-   653 				    
-   654 83D8 A2 FF		    ldx     #$ff
-   655 83DA 38			    sec
-   656 83DB 86 00		    stx     $00
-   657 83DD F0 06		    beq     stxerr
-   658 83DF 10 04		    bpl     stxerr
-   659 83E1 90 02		    bcc     stxerr
-   660 83E3 B0 0D		    bcs     stxok
-   661
-   662 83E5			stxerr
-   663 83E5 4C E5 83		    jmp *
-   664 83E8 33 34 38 1A 26 21 +     .byte "STX:FAILED"
-   665 83F2			stxok
-   666
-   667 				; sty
-   668
-   669 83F2 A0 00		    ldy     #0
-   670 83F4 18			    clc
-   671 83F5 84 00		    sty     $00
-   672 83F7 D0 15		    bne     styerr
-   673 83F9 30 13		    bmi     styerr
-   674 83FB B0 11		    bcs     styerr
-   675 				    
-   676 83FD A4 00		    ldy     $00
-   677 83FF D0 0D		    bne     styerr
-   678 				    
-   679 8401 A0 FF		    ldy     #$ff
-   680 8403 38			    sec
-   681 8404 84 00		    sty     $00
-   682 8406 F0 06		    beq     styerr
-   683 8408 10 04		    bpl     styerr
-   684 840A 90 02		    bcc     styerr
-   685 840C B0 0D		    bcs     styok
-   686
-   687 840E			styerr
-   688 840E 4C 0E 84		    jmp *
-   689 8411 33 34 39 1A 26 21 +     .byte "STY:FAILED"
-   690 841B			styok
-   691
-   692 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   693 				; Test addressing mode
-   694 				;   Note that addressing modes are handled independently of the
-   695 				; actual operation performed by the processor. This means that
-   696 				; if a mode works with one instruction, it should work properly
-   697 				; with all instructions that use that mode.
-   698 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   606 838B 38			    sec
+   607 838C			deyl2
+   608 838C 88			    dey
+   609 838D 90 04		    bcc     deyerr
+   610 838F D0 FB		    bne     deyl2
+   611 				    
+   612 8391 F0 0D		    beq     deyok
+   613 				    
+   614 8393			deyerr
+   615 8393 4C 93 83		    jmp *
+   616 8396 24 25 39 1A 26 21 +     .byte "DEY:FAILED"
+   617 				    
+   618 83A0			deyok
+   619
+   620
+   621 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   622 				; Stores
+   623 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   624
+   625 				; sta
+   626
+   627 83A0 A9 00		    lda     #0
+   628 83A2 18			    clc
+   629 83A3 85 00		    sta     $00
+   630 83A5 D0 15		    bne     staerr
+   631 83A7 30 13		    bmi     staerr
+   632 83A9 B0 11		    bcs     staerr
+   633 				    
+   634 83AB A5 00		    lda     $00
+   635 83AD D0 0D		    bne     staerr
+   636 				    
+   637 83AF A9 FF		    lda     #$ff
+   638 83B1 38			    sec
+   639 83B2 85 00		    sta     $00
+   640 83B4 F0 06		    beq     staerr
+   641 83B6 10 04		    bpl     staerr
+   642 83B8 90 02		    bcc     staerr
+   643 83BA B0 0D		    bcs     staok
+   644
+   645 83BC			staerr
+   646 83BC 4C BC 83		    jmp *
+   647 83BF 33 34 21 1A 26 21 +     .byte "STA:FAILED"
+   648 83C9			staok
+   649
+   650 				; stx
+   651
+   652 83C9 A2 00		    ldx     #0
+   653 83CB 18			    clc
+   654 83CC 86 00		    stx     $00
+   655 83CE D0 15		    bne     stxerr
+   656 83D0 30 13		    bmi     stxerr
+   657 83D2 B0 11		    bcs     stxerr
+   658 				    
+   659 83D4 A6 00		    ldx     $00
+   660 83D6 D0 0D		    bne     stxerr
+   661 				    
+   662 83D8 A2 FF		    ldx     #$ff
+   663 83DA 38			    sec
+   664 83DB 86 00		    stx     $00
+   665 83DD F0 06		    beq     stxerr
+   666 83DF 10 04		    bpl     stxerr
+   667 83E1 90 02		    bcc     stxerr
+   668 83E3 B0 0D		    bcs     stxok
+   669
+   670 83E5			stxerr
+   671 83E5 4C E5 83		    jmp *
+   672 83E8 33 34 38 1A 26 21 +     .byte "STX:FAILED"
+   673 83F2			stxok
+   674
+   675 				; sty
+   676
+   677 83F2 A0 00		    ldy     #0
+   678 83F4 18			    clc
+   679 83F5 84 00		    sty     $00
+   680 83F7 D0 15		    bne     styerr
+   681 83F9 30 13		    bmi     styerr
+   682 83FB B0 11		    bcs     styerr
+   683 				    
+   684 83FD A4 00		    ldy     $00
+   685 83FF D0 0D		    bne     styerr
+   686 				    
+   687 8401 A0 FF		    ldy     #$ff
+   688 8403 38			    sec
+   689 8404 84 00		    sty     $00
+   690 8406 F0 06		    beq     styerr
+   691 8408 10 04		    bpl     styerr
+   692 840A 90 02		    bcc     styerr
+   693 840C B0 0D		    bcs     styok
+   694
+   695 840E			styerr
+   696 840E 4C 0E 84		    jmp *
+   697 8411 33 34 39 1A 26 21 +     .byte "STY:FAILED"
+   698 841B			styok
    699
-   700 841B A9 AA		    lda     #$AA
-   701 841D 49 55		    eor     #$55
-   702 841F C9 FF		    cmp     #$ff
-   703 8421 F0 0D		    beq     imm_ok
-   704
-   705 8423 4C 23 84		    jmp *
-   706 8426 29 2D 2D 1A 26 21 +     .byte "IMM:FAILED"
+   700 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   701 				; Test addressing mode
+   702 				;   Note that addressing modes are handled independently of the
+   703 				; actual operation performed by the processor. This means that
+   704 				; if a mode works with one instruction, it should work properly
+   705 				; with all instructions that use that mode.
+   706 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
    707
-   708 8430			imm_ok
-   709 8430 AD 27 86		    lda     n55
-   710 8433 4D 28 86		    eor     nAA
-   711 8436 18			    clc
-   712 8437 69 01		    adc     #1
-   713 8439 F0 0D		    beq     abs_ok
-   714
-   715 843B 4C 3B 84		    jmp *
-   716 843E 21 22 33 1A 26 21 +     .byte "ABS:FAILED"
-   717
-   718 8448			abs_ok
-   719 8448 A2 02		    ldx     #2
-   720 844A BD 27 86		    lda     n55,x
-   721 844D C9 0C		    cmp     #12
-   722 844F F0 0F		    beq     absx_ok
-   723
-   724 8451 4C 51 84		    jmp *
-   725 8454 21 22 33 0C 38 1A +     .byte "ABS,X:FAILED"
-   726
-   727 8460			absx_ok
-   728 8460 A0 03		    ldy     #3
-   729 8462 B9 27 86		    lda     n55,y
-   730 8465 C9 22		    cmp     #34
-   731 8467 F0 0F		    beq     absy_ok
-   732
-   733 8469 4C 69 84		    jmp *
-   734 846C 21 22 33 0C 39 1A +     .byte "ABS,Y:FAILED"
-   735
-   736 8478			absy_ok
-   737 8478 A9 21		    lda     #33
-   738 847A 85 08		    sta     data_ptr
-   739 847C A2 00		    ldx     #0
-   740 847E A6 08		    ldx     data_ptr
-   741 8480 E0 21		    cpx     #33
-   742 8482 F0 0C		    beq     zp_ok
+   708 841B A9 AA		    lda     #$AA
+   709 841D 49 55		    eor     #$55
+   710 841F C9 FF		    cmp     #$ff
+   711 8421 F0 0D		    beq     imm_ok
+   712
+   713 8423 4C 23 84		    jmp *
+   714 8426 29 2D 2D 1A 26 21 +     .byte "IMM:FAILED"
+   715
+   716 8430			imm_ok
+   717 8430 AD 27 86		    lda     n55
+   718 8433 4D 28 86		    eor     nAA
+   719 8436 18			    clc
+   720 8437 69 01		    adc     #1
+   721 8439 F0 0D		    beq     abs_ok
+   722
+   723 843B 4C 3B 84		    jmp *
+   724 843E 21 22 33 1A 26 21 +     .byte "ABS:FAILED"
+   725
+   726 8448			abs_ok
+   727 8448 A2 02		    ldx     #2
+   728 844A BD 27 86		    lda     n55,x
+   729 844D C9 0C		    cmp     #12
+   730 844F F0 0F		    beq     absx_ok
+   731
+   732 8451 4C 51 84		    jmp *
+   733 8454 21 22 33 0C 38 1A +     .byte "ABS,X:FAILED"
+   734
+   735 8460			absx_ok
+   736 8460 A0 03		    ldy     #3
+   737 8462 B9 27 86		    lda     n55,y
+   738 8465 C9 22		    cmp     #34
+   739 8467 F0 0F		    beq     absy_ok
+   740
+   741 8469 4C 69 84		    jmp *
+   742 846C 21 22 33 0C 39 1A +     .byte "ABS,Y:FAILED"
    743
-   744 8484 4C 84 84		    jmp *
-   745 8487 3A 30 1A 26 21 29 +     .byte "ZP:FAILED"
-   746
-   747 8490			zp_ok
-   748 8490 A9 2C		    lda     #44
-   749 8492 85 29		    sta     data_ptr+33
-   750 8494 B5 08		    lda     data_ptr,x
-   751 8496 C9 2C		    cmp     #44
-   752 8498 F0 0E		    beq     zpx_ok
-   753
-   754 849A 4C 9A 84		    jmp *
-   755 849D 3A 30 0C 38 1A 26 +     .byte "ZP,X:FAILED"
-   756
-   757 84A8			zpx_ok
-   758 84A8 A9 12		    lda     #$12
-   759 84AA 8D 01 02		    sta     $201
-   760 84AD A9 01		    lda     #$01
-   761 84AF 85 08		    sta     data_ptr
-   762 84B1 A9 02		    lda     #$2
-   763 84B3 85 09		    sta     data_ptr+1
-   764 84B5 A2 05		    ldx     #5
-   765 84B7 A1 03		    lda     (data_ptr-5,x)
-   766 84B9 C9 12		    cmp     #$12
-   767 84BB F0 10		    beq     zpix_ok
-   768
-   769 84BD 4C BD 84		    jmp *
-   770 84C0 08 3A 30 0C 38 09 +     .byte "(ZP,X):FAILED"
-   771
-   772 84CD			zpix_ok
-   773 84CD A9 FE		    lda     #$fe
-   774 84CF 85 08		    sta     data_ptr
-   775 84D1 A9 01		    lda     #$01
-   776 84D3 85 09		    sta     data_ptr+1
-   777 84D5 A0 03		    ldy     #3
-   778 84D7 B1 08		    lda     (data_ptr),y
-   779 84D9 C9 12		    cmp     #$12
-   780 84DB F0 10		    beq     zpiy_ok
-   781
-   782 84DD 4C DD 84		    jmp *
-   783 84E0 08 3A 30 09 0C 79 +     .byte "(ZP),y:FAILED"
-   784
-   785 84ED			zpiy_ok
-   786 84ED A0 0F		    ldy     #15
-   787 84EF B6 F9		    ldx     data_ptr-15,y
-   788 84F1 E0 FE		    cpx     #$fe
-   789 84F3 F0 11		    beq     zpy_ok
-   790
-   791 84F5 4C F5 84		    jmp *
-   792 84F8 4C F8 84		    jmp *
-   793 84FB 3A 30 0C 39 1A 26 +     .byte "ZP,Y:FAILED"
-   794
-   795 8506			zpy_ok
-   796
-   797
-   798 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   799 8506 A0 FF		    ldy     #$ff
-   800 8508 C8			    iny
-   801 8509 C0 00		    cpy     #0  
-   802 850B F0 0D		    beq     iny_ok
-   803
-   804 850D 4C 0D 85		    jmp *
-   805 8510 29 2E 39 1A 26 21 +     .byte "INY:FAILED"
-   806
-   807 851A			iny_ok
-   808 851A A0 0A		    ldy     #10
-   809 851C 88			    dey
-   810 851D C0 09		    cpy     #9
-   811 851F F0 0D		    beq     dey_ok
-   812
-   813 8521 4C 21 85		    jmp *
-   814 8524 24 25 39 1A 26 21 +     .byte "DEY:FAILED"
-   815
-   816 852E			dey_ok
-   817 852E A2 80		    ldx     #$80
-   818 8530 E8			    inx
-   819 8531 E0 81		    cpx     #$81
-   820 8533 F0 0D		    beq     inx_ok
-   821
-   822 8535 4C 35 85		    jmp *
-   823 8538 29 2E 38 1A 26 21 +     .byte "INX:FAILED"
-   824
-   825 8542			inx_ok
-   826 8542 A2 00		    ldx     #$00
-   827 8544 CA			    dex
-   828 8545 E0 FF		    cpx     #$ff
-   829 8547 F0 0D		    beq     dex_ok
-   830
-   831 8549 4C 49 85		    jmp *
-   832 854C 24 25 38 1A 26 21 +     .byte "DEX:FAILED"
-   833
-   834 8556			dex_ok
-   835
-   836 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   837 				; Shift ops
-   838 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-   839
-   840 				; asl a
+   744 8478			absy_ok
+   745 8478 A9 21		    lda     #33
+   746 847A 85 08		    sta     data_ptr
+   747 847C A2 00		    ldx     #0
+   748 847E A6 08		    ldx     data_ptr
+   749 8480 E0 21		    cpx     #33
+   750 8482 F0 0C		    beq     zp_ok
+   751
+   752 8484 4C 84 84		    jmp *
+   753 8487 3A 30 1A 26 21 29 +     .byte "ZP:FAILED"
+   754
+   755 8490			zp_ok
+   756 8490 A9 2C		    lda     #44
+   757 8492 85 29		    sta     data_ptr+33
+   758 8494 B5 08		    lda     data_ptr,x
+   759 8496 C9 2C		    cmp     #44
+   760 8498 F0 0E		    beq     zpx_ok
+   761
+   762 849A 4C 9A 84		    jmp *
+   763 849D 3A 30 0C 38 1A 26 +     .byte "ZP,X:FAILED"
+   764
+   765 84A8			zpx_ok
+   766 84A8 A9 12		    lda     #$12
+   767 84AA 8D 01 02		    sta     $201
+   768 84AD A9 01		    lda     #$01
+   769 84AF 85 08		    sta     data_ptr
+   770 84B1 A9 02		    lda     #$2
+   771 84B3 85 09		    sta     data_ptr+1
+   772 84B5 A2 05		    ldx     #5
+   773 84B7 A1 03		    lda     (data_ptr-5,x)
+   774 84B9 C9 12		    cmp     #$12
+   775 84BB F0 10		    beq     zpix_ok
+   776
+   777 84BD 4C BD 84		    jmp *
+   778 84C0 08 3A 30 0C 38 09 +     .byte "(ZP,X):FAILED"
+   779
+   780 84CD			zpix_ok
+   781 84CD A9 FE		    lda     #$fe
+   782 84CF 85 08		    sta     data_ptr
+   783 84D1 A9 01		    lda     #$01
+   784 84D3 85 09		    sta     data_ptr+1
+   785 84D5 A0 03		    ldy     #3
+   786 84D7 B1 08		    lda     (data_ptr),y
+   787 84D9 C9 12		    cmp     #$12
+   788 84DB F0 10		    beq     zpiy_ok
+   789
+   790 84DD 4C DD 84		    jmp *
+   791 84E0 08 3A 30 09 0C 79 +     .byte "(ZP),y:FAILED"
+   792
+   793 84ED			zpiy_ok
+   794 84ED A0 0F		    ldy     #15
+   795 84EF B6 F9		    ldx     data_ptr-15,y
+   796 84F1 E0 FE		    cpx     #$fe
+   797 84F3 F0 11		    beq     zpy_ok
+   798
+   799 84F5 4C F5 84		    jmp *
+   800 84F8 4C F8 84		    jmp *
+   801 84FB 3A 30 0C 39 1A 26 +     .byte "ZP,Y:FAILED"
+   802
+   803 8506			zpy_ok
+   804
+   805
+   806 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   807 8506 A0 FF		    ldy     #$ff
+   808 8508 C8			    iny
+   809 8509 C0 00		    cpy     #0  
+   810 850B F0 0D		    beq     iny_ok
+   811
+   812 850D 4C 0D 85		    jmp *
+   813 8510 29 2E 39 1A 26 21 +     .byte "INY:FAILED"
+   814
+   815 851A			iny_ok
+   816 851A A0 0A		    ldy     #10
+   817 851C 88			    dey
+   818 851D C0 09		    cpy     #9
+   819 851F F0 0D		    beq     dey_ok
+   820
+   821 8521 4C 21 85		    jmp *
+   822 8524 24 25 39 1A 26 21 +     .byte "DEY:FAILED"
+   823
+   824 852E			dey_ok
+   825 852E A2 80		    ldx     #$80
+   826 8530 E8			    inx
+   827 8531 E0 81		    cpx     #$81
+   828 8533 F0 0D		    beq     inx_ok
+   829
+   830 8535 4C 35 85		    jmp *
+   831 8538 29 2E 38 1A 26 21 +     .byte "INX:FAILED"
+   832
+   833 8542			inx_ok
+   834 8542 A2 00		    ldx     #$00
+   835 8544 CA			    dex
+   836 8545 E0 FF		    cpx     #$ff
+   837 8547 F0 0D		    beq     dex_ok
+   838
+   839 8549 4C 49 85		    jmp *
+   840 854C 24 25 38 1A 26 21 +     .byte "DEX:FAILED"
    841
-   842 8556 A9 01		    lda     #$01
-   843 8558 0A			    asl
-   844 8559 0A			    asl
-   845 855A 0A			    asl
-   846 855B 0A			    asl
-   847 855C 0A			    asl
-   848 855D 0A			    asl
-   849 855E 0A			    asl
-   850 855F 10 08		    bpl     aslaerr
-   851 8561 F0 06		    beq     aslaerr
-   852 8563 B0 04		    bcs     aslaerr
-   853 8565 C9 80		    cmp     #$80
-   854 8567 F0 0E		    beq     aslaok
-   855
-   856 8569			aslaerr
-   857 8569 4C 69 85		    jmp *
-   858 856C 21 33 2C 21 1A 26 +     .byte "ASLA:FAILED"
-   859 				    
-   860 8577			aslaok
-   861
-   862 				; lsr a
+   842 8556			dex_ok
+   843
+   844 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   845 				; Shift ops
+   846 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   847
+   848 				; asl a
+   849
+   850 8556 A9 01		    lda     #$01
+   851 8558 0A			    asl
+   852 8559 0A			    asl
+   853 855A 0A			    asl
+   854 855B 0A			    asl
+   855 855C 0A			    asl
+   856 855D 0A			    asl
+   857 855E 0A			    asl
+   858 855F 10 08		    bpl     aslaerr
+   859 8561 F0 06		    beq     aslaerr
+   860 8563 B0 04		    bcs     aslaerr
+   861 8565 C9 80		    cmp     #$80
+   862 8567 F0 0E		    beq     aslaok
    863
-   864 8577 4A			    lsr
-   865 8578 4A			    lsr
-   866 8579 4A			    lsr
-   867 857A 4A			    lsr
-   868 857B 4A			    lsr
-   869 857C 4A			    lsr
-   870 857D 4A			    lsr
-   871 857E 30 06		    bmi     lsraerr
-   872 8580 F0 04		    beq     lsraerr
-   873 8582 B0 02		    bcs     lsraerr
-   874 8584 90 0E		    bcc     lsraok
-   875
-   876 8586			lsraerr
-   877 8586 4C 86 85		    jmp *
-   878 8589 2C 33 32 21 1A 26 +     .byte "LSRA:FAILED"
-   879 				    
-   880 8594			lsraok
-   881
-   882 				; rol a
+   864 8569			aslaerr
+   865 8569 4C 69 85		    jmp *
+   866 856C 21 33 2C 21 1A 26 +     .byte "ASLA:FAILED"
+   867 				    
+   868 8577			aslaok
+   869
+   870 				; lsr a
+   871
+   872 8577 4A			    lsr
+   873 8578 4A			    lsr
+   874 8579 4A			    lsr
+   875 857A 4A			    lsr
+   876 857B 4A			    lsr
+   877 857C 4A			    lsr
+   878 857D 4A			    lsr
+   879 857E 30 06		    bmi     lsraerr
+   880 8580 F0 04		    beq     lsraerr
+   881 8582 B0 02		    bcs     lsraerr
+   882 8584 90 0E		    bcc     lsraok
    883
-   884 8594 18			    clc
-   885 8595 A9 01		    lda     #$01
-   886 8597 2A			    rol
-   887 8598 2A			    rol
-   888 8599 2A			    rol
-   889 859A 2A			    rol
-   890 859B 2A			    rol
-   891 859C 2A			    rol
-   892 859D 2A			    rol
-   893 859E 10 1B		    bpl     rolaerr
-   894 85A0 F0 19		    beq     rolaerr
-   895 85A2 B0 17		    bcs     rolaerr
-   896 85A4 C9 80		    cmp     #$80        ; this will set the carry !!!
-   897 85A6 D0 13		    bne     rolaerr
-   898 85A8 18			    clc
-   899 85A9 2A			    rol
-   900 85AA 90 0F		    bcc     rolaerr
-   901 85AC D0 0D		    bne     rolaerr
-   902 85AE 30 0B		    bmi     rolaerr
-   903 85B0 2A			    rol
-   904 85B1 B0 08		    bcs     rolaerr
-   905 85B3 30 06		    bmi     rolaerr
-   906 85B5 F0 04		    beq     rolaerr
-   907 85B7 C9 01		    cmp     #1
-   908 85B9 F0 0E		    beq     rolaok
-   909
-   910 85BB			rolaerr
-   911 85BB 4C BB 85		    jmp *
-   912 85BE 32 2F 2C 21 1A 26 +     .byte "ROLA:FAILED"
-   913
-   914 85C9			rolaok
-   915
-   916 				; ror a
+   884 8586			lsraerr
+   885 8586 4C 86 85		    jmp *
+   886 8589 2C 33 32 21 1A 26 +     .byte "LSRA:FAILED"
+   887 				    
+   888 8594			lsraok
+   889
+   890 				; rol a
+   891
+   892 8594 18			    clc
+   893 8595 A9 01		    lda     #$01
+   894 8597 2A			    rol
+   895 8598 2A			    rol
+   896 8599 2A			    rol
+   897 859A 2A			    rol
+   898 859B 2A			    rol
+   899 859C 2A			    rol
+   900 859D 2A			    rol
+   901 859E 10 1B		    bpl     rolaerr
+   902 85A0 F0 19		    beq     rolaerr
+   903 85A2 B0 17		    bcs     rolaerr
+   904 85A4 C9 80		    cmp     #$80        ; this will set the carry !!!
+   905 85A6 D0 13		    bne     rolaerr
+   906 85A8 18			    clc
+   907 85A9 2A			    rol
+   908 85AA 90 0F		    bcc     rolaerr
+   909 85AC D0 0D		    bne     rolaerr
+   910 85AE 30 0B		    bmi     rolaerr
+   911 85B0 2A			    rol
+   912 85B1 B0 08		    bcs     rolaerr
+   913 85B3 30 06		    bmi     rolaerr
+   914 85B5 F0 04		    beq     rolaerr
+   915 85B7 C9 01		    cmp     #1
+   916 85B9 F0 0E		    beq     rolaok
    917
-   918 85C9 18			    clc
-   919 85CA A9 80		    lda     #$80
-   920 85CC 6A			    ror
-   921 85CD 6A			    ror
-   922 85CE 6A			    ror
-   923 85CF 6A			    ror
-   924 85D0 6A			    ror
-   925 85D1 6A			    ror
-   926 85D2 6A			    ror
-   927 85D3 30 1D		    bmi     roraerr
-   928 85D5 F0 1B		    beq     roraerr
-   929 85D7 B0 19		    bcs     roraerr
-   930 85D9 C9 01		    cmp     #$01        ; this will set the carry !!!
-   931 85DB D0 15		    bne     roraerr
-   932 85DD 18			    clc
-   933 85DE 6A			    ror
-   934 85DF 90 11		    bcc     roraerr
-   935 85E1 D0 0F		    bne     roraerr
-   936 85E3 30 0D		    bmi     roraerr
-   937 85E5 6A			    ror
-   938 85E6 B0 0A		    bcs     roraerr
-   939 85E8 10 08		    bpl     roraerr
-   940 85EA F0 06		    beq     roraerr
-   941 85EC C9 80		    cmp     #$80
-   942 85EE F0 10		    beq     roraok
-   943 85F0 D0 00		    bne     roraerr
-   944
-   945 85F2			roraerr
-   946 85F2 4C F2 85		    jmp *
-   947 85F5 32 2F 32 21 1A 26 +     .byte "RORA:FAILED"
-   948 				    
-   949 8600			roraok
-   950
-   951 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   918 85BB			rolaerr
+   919 85BB 4C BB 85		    jmp *
+   920 85BE 32 2F 2C 21 1A 26 +     .byte "ROLA:FAILED"
+   921
+   922 85C9			rolaok
+   923
+   924 				; ror a
+   925
+   926 85C9 18			    clc
+   927 85CA A9 80		    lda     #$80
+   928 85CC 6A			    ror
+   929 85CD 6A			    ror
+   930 85CE 6A			    ror
+   931 85CF 6A			    ror
+   932 85D0 6A			    ror
+   933 85D1 6A			    ror
+   934 85D2 6A			    ror
+   935 85D3 30 1D		    bmi     roraerr
+   936 85D5 F0 1B		    beq     roraerr
+   937 85D7 B0 19		    bcs     roraerr
+   938 85D9 C9 01		    cmp     #$01        ; this will set the carry !!!
+   939 85DB D0 15		    bne     roraerr
+   940 85DD 18			    clc
+   941 85DE 6A			    ror
+   942 85DF 90 11		    bcc     roraerr
+   943 85E1 D0 0F		    bne     roraerr
+   944 85E3 30 0D		    bmi     roraerr
+   945 85E5 6A			    ror
+   946 85E6 B0 0A		    bcs     roraerr
+   947 85E8 10 08		    bpl     roraerr
+   948 85EA F0 06		    beq     roraerr
+   949 85EC C9 80		    cmp     #$80
+   950 85EE F0 10		    beq     roraok
+   951 85F0 D0 00		    bne     roraerr
    952
-   953 				; pha / pla
-   954 8600 A9 EE		    lda     #$ee
-   955 8602 48			    pha
-   956 8603 A9 00		    lda     #00
-   957 8605 18			    clc
-   958 8606 68			    pla                 ; doesn't affect flags
-   959 8607 30 06		    bmi     plaerr
-   960 8609 D0 04		    bne     plaerr
-   961 860B B0 02		    bcs     plaerr
-   962 860D 90 0D		    bcc     plaok
-   963
-   964 860F			plaerr
-   965 860F 4C 0F 86		    jmp *
-   966 8612 30 2C 21 1A 26 21 +     .byte "PLA:FAILED"
-   967
-   968 861C			plaok
-   969 861C 4C 1C 86		    jmp *
-   970 861F 33 35 23 23 25 33 +     .byte "SUCCESS!"
-   971
-   972 8627			n55
-   973 8627 55			    .byte $55
-   974 8628			nAA
-   975 8628 AA 0C 22		    .byte $AA, 12, 34
-   976
-   977 862B			    org $fffa
-   978 FFFA 00 00 00 80 00 00	    .word 0, run, 0
+   953 85F2			roraerr
+   954 85F2 4C F2 85		    jmp *
+   955 85F5 32 2F 32 21 1A 26 +     .byte "RORA:FAILED"
+   956 				    
+   957 8600			roraok
+   958
+   959 				;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+   960
+   961 				; pha / pla
+   962 8600 A9 EE		    lda     #$ee
+   963 8602 48			    pha
+   964 8603 A9 00		    lda     #00
+   965 8605 18			    clc
+   966 8606 68			    pla                 ; doesn't affect flags
+   967 				;    bmi     plaerr
+   968 8607 10 06		    bpl     plaerr
+   969 				;    bne     plaerr
+   970 8609 F0 04		    beq     plaerr
+   971 860B B0 FE		    bcs     *
+   972 860D 90 0D		    bcc     plaok
+   973
+   974 860F			plaerr
+   975 860F 4C 0F 86		    jmp *
+   976 8612 30 2C 21 1A 26 21 +     .byte "PLA:FAILED"
+   977
+   978 861C			plaok
+   979 861C 4C 1C 86		    jmp *
+   980 861F 33 35 23 23 25 33 +     .byte "SUCCESS!"
+   981
+   982 8627			n55
+   983 8627 55			    .byte $55
+   984 8628			nAA
+   985 8628 AA 0C 22		    .byte $AA, 12, 34
+   986
+   987 				.ifndef ATARI
+   988 862B			    org $fffa
+   989 FFFA 00 00 00 80 00 00	    .word 0, run, 0
+   990 				.endif

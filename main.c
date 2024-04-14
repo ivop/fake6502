@@ -30,7 +30,7 @@ void test(const char *filename, uint16_t success) {
         if (save == PC) {
             printf("%s ", PC != success ? "FAIL!" : "PASS");
             printf("PC = $%04x, instructions = %ld\n", PC, instructions);
-            printf("\tA=%02x X=%02x Y=%02x SP=%02x\n", A, X, Y, SP);
+            printf("\tA=%02x X=%02x Y=%02x SP=%02x P=%02x\n", A, X, Y, SP, getP());
             return;
         }
     }
@@ -40,4 +40,6 @@ void main(void) {
     test("test/6502_functional_test.bin", 0x3469);
     instructions = 0;
     test("test/6502_decimal_test.bin", 0x044b);
+    instructions = 0;
+    test("test/bird6502.bin", 0x861c);
 }
