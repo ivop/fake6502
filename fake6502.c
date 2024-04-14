@@ -10,10 +10,6 @@
 extern uint8_t read6502(uint16_t address);
 extern void write6502(uint16_t address, uint8_t value);
 
-//6502 defines
-#define UNDOCUMENTED //when this is defined, undocumented opcodes are handled.
-                     //otherwise, they're simply treated as NOPs.
-
 #define FLAG_BREAK     0x10
 #define FLAG_CONSTANT  0x20
 
@@ -601,66 +597,53 @@ static void tya() {
     signcalc(a);
 }
 
-//undocumented instructions
-#ifdef UNDOCUMENTED
-    static void lax() {
-        lda();
-        ldx();
-    }
+static void lax() {
+    lda();
+    ldx();
+}
 
-    static void sax() {
-        sta();
-        stx();
-        putvalue(a & x);
-        if (penaltyop && penaltyaddr) clockticks6502--;
-    }
+static void sax() {
+    sta();
+    stx();
+    putvalue(a & x);
+    if (penaltyop && penaltyaddr) clockticks6502--;
+}
 
-    static void dcp() {
-        dec();
-        cmp();
-        if (penaltyop && penaltyaddr) clockticks6502--;
-    }
+static void dcp() {
+    dec();
+    cmp();
+    if (penaltyop && penaltyaddr) clockticks6502--;
+}
 
-    static void isb() {
-        inc();
-        sbc();
-        if (penaltyop && penaltyaddr) clockticks6502--;
-    }
+static void isb() {
+    inc();
+    sbc();
+    if (penaltyop && penaltyaddr) clockticks6502--;
+}
 
-    static void slo() {
-        asl();
-        ora();
-        if (penaltyop && penaltyaddr) clockticks6502--;
-    }
+static void slo() {
+    asl();
+    ora();
+    if (penaltyop && penaltyaddr) clockticks6502--;
+}
 
-    static void rla() {
-        rol();
-        and();
-        if (penaltyop && penaltyaddr) clockticks6502--;
-    }
+static void rla() {
+    rol();
+    and();
+    if (penaltyop && penaltyaddr) clockticks6502--;
+}
 
-    static void sre() {
-        lsr();
-        eor();
-        if (penaltyop && penaltyaddr) clockticks6502--;
-    }
+static void sre() {
+    lsr();
+    eor();
+    if (penaltyop && penaltyaddr) clockticks6502--;
+}
 
-    static void rra() {
-        ror();
-        adc();
-        if (penaltyop && penaltyaddr) clockticks6502--;
-    }
-#else
-    #define lax nop
-    #define sax nop
-    #define dcp nop
-    #define isb nop
-    #define slo nop
-    #define rla nop
-    #define sre nop
-    #define rra nop
-#endif
-
+static void rra() {
+    ror();
+    adc();
+    if (penaltyop && penaltyaddr) clockticks6502--;
+}
 
 static void (*addrtable[256])() = {
 /*        |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  A  |  B  |  C  |  D  |  E  |  F  |     */
@@ -721,7 +704,6 @@ static const uint32_t ticktable[256] = {
 /* E */      2,    6,    2,    8,    3,    3,    5,    5,    2,    2,    2,    2,    4,    4,    6,    6,  /* E */
 /* F */      2,    5,    2,    8,    4,    4,    6,    6,    2,    4,    2,    7,    4,    4,    7,    7   /* F */
 };
-
 
 void nmi6502() {
     push16(pc);
