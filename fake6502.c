@@ -15,7 +15,8 @@
 
 static void (*addrtable[256])();
 static void (*optable[256])();
-static uint8_t penaltyop, penaltyaddr;
+static uint8_t penaltyop, penaltyaddr, callexternal;
+static void (*loopexternal)();
 
 #define FLAG_BREAK     0x10
 #define FLAG_CONSTANT  0x20
@@ -507,9 +508,6 @@ void irq6502() {
     I = 1;
     PC = read6502word(0xfffe);
 }
-
-uint8_t callexternal = 0;
-void (*loopexternal)();
 
 void exec6502(uint32_t tickcount) {
     clockgoal6502 += tickcount;
