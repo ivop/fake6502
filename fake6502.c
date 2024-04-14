@@ -13,11 +13,6 @@ extern void write6502(uint16_t address, uint8_t value);
 #define UNDOCUMENTED //when this is defined, undocumented opcodes are handled.
                      //otherwise, they're simply treated as NOPs.
 
-//#define NES_CPU      //when this is defined, the binary-coded decimal (BCD)
-                     //status flag is not honored by ADC and SBC. the 2A03
-                     //CPU in the Nintendo Entertainment System does not
-                     //support BCD operation.
-
 #define FLAG_CARRY     0x01
 #define FLAG_ZERO      0x02
 #define FLAG_INTERRUPT 0x04
@@ -218,27 +213,19 @@ static void adc() {
     penaltyop = 1;
     value = getvalue();
     result = (uint16_t)a + value + (uint16_t)(status & FLAG_CARRY);
-
-    carrycalc(result);
     zerocalc(result);
-    overflowcalc(result, a, value);
-    signcalc(result);
 
-    #ifndef NES_CPU
     if (status & FLAG_DECIMAL) {
-        clearcarry();
-
-        if ((a & 0x0F) > 0x09) {
-            a += 0x06;
-        }
-        if ((a & 0xF0) > 0x90) {
-            a += 0x60;
-            setcarry();
-        }
-
+        uint8_t B = (a & 0x0f) + (value & 0x0f) + (status & FLAG_CARRY);
+        if (B >= 0x0a) B = ((B + 0x06) & 0x0f) + 0x10;
+        result = (a & 0xf0) + (value & 0xf0) + B;
+        if (result >= 0xa0) result += 0x60;
         clockticks6502++;
     }
-    #endif
+
+    carrycalc(result);
+    overflowcalc(result, a, value);
+    signcalc(result);
 
     saveaccum(result);
 }
@@ -588,31 +575,24 @@ static void rts() {
 }
 
 static void sbc() {
+    uint16_t C = status & FLAG_CARRY;
     penaltyop = 1;
-    value = getvalue() ^ 0x00FF;
-    result = (uint16_t)a + value + (uint16_t)(status & FLAG_CARRY);
-
+    value = getvalue() ^ 0xff;
+    result = a + value + C;
     carrycalc(result);
     zerocalc(result);
     overflowcalc(result, a, value);
     signcalc(result);
 
-    #ifndef NES_CPU
     if (status & FLAG_DECIMAL) {
-        clearcarry();
-
-        a -= 0x66;
-        if ((a & 0x0F) > 0x09) {
-            a += 0x06;
-        }
-        if ((a & 0xF0) > 0x90) {
-            a += 0x60;
-            setcarry();
-        }
-
+        uint16_t AL, B;
+        B = value ^ 0xff;
+        AL = (a & 0x0f) - (B & 0x0f) + C - 1;
+        if(AL & 0x8000)  AL =  ((AL - 0x06) & 0x0f) - 0x10;
+        result = (a & 0xf0) - (B & 0xf0) + AL;
+        if(result & 0x8000) result -= 0x60;
         clockticks6502++;
     }
-    #endif
 
     saveaccum(result);
 }
