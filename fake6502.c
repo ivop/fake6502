@@ -156,18 +156,14 @@ static void indy() { // (indirect),Y
     }
 }
 
-static uint16_t getvalue() {
-    if (addrtable[opcode] == acc) return((uint16_t)a);
-        else return((uint16_t)read6502(ea));
+static inline uint16_t getvalue() {
+    return addrtable[opcode] == acc ? a : read6502(ea);
 }
 
-static void putvalue(uint16_t saveval) {
-    if (addrtable[opcode] == acc) a = (uint8_t)(saveval & 0x00FF);
-        else write6502(ea, (saveval & 0x00FF));
+static inline void putvalue(uint16_t saveval) {
+    if (addrtable[opcode] == acc) a = saveval; else write6502(ea, saveval);
 }
 
-
-//instruction handler functions
 static void adc() {
     penaltyop = 1;
     value = getvalue();
