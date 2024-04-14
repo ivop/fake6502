@@ -30,7 +30,7 @@ uint8_t SP, A, X, Y;
 bool C, Z, I, D, B, V, N;
 uint64_t instructions = 0; //keep track of total instructions executed
 uint32_t clockticks6502 = 0, clockgoal6502 = 0;
-static uint16_t ea, reladdr, value, result;
+static uint16_t ea, reladdr;
 static uint8_t opcode, oldstatus;
 
 static void push16(uint16_t pushval) {
@@ -143,8 +143,8 @@ static inline void putvalue(uint16_t saveval) {
 
 static void adc() {
     penaltyop = 1;
-    value = getvalue();
-    result = A + value + C;
+    uint16_t value = getvalue();
+    uint16_t result = A + value + C;
     zerocalc(result);
 
     if (D) {
@@ -170,7 +170,7 @@ static void and() {
 }
 
 static void asl() {
-    result = getvalue() << 1;
+    uint16_t result = getvalue() << 1;
     carrycalc(result);
     zerocalc(result);
     signcalc(result);
@@ -196,7 +196,7 @@ static void bvc() { branch(!V); }
 static void bvs() { branch( V); }
 
 static void bit() {
-    value = getvalue();
+    uint16_t value = getvalue();
     zerocalc(A & value);
     N = value & 0x80;
     V = value & 0x40;
@@ -216,28 +216,28 @@ static void clv() { V = 0; }
 
 static void cmp() {
     penaltyop = 1;
-    value = getvalue();
+    uint16_t value = getvalue();
     signcalc(A - value);
     C = A >= (value & 0xff);
     Z = A == (value & 0xff);
 }
 
 static void cpx() {
-    value = getvalue();
+    uint16_t value = getvalue();
     signcalc(X - value);
     C = X >= (value & 0xff);
     Z = X == (value & 0xff);
 }
 
 static void cpy() {
-    value = getvalue();
+    uint16_t value = getvalue();
     signcalc(Y - value);
     C = Y >= (value & 0xff);
     Z = Y == (value & 0xff);
 }
 
 static void dec() {
-    result = getvalue() - 1;
+    uint16_t result = getvalue() - 1;
     zerocalc(result);
     signcalc(result);
     putvalue(result);
@@ -255,14 +255,14 @@ static void dey() {
 
 static void eor() {
     penaltyop = 1;
-    result = A ^ getvalue();
+    uint16_t result = A ^ getvalue();
     zerocalc(result);
     signcalc(result);
     saveaccum(result);
 }
 
 static void inc() {
-    result = getvalue() + 1;
+    uint16_t result = getvalue() + 1;
     zerocalc(result);
     signcalc(result);
     putvalue(result);
@@ -309,8 +309,8 @@ static void ldy() {
 }
 
 static void lsr() {
-    value = getvalue();
-    result = value >> 1;
+    uint16_t value = getvalue();
+    uint16_t result = value >> 1;
     C = value & 1;
     zerocalc(result);
     signcalc(result);
@@ -357,7 +357,7 @@ static void plp() {
 }
 
 static void rol() {
-    result = (getvalue() << 1) | C;
+    uint16_t result = (getvalue() << 1) | C;
     carrycalc(result);
     zerocalc(result);
     signcalc(result);
@@ -365,8 +365,8 @@ static void rol() {
 }
 
 static void ror() {
-    value = getvalue();
-    result = (value >> 1) | (C << 7);
+    uint16_t value = getvalue();
+    uint16_t result = (value >> 1) | (C << 7);
     C = value & 1;
     zerocalc(result);
     signcalc(result);
@@ -386,8 +386,8 @@ static void rts() {
 static void sbc() {
     bool cC = C;
     penaltyop = 1;
-    value = getvalue() ^ 0xff;
-    result = A + value + C;
+    uint16_t value = getvalue() ^ 0xff;
+    uint16_t result = A + value + C;
     carrycalc(result);
     zerocalc(result);
     signcalc(result);
