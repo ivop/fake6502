@@ -12,24 +12,31 @@ void write6502(uint16_t address, uint8_t value) {
     memory[address] = value;
 }
 
-int main(int argc, char **argv) {
-    FILE *f = fopen("test/6502_functional_test.bin","rb");
+void test(const char *filename, uint16_t run, uint16_t success) {
+    printf("Test: %s -- ", filename);
+    FILE *f = fopen(filename,"rb");
     if (!f) {
         fprintf(stderr, "cannot open test\n");
-        return 1;
+        return;
     }
     if (fread(memory, 1, 65536, f) != 65536) {
         fprintf(stderr, "premature EOF\n");
-        return 1;
+        return;
     }
-    pc = 0x0400;
+    pc = run;
     while (1) {
         uint16_t save = pc;
         step6502();
         if (save == pc) {
-            printf("done. pc = $%04x, instructions = %ld\n", pc, instructions);
-            if (pc != 0x3469) printf("FAIL!\n"); else printf("PASS\n");
-            return 0;
+            printf("%s ", pc != success ? "FAIL!" : "PASS");
+            printf("pc = $%04x, instructions = %ld\n", pc, instructions);
+            return;
         }
     }
+}
+
+void main(void) {
+    test("test/6502_functional_test.bin", 0x0400, 0x3469);
+    instructions = 0;
+    test("test/6502_decimal_test.bin", 0x0400, 0x044b);
 }
