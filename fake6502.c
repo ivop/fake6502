@@ -207,8 +207,8 @@ static void asl() {
     putvalue(result);
 }
 
-static void bcc() {
-    if (!C) {
+static void branch(bool condition) {
+    if (condition) {
         uint16_t oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
@@ -216,23 +216,14 @@ static void bcc() {
     }
 }
 
-static void bcs() {
-    if (C) {
-        uint16_t oldpc = pc;
-        pc += reladdr;
-        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
-            else clockticks6502++;
-    }
-}
-
-static void beq() {
-    if (Z) {
-        uint16_t oldpc = pc;
-        pc += reladdr;
-        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
-            else clockticks6502++;
-    }
-}
+static void bcc() { branch(!C); }
+static void bcs() { branch( C); }
+static void bne() { branch(!Z); }
+static void beq() { branch( Z); }
+static void bpl() { branch(!N); }
+static void bmi() { branch( N); }
+static void bvc() { branch(!V); }
+static void bvs() { branch( V); }
 
 static void bit() {
     value = getvalue();
@@ -243,33 +234,6 @@ static void bit() {
     V = value & 0x40;
 }
 
-static void bmi() {
-    if (N) {
-        uint16_t oldpc = pc;
-        pc += reladdr;
-        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
-            else clockticks6502++;
-    }
-}
-
-static void bne() {
-    if (!Z) {
-        uint16_t oldpc = pc;
-        pc += reladdr;
-        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
-            else clockticks6502++;
-    }
-}
-
-static void bpl() {
-    if (!N) {
-        uint16_t oldpc = pc;
-        pc += reladdr;
-        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
-            else clockticks6502++;
-    }
-}
-
 static void brk() {
     pc++;
     push16(pc); //push next instruction address onto stack
@@ -277,24 +241,6 @@ static void brk() {
     //setinterrupt(); //set interrupt flag
     I = 1;
     pc = (uint16_t)read6502(0xFFFE) | ((uint16_t)read6502(0xFFFF) << 8);
-}
-
-static void bvc() {
-    if (!V) {
-        uint16_t oldpc = pc;
-        pc += reladdr;
-        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
-            else clockticks6502++;
-    }
-}
-
-static void bvs() {
-    if (V) {
-        uint16_t oldpc = pc;
-        pc += reladdr;
-        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
-            else clockticks6502++;
-    }
 }
 
 static void clc() { C = 0; }
