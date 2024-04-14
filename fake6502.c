@@ -5,9 +5,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-extern uint8_t read6502(uint16_t address);
-extern void write6502(uint16_t address, uint8_t value);
+#include "fake6502.h"
 
 static void (*addrtable[256])();
 static void (*optable[256])();
@@ -34,6 +32,7 @@ uint64_t instructions = 0; //keep track of total instructions executed
 uint32_t clockticks6502 = 0, clockgoal6502 = 0;
 static uint16_t ea, reladdr, value, result;
 static uint8_t opcode, oldstatus;
+
 static void push16(uint16_t pushval) {
     write6502(BASE_STACK + SP, (pushval >> 8) & 0xFF);
     write6502(BASE_STACK + ((SP - 1) & 0xFF), pushval & 0xFF);
