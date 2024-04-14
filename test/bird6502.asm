@@ -9,18 +9,26 @@
 ; instructions.
 ;==================================================================
 
-UART            equ     $DF00
-XMIT_FUL        equ     $08     ; the transmit buffer is full
+; Modified for Mad-Assembler by Ivo van Poorten
+; On error, it hangs with jmp *. Use debugger to see what failed.
+
+    opt h-
+    opt f+
+
+    org $0
+
+    .byte 0
+
 data_ptr        equ     $08
 
     org $8000
 
+run:
+
 ; If the program gets here then we know at least the boot strap
 ; worked okay, which is in itself a good test of processor health.
 
-    jsr     putmsg
-    db      "Testing Processor", 13, 10, 0
-
+    nop
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ; First thing to test is branches. If you can't branch reliably
@@ -33,45 +41,55 @@ data_ptr        equ     $08
 
     sec
     bcs     bcsok
-    jsr     putmsg
-    db      "BCS:F", 13, 10, 0
+
+    jmp *
+    .byte "BCS:FAILED"
+
 bcsok
     clc
     bcc     bccok
-    jsr     putmsg
-    db      "BCC:F", 13, 10, 0
+
+    jmp *
+    .byte "BCC:FAILED"
+
 bccok
     lda     #$00
     beq     beqok
-    jsr     putmsg
-    db      "BEQ:F", 13, 10, 0
+
+    jmp *
+    .byte "BEQ:FAILED"
 beqok
     lda     #$80
     bne     bneok
-    jsr     putmsg
-    db      "BNE:F", 13, 10, 0
+
+    jmp *
+    .byte "BNE:FAILED"
 bneok
     ora     #$00
     bmi     bmiok
-    jsr     putmsg
-    db      "BMI:F", 13, 10, 0
+
+    jmp *
+    .byte "BMI:FAILED"
 bmiok
     eor     #$80
     bpl     bplok
-    jsr     putmsg
-    db      "BPL:F", 13, 10, 0
+
+    jmp *
+    .byte "BPL:FAILED"
 bplok
     lda     #$7f
     clc
     adc     #$10        ; should give signed overflow
     bvs     bvsok
-    jsr     putmsg
-    db      "BVS:F", 13, 10, 0
+
+    jmp *
+    .byte "BVS:FAILED"
 bvsok
     clv
     bvc     bvcok
-    jsr     putmsg
-    db      "BVC:F", 13, 10, 0
+
+    jmp *
+    .byte "BVC:FAILED"
 bvcok
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -98,8 +116,8 @@ bvcok
     bvc     cmpok
 
 cmperr
-    jsr     putmsg
-    db      "CMP:F", 13, 10, 0
+    jmp *
+    .byte "CMP:FAILED"
 
 cmpok
     ldx     #27
@@ -121,8 +139,8 @@ cmpok
     bvc     cpxok
 
 cpxerr
-    jsr     putmsg
-    db      "CPX:F", 13, 10, 0
+    jmp *
+    .byte "CPX:FAILED"
 
 cpxok
     ldy     #27
@@ -144,8 +162,8 @@ cpxok
     bvc     cpyok
 
 cpyerr
-    jsr     putmsg
-    db      "CPY:F", 13, 10, 0
+    jmp *
+    .byte "CPY:FAILED"
 
 cpyok
 
@@ -197,8 +215,8 @@ cpyok
     beq     ldaok
 
 ldaerr
-    jsr     putmsg
-    db      "LDA:F", 13, 10, 0
+    jmp *
+    .byte "LDA:FAILED"
 
 ldaok
 
@@ -243,8 +261,8 @@ ldaok
     beq     ldxok
 
 ldxerr
-    jsr     putmsg
-    db      "LDX:F", 13, 10, 0
+    jmp *
+    .byte "LDX:FAILED"
 
 
 ; ldy
@@ -288,8 +306,8 @@ ldxok
     beq     ldyok
 
 ldyerr
-    jsr     putmsg
-    db      "LDY:F", 13, 10, 0
+    jmp *
+    .byte "LDY:FAILED"
 
 ldyok
 
@@ -323,8 +341,8 @@ ldyok
     beq     taxok
 
 taxerr
-    jsr     putmsg
-    db      "TAX:F", 13, 10, 0
+    jmp *
+    .byte "TAX:FAILED"
 taxok
 
 ; tay
@@ -353,10 +371,10 @@ taxok
     beq     tayok
 
 tayerr
-    jsr     putmsg
-    db      "TAY:F", 13, 10, 0
-tayok
+    jmp *
+    .byte "TAY:FAILED"
 
+tayok
 
 ; txs
 
@@ -366,32 +384,39 @@ tayok
     tsx
     cpx     #15
     beq     txsok
-    jsr     putmsg
-    db      "TSX:F", 13, 10, 0
+
+    jmp *
+    .byte "TSX:FAILED"
+
 txsok
     ldx     #87
     txa
     cmp     #87
     beq     txaok
-    jsr     putmsg
-    db      "TXA:F", 13, 10, 0
+
+    jmp *
+    .byte "TXA:FAILED"
+
 txaok
     tay
     cpy     #87
     beq     tayok1
-    jsr     putmsg
-    db      "TAY:F", 13, 10, 0
+
+    jmp *
+    .byte "TAY:FAILED"
+
 tayok1
     tya
     beq     tyaerr
     bmi     tyaerr
     cmp     #87
     beq     tyaok
-tyaerr
-    jsr     putmsg
-    db      "TYA:F", 13, 10, 0
-tyaok
 
+tyaerr
+    jmp *
+    .byte "TYA:FAILED"
+
+tyaok
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ; Increment / Decrement
@@ -433,8 +458,8 @@ inxl2
     beq     inxok
     
 inxerr
-    jsr     putmsg
-    db      "INX:F", 13, 10, 0
+    jmp *
+    .byte "INX:FAILED"
 
 inxok
 
@@ -484,14 +509,10 @@ dexl2
     beq     dexok
     
 dexerr
-    jsr     putmsg
-    db      "DEX:F", 13, 10, 0
+    jmp *
+    .byte "DEX:FAILED"
     
 dexok
-
-    jsr     putmsg
-    db      "DEX", 13, 10, 0
-
 
 ; iny
 
@@ -531,8 +552,8 @@ inyl2
     beq     inyok
     
 inyerr
-    jsr     putmsg
-    db      "INY:F", 13, 10, 0
+    jmp *
+    .byte "INY:FAILED"
 
 
 ;   dey
@@ -583,8 +604,8 @@ deyl2
     beq     deyok
     
 deyerr
-    jsr     putmsg
-    db      "DEY:F", 13, 10, 0
+    jmp *
+    .byte "DEY:FAILED"
     
 deyok
 
@@ -614,8 +635,8 @@ deyok
     bcs     staok
 
 staerr
-    jsr     putmsg
-    db      "STA:F", 13, 10, 0
+    jmp *
+    .byte "STA:FAILED"
 staok
 
 ; stx
@@ -639,8 +660,8 @@ staok
     bcs     stxok
 
 stxerr
-    jsr     putmsg
-    db      "STX:F", 13, 10, 0
+    jmp *
+    .byte "STX:FAILED"
 stxok
 
 ; sty
@@ -664,8 +685,8 @@ stxok
     bcs     styok
 
 styerr
-    jsr     putmsg
-    db      "STY:F", 13, 10, 0
+    jmp *
+    .byte "STY:FAILED"
 styok
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -680,30 +701,38 @@ styok
     eor     #$55
     cmp     #$ff
     beq     imm_ok
-    jsr     putmsg
-    db      "IMM:F", 13, 10, 0
+
+    jmp *
+    .byte "IMM:FAILED"
+
 imm_ok
     lda     n55
     eor     nAA
     clc
     adc     #1
     beq     abs_ok
-    jsr     putmsg
-    db      "ABS:F", 13, 10, 0
+
+    jmp *
+    .byte "ABS:FAILED"
+
 abs_ok
     ldx     #2
     lda     n55,x
     cmp     #12
     beq     absx_ok
-    jsr     putmsg
-    db      "ABS,X:F", 13, 10, 0
+
+    jmp *
+    .byte "ABS,X:FAILED"
+
 absx_ok
     ldy     #3
     lda     n55,y
     cmp     #34
     beq     absy_ok
-    jsr     putmsg
-    db      "ABS,Y:F", 13, 10, 0
+
+    jmp *
+    .byte "ABS,Y:FAILED"
+
 absy_ok
     lda     #33
     sta     data_ptr
@@ -711,16 +740,20 @@ absy_ok
     ldx     data_ptr
     cpx     #33
     beq     zp_ok
-    jsr     putmsg
-    db      "ZP:F", 13, 10, 0
+
+    jmp *
+    .byte "ZP:FAILED"
+
 zp_ok
     lda     #44
     sta     data_ptr+33
     lda     data_ptr,x
     cmp     #44
     beq     zpx_ok
-    jsr     putmsg
-    db      "ZP,X:F", 13, 10, 0
+
+    jmp *
+    .byte "ZP,X:FAILED"
+
 zpx_ok
     lda     #$12
     sta     $201
@@ -732,8 +765,10 @@ zpx_ok
     lda     (data_ptr-5,x)
     cmp     #$12
     beq     zpix_ok
-    jsr     putmsg
-    db      "(ZP,X):F", 13, 10, 0
+
+    jmp *
+    .byte "(ZP,X):FAILED"
+
 zpix_ok
     lda     #$fe
     sta     data_ptr
@@ -743,15 +778,20 @@ zpix_ok
     lda     (data_ptr),y
     cmp     #$12
     beq     zpiy_ok
-    jsr     putmsg
-    db      "(ZP),y:F", 13, 10, 0
+
+    jmp *
+    .byte "(ZP),y:FAILED"
+
 zpiy_ok
     ldy     #15
     ldx     data_ptr-15,y
     cpx     #$fe
     beq     zpy_ok
-    jsr     putmsg
-    db      "ZP,Y:F", 13, 10, 0
+
+    jmp *
+    jmp *
+    .byte "ZP,Y:FAILED"
+
 zpy_ok
 
 
@@ -760,31 +800,38 @@ zpy_ok
     iny
     cpy     #0  
     beq     iny_ok
-    jsr     putmsg
-    db      "INY:F", 13, 10, 0
+
+    jmp *
+    .byte "INY:FAILED"
+
 iny_ok
     ldy     #10
     dey
     cpy     #9
     beq     dey_ok
-    jsr     putmsg
-    db      "DEY:F", 13, 10, 0
+
+    jmp *
+    .byte "DEY:FAILED"
+
 dey_ok
     ldx     #$80
     inx
     cpx     #$81
     beq     inx_ok
-    jsr     putmsg
-    db      "INX:F", 13, 10, 0
+
+    jmp *
+    .byte "INX:FAILED"
+
 inx_ok
     ldx     #$00
     dex
     cpx     #$ff
     beq     dex_ok
-    jsr     putmsg
-    db      "DEX:F", 13, 10, 0
-dex_ok
 
+    jmp *
+    .byte "DEX:FAILED"
+
+dex_ok
 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ; Shift ops
@@ -793,13 +840,13 @@ dex_ok
 ; asl a
 
     lda     #$01
-    asl     a
-    asl     a
-    asl     a
-    asl     a
-    asl     a
-    asl     a
-    asl     a
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
+    asl
     bpl     aslaerr
     beq     aslaerr
     bcs     aslaerr
@@ -807,54 +854,53 @@ dex_ok
     beq     aslaok
 
 aslaerr
-    jsr     putmsg
-    db      "ASLA:F", 13, 10, 0
+    jmp *
+    .byte "ASLA:FAILED"
     
 aslaok
 
 ; lsr a
 
-    lsr     a
-    lsr     a
-    lsr     a
-    lsr     a
-    lsr     a
-    lsr     a
-    lsr     a
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
     bmi     lsraerr
     beq     lsraerr
     bcs     lsraerr
     bcc     lsraok
 
 lsraerr
-    jsr     putmsg
-    db      "LSRA:F", 13, 10, 0
+    jmp *
+    .byte "LSRA:FAILED"
     
 lsraok
-
 
 ; rol a
 
     clc
     lda     #$01
-    rol     a
-    rol     a
-    rol     a
-    rol     a
-    rol     a
-    rol     a
-    rol     a
+    rol
+    rol
+    rol
+    rol
+    rol
+    rol
+    rol
     bpl     rolaerr
     beq     rolaerr
     bcs     rolaerr
     cmp     #$80        ; this will set the carry !!!
     bne     rolaerr
     clc
-    rol     a
+    rol
     bcc     rolaerr
     bne     rolaerr
     bmi     rolaerr
-    rol     a
+    rol
     bcs     rolaerr
     bmi     rolaerr
     beq     rolaerr
@@ -862,35 +908,33 @@ lsraok
     beq     rolaok
 
 rolaerr
-    jsr     putmsg
-    db      "ROLA:F", 13, 10, 0
-    jmp     rolaok
-    
-rolaok
+    jmp *
+    .byte "ROLA:FAILED"
 
+rolaok
 
 ; ror a
 
     clc
     lda     #$80
-    ror     a
-    ror     a
-    ror     a
-    ror     a
-    ror     a
-    ror     a
-    ror     a
+    ror
+    ror
+    ror
+    ror
+    ror
+    ror
+    ror
     bmi     roraerr
     beq     roraerr
     bcs     roraerr
     cmp     #$01        ; this will set the carry !!!
     bne     roraerr
     clc
-    ror     a
+    ror
     bcc     roraerr
     bne     roraerr
     bmi     roraerr
-    ror     a
+    ror
     bcs     roraerr
     bpl     roraerr
     beq     roraerr
@@ -899,17 +943,11 @@ rolaok
     bne     roraerr
 
 roraerr
-    jsr     putmsg
-    db      "RORA:F", 13, 10, 0
+    jmp *
+    .byte "RORA:FAILED"
     
 roraok
 
-    jsr     putmsg
-    db      "SH", 13, 10, 0
-
-
-
-;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 ;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 ; pha / pla
@@ -924,62 +962,17 @@ roraok
     bcc     plaok
 
 plaerr
-    jsr     putmsg
-    db      "PLA:F", 13, 10, 0
+    jmp *
+    .byte "PLA:FAILED"
 
 plaok
-    jmp     ($FFFC)     ; go back to reset
-
-;------------------------------------------------------------------
-; Kind of a chicken and egg problem here. If there is something
-; wrong with the processor, then this code likely won't execute.
-;
-
-; put message to screen
-; tests pla,sta,ldy,inc,bne,ora,jmp,jmp(abs)
-
-putmsg
-    pla                 ; pop the return address off the stack
-    sta     data_ptr    ; to use as a pointer to the data
-    pla
-    sta     data_ptr+1
-pm2
-    ldy     #$01
-    lda     (data_ptr),y
-    inc     data_ptr
-    bne     pm3
-    inc     data_ptr+1
-pm3
-    ora     #0          ; end of string ?
-    beq     pm1
-    jsr     putSer
-    jmp     pm2
-pm1                     ; must update the return address !
-    inc     data_ptr
-    bne     pm4
-    inc     data_ptr+1
-pm4
-    jmp     (data_ptr)
-
-
-
-; put character to serial port
-; test and,bne,pha,pla,sta,lda,rts
-
-putSer
-    pha                 ; temporarily save character
-ps1
-    lda     UART+1      ; get serial port status
-    and     #XMIT_FUL   ; is it full ?
-    bne     ps1         ; If full then wait
-    pla                 ; get back the char to write
-    sta     UART        ; write it to the xmit register
-    rts
+    jmp *
+    .byte "SUCCESS!"
 
 n55
-    db      $55
+    .byte $55
 nAA
-    db      $AA
-    
-    db      12
-    db      34
+    .byte $AA, 12, 34
+
+    org $fffa
+    .word 0, run, 0
