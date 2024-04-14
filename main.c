@@ -25,12 +25,12 @@ void test(const char *filename, uint16_t success) {
     }
     reset6502();
     while (1) {
-        uint16_t save = pc;
+        uint16_t save = PC;
         step6502();
-        if (save == pc) {
-            printf("%s ", pc != success ? "FAIL!" : "PASS");
-            printf("pc = $%04x, instructions = %ld\n", pc, instructions);
-            printf("\tA=%02x X=%02x Y=%02x SP=%02x\n", a, x, y, sp);
+        if (save == PC) {
+            printf("%s ", PC != success ? "FAIL!" : "PASS");
+            printf("PC = $%04x, instructions = %ld\n", PC, instructions);
+            printf("\tA=%02x X=%02x Y=%02x SP=%02x\n", a, x, y, SP);
             return;
         }
     }

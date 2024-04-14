@@ -27,39 +27,39 @@ static uint8_t penaltyop, penaltyaddr;
 #define splitP(x) \
     N=(x)&0x80, V=(x)&0x40, B=(x)&0x10, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1
 
-uint16_t pc;
-uint8_t sp, a, x, y;
+uint16_t PC;
+uint8_t SP, a, x, y;
 bool C, Z, I, D, B, V, N;
 uint64_t instructions = 0; //keep track of total instructions executed
 uint32_t clockticks6502 = 0, clockgoal6502 = 0;
 static uint16_t ea, reladdr, value, result;
 static uint8_t opcode, oldstatus;
 static void push16(uint16_t pushval) {
-    write6502(BASE_STACK + sp, (pushval >> 8) & 0xFF);
-    write6502(BASE_STACK + ((sp - 1) & 0xFF), pushval & 0xFF);
-    sp -= 2;
+    write6502(BASE_STACK + SP, (pushval >> 8) & 0xFF);
+    write6502(BASE_STACK + ((SP - 1) & 0xFF), pushval & 0xFF);
+    SP -= 2;
 }
 
 static void push8(uint8_t pushval) {
-    write6502(BASE_STACK + sp--, pushval);
+    write6502(BASE_STACK + SP--, pushval);
 }
 
 static uint16_t pull16() {
-    sp += 2;
-    return read6502(BASE_STACK + ((sp - 1) & 0xFF)) | \
-          (read6502(BASE_STACK + ((sp    ) & 0xFF)) << 8);
+    SP += 2;
+    return read6502(BASE_STACK + ((SP - 1) & 0xFF)) | \
+          (read6502(BASE_STACK + ((SP    ) & 0xFF)) << 8);
 }
 
 static uint8_t pull8() {
-    return (read6502(BASE_STACK + ++sp));
+    return (read6502(BASE_STACK + ++SP));
 }
 
 void reset6502() {
-    pc = (uint16_t)read6502(0xFFFC) | ((uint16_t)read6502(0xFFFD) << 8);
+    PC = (uint16_t)read6502(0xFFFC) | ((uint16_t)read6502(0xFFFD) << 8);
     a = 0;
     x = 0;
     y = 0;
-    sp = 0xFD;
+    SP = 0xFD;
 }
 
 static void imp() { //implied
@@ -69,34 +69,34 @@ static void acc() { //accumulator
 }
 
 static void imm() { //immediate
-    ea = pc++;
+    ea = PC++;
 }
 
 static void zp() { //zero-page
-    ea = (uint16_t)read6502((uint16_t)pc++);
+    ea = (uint16_t)read6502((uint16_t)PC++);
 }
 
 static void zpx() { //zero-page,X
-    ea = ((uint16_t)read6502((uint16_t)pc++) + (uint16_t)x) & 0xFF; //zero-page wraparound
+    ea = ((uint16_t)read6502((uint16_t)PC++) + (uint16_t)x) & 0xFF; //zero-page wraparound
 }
 
 static void zpy() { //zero-page,Y
-    ea = ((uint16_t)read6502((uint16_t)pc++) + (uint16_t)y) & 0xFF; //zero-page wraparound
+    ea = ((uint16_t)read6502((uint16_t)PC++) + (uint16_t)y) & 0xFF; //zero-page wraparound
 }
 
 static void rel() { //relative for branch ops (8-bit immediate value, sign-extended)
-    reladdr = (uint16_t)read6502(pc++);
+    reladdr = (uint16_t)read6502(PC++);
     if (reladdr & 0x80) reladdr |= 0xFF00;
 }
 
 static void abso() { //absolute
-    ea = (uint16_t)read6502(pc) | ((uint16_t)read6502(pc+1) << 8);
-    pc += 2;
+    ea = (uint16_t)read6502(PC) | ((uint16_t)read6502(PC+1) << 8);
+    PC += 2;
 }
 
 static void absx() { //absolute,X
     uint16_t startpage;
-    ea = ((uint16_t)read6502(pc) | ((uint16_t)read6502(pc+1) << 8));
+    ea = ((uint16_t)read6502(PC) | ((uint16_t)read6502(PC+1) << 8));
     startpage = ea & 0xFF00;
     ea += (uint16_t)x;
 
@@ -104,12 +104,12 @@ static void absx() { //absolute,X
         penaltyaddr = 1;
     }
 
-    pc += 2;
+    PC += 2;
 }
 
 static void absy() { //absolute,Y
     uint16_t startpage;
-    ea = ((uint16_t)read6502(pc) | ((uint16_t)read6502(pc+1) << 8));
+    ea = ((uint16_t)read6502(PC) | ((uint16_t)read6502(PC+1) << 8));
     startpage = ea & 0xFF00;
     ea += (uint16_t)y;
 
@@ -117,26 +117,26 @@ static void absy() { //absolute,Y
         penaltyaddr = 1;
     }
 
-    pc += 2;
+    PC += 2;
 }
 
 static void ind() { //indirect
     uint16_t eahelp, eahelp2;
-    eahelp = (uint16_t)read6502(pc) | (uint16_t)((uint16_t)read6502(pc+1) << 8);
+    eahelp = (uint16_t)read6502(PC) | (uint16_t)((uint16_t)read6502(PC+1) << 8);
     eahelp2 = (eahelp & 0xFF00) | ((eahelp + 1) & 0x00FF); //replicate 6502 page-boundary wraparound bug
     ea = (uint16_t)read6502(eahelp) | ((uint16_t)read6502(eahelp2) << 8);
-    pc += 2;
+    PC += 2;
 }
 
 static void indx() { // (indirect,X)
     uint16_t eahelp;
-    eahelp = (uint16_t)(((uint16_t)read6502(pc++) + (uint16_t)x) & 0xFF); //zero-page wraparound for table pointer
+    eahelp = (uint16_t)(((uint16_t)read6502(PC++) + (uint16_t)x) & 0xFF); //zero-page wraparound for table pointer
     ea = (uint16_t)read6502(eahelp & 0x00FF) | ((uint16_t)read6502((eahelp+1) & 0x00FF) << 8);
 }
 
 static void indy() { // (indirect),Y
     uint16_t eahelp, eahelp2, startpage;
-    eahelp = (uint16_t)read6502(pc++);
+    eahelp = (uint16_t)read6502(PC++);
     eahelp2 = (eahelp & 0xFF00) | ((eahelp + 1) & 0x00FF); //zero-page wraparound
     ea = (uint16_t)read6502(eahelp) | ((uint16_t)read6502(eahelp2) << 8);
     startpage = ea & 0xFF00;
@@ -200,9 +200,9 @@ static void asl() {
 
 static void branch(bool condition) {
     if (condition) {
-        uint16_t oldpc = pc;    // for page cross check
-        pc += reladdr;
-        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2;
+        uint16_t oldpc = PC;    // for page cross check
+        PC += reladdr;
+        if ((oldpc & 0xFF00) != (PC & 0xFF00)) clockticks6502 += 2;
             else clockticks6502++;
     }
 }
@@ -226,11 +226,11 @@ static void bit() {
 }
 
 static void brk() {
-    pc++;
-    push16(pc);                 // address before next instruction
+    PC++;
+    push16(PC);                 // address before next instruction
     push8(makeP | FLAG_BREAK);
     I = 1;
-    pc = read6502(0xFFFE) | (read6502(0xFFFF) << 8);
+    PC = read6502(0xFFFE) | (read6502(0xFFFF) << 8);
 }
 
 static void clc() { C = 0; }
@@ -326,12 +326,12 @@ static void iny() {
 }
 
 static void jmp() {
-    pc = ea;
+    PC = ea;
 }
 
 static void jsr() {
-    push16(pc - 1);
-    pc = ea;
+    push16(PC - 1);
+    PC = ea;
 }
 
 static void lda() {
@@ -442,12 +442,12 @@ static void rti() {
     uint8_t P = pull8();
     splitP(P);
     value = pull16();
-    pc = value;
+    PC = value;
 }
 
 static void rts() {
     value = pull16();
-    pc = value + 1;
+    PC = value + 1;
 }
 
 static void sbc() {
@@ -504,7 +504,7 @@ static void tay() {
 }
 
 static void tsx() {
-    x = sp;
+    x = SP;
 
     zerocalc(x);
     signcalc(x);
@@ -518,7 +518,7 @@ static void txa() {
 }
 
 static void txs() {
-    sp = x;
+    SP = x;
 }
 
 static void tya() {
@@ -637,17 +637,17 @@ static const uint32_t ticktable[256] = {
 };
 
 void nmi6502() {
-    push16(pc);
+    push16(PC);
     push8(makeP);
     I = 1;
-    pc = read6502(0xFFFA) | (read6502(0xFFFB) << 8);
+    PC = read6502(0xFFFA) | (read6502(0xFFFB) << 8);
 }
 
 void irq6502() {
-    push16(pc);
+    push16(PC);
     push8(makeP);
     I = 1;
-    pc = read6502(0xFFFE) | (read6502(0xFFFF) << 8);
+    PC = read6502(0xFFFE) | (read6502(0xFFFF) << 8);
 }
 
 uint8_t callexternal = 0;
@@ -657,7 +657,7 @@ void exec6502(uint32_t tickcount) {
     clockgoal6502 += tickcount;
 
     while (clockticks6502 < clockgoal6502) {
-        opcode = read6502(pc++);
+        opcode = read6502(PC++);
 
         penaltyop = 0;
         penaltyaddr = 0;
@@ -675,7 +675,7 @@ void exec6502(uint32_t tickcount) {
 }
 
 void step6502() {
-    opcode = read6502(pc++);
+    opcode = read6502(PC++);
 
     penaltyop = 0;
     penaltyaddr = 0;
