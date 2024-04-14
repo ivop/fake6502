@@ -33,7 +33,7 @@ bool C, Z, I, D, B, V, N;
 //helper variables
 uint64_t instructions = 0; //keep track of total instructions executed
 uint32_t clockticks6502 = 0, clockgoal6502 = 0;
-static uint16_t oldpc, ea, reladdr, value, result;
+static uint16_t ea, reladdr, value, result;
 static uint8_t opcode, oldstatus;
 
 //a few general functions used by various other functions
@@ -209,7 +209,7 @@ static void asl() {
 
 static void bcc() {
     if (!C) {
-        oldpc = pc;
+        uint16_t oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
             else clockticks6502++;
@@ -218,7 +218,7 @@ static void bcc() {
 
 static void bcs() {
     if (C) {
-        oldpc = pc;
+        uint16_t oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
             else clockticks6502++;
@@ -227,7 +227,7 @@ static void bcs() {
 
 static void beq() {
     if (Z) {
-        oldpc = pc;
+        uint16_t oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
             else clockticks6502++;
@@ -245,7 +245,7 @@ static void bit() {
 
 static void bmi() {
     if (N) {
-        oldpc = pc;
+        uint16_t oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
             else clockticks6502++;
@@ -254,7 +254,7 @@ static void bmi() {
 
 static void bne() {
     if (!Z) {
-        oldpc = pc;
+        uint16_t oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
             else clockticks6502++;
@@ -263,7 +263,7 @@ static void bne() {
 
 static void bpl() {
     if (!N) {
-        oldpc = pc;
+        uint16_t oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
             else clockticks6502++;
@@ -281,7 +281,7 @@ static void brk() {
 
 static void bvc() {
     if (!V) {
-        oldpc = pc;
+        uint16_t oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
             else clockticks6502++;
@@ -290,7 +290,7 @@ static void bvc() {
 
 static void bvs() {
     if (V) {
-        oldpc = pc;
+        uint16_t oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
             else clockticks6502++;
