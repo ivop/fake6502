@@ -17,7 +17,7 @@ static uint8_t penaltyop, penaltyaddr;
 #define FLAG_CONSTANT  0x20
 #define BASE_STACK     0x100
 
-#define saveaccum(n)        a = (n) & 0xff
+#define saveaccum(n)        a = (n)
 #define zerocalc(n)         Z = !((n) & 0xff)
 #define signcalc(n)         N = (n) & 0x80
 #define carrycalc(n)        C = (n) & 0xff00
