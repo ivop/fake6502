@@ -17,7 +17,7 @@ static uint8_t penaltyop, penaltyaddr;
 #define FLAG_CONSTANT  0x20
 #define BASE_STACK     0x100
 
-#define saveaccum(n)        a = (n)
+#define saveaccum(n)        A = (n)
 #define zerocalc(n)         Z = !((n) & 0xff)
 #define signcalc(n)         N = (n) & 0x80
 #define carrycalc(n)        C = (n) & 0xff00
@@ -28,7 +28,7 @@ static uint8_t penaltyop, penaltyaddr;
     N=(x)&0x80, V=(x)&0x40, B=(x)&0x10, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1
 
 uint16_t PC;
-uint8_t SP, a, x, y;
+uint8_t SP, A, X, Y;
 bool C, Z, I, D, B, V, N;
 uint64_t instructions = 0; //keep track of total instructions executed
 uint32_t clockticks6502 = 0, clockgoal6502 = 0;
@@ -56,9 +56,9 @@ static uint8_t pull8() {
 
 void reset6502() {
     PC = (uint16_t)read6502(0xFFFC) | ((uint16_t)read6502(0xFFFD) << 8);
-    a = 0;
-    x = 0;
-    y = 0;
+    A = 0;
+    X = 0;
+    Y = 0;
     SP = 0xFD;
 }
 
@@ -77,11 +77,11 @@ static void zp() { //zero-page
 }
 
 static void zpx() { //zero-page,X
-    ea = ((uint16_t)read6502((uint16_t)PC++) + (uint16_t)x) & 0xFF; //zero-page wraparound
+    ea = ((uint16_t)read6502((uint16_t)PC++) + (uint16_t)X) & 0xFF; //zero-page wraparound
 }
 
 static void zpy() { //zero-page,Y
-    ea = ((uint16_t)read6502((uint16_t)PC++) + (uint16_t)y) & 0xFF; //zero-page wraparound
+    ea = ((uint16_t)read6502((uint16_t)PC++) + (uint16_t)Y) & 0xFF; //zero-page wraparound
 }
 
 static void rel() { //relative for branch ops (8-bit immediate value, sign-extended)
@@ -98,7 +98,7 @@ static void absx() { //absolute,X
     uint16_t startpage;
     ea = ((uint16_t)read6502(PC) | ((uint16_t)read6502(PC+1) << 8));
     startpage = ea & 0xFF00;
-    ea += (uint16_t)x;
+    ea += (uint16_t)X;
 
     if (startpage != (ea & 0xFF00)) { //one cycle penlty for page-crossing on some opcodes
         penaltyaddr = 1;
@@ -111,7 +111,7 @@ static void absy() { //absolute,Y
     uint16_t startpage;
     ea = ((uint16_t)read6502(PC) | ((uint16_t)read6502(PC+1) << 8));
     startpage = ea & 0xFF00;
-    ea += (uint16_t)y;
+    ea += (uint16_t)Y;
 
     if (startpage != (ea & 0xFF00)) { //one cycle penlty for page-crossing on some opcodes
         penaltyaddr = 1;
@@ -130,7 +130,7 @@ static void ind() { //indirect
 
 static void indx() { // (indirect,X)
     uint16_t eahelp;
-    eahelp = (uint16_t)(((uint16_t)read6502(PC++) + (uint16_t)x) & 0xFF); //zero-page wraparound for table pointer
+    eahelp = (uint16_t)(((uint16_t)read6502(PC++) + (uint16_t)X) & 0xFF); //zero-page wraparound for table pointer
     ea = (uint16_t)read6502(eahelp & 0x00FF) | ((uint16_t)read6502((eahelp+1) & 0x00FF) << 8);
 }
 
@@ -140,7 +140,7 @@ static void indy() { // (indirect),Y
     eahelp2 = (eahelp & 0xFF00) | ((eahelp + 1) & 0x00FF); //zero-page wraparound
     ea = (uint16_t)read6502(eahelp) | ((uint16_t)read6502(eahelp2) << 8);
     startpage = ea & 0xFF00;
-    ea += (uint16_t)y;
+    ea += (uint16_t)Y;
 
     if (startpage != (ea & 0xFF00)) { //one cycle penlty for page-crossing on some opcodes
         penaltyaddr = 1;
@@ -148,29 +148,29 @@ static void indy() { // (indirect),Y
 }
 
 static inline uint16_t getvalue() {
-    return addrtable[opcode] == acc ? a : read6502(ea);
+    return addrtable[opcode] == acc ? A : read6502(ea);
 }
 
 static inline void putvalue(uint16_t saveval) {
-    if (addrtable[opcode] == acc) a = saveval; else write6502(ea, saveval);
+    if (addrtable[opcode] == acc) A = saveval; else write6502(ea, saveval);
 }
 
 static void adc() {
     penaltyop = 1;
     value = getvalue();
-    result = a + value + C;
+    result = A + value + C;
     zerocalc(result);
 
     if (D) {
-        uint8_t B = (a & 0x0f) + (value & 0x0f) + C;
+        uint8_t B = (A & 0x0f) + (value & 0x0f) + C;
         if (B >= 0x0a) B = ((B + 0x06) & 0x0f) + 0x10;
-        result = (a & 0xf0) + (value & 0xf0) + B;
+        result = (A & 0xf0) + (value & 0xf0) + B;
         if (result >= 0xa0) result += 0x60;
         clockticks6502++;
     }
 
     carrycalc(result);
-    overflowcalc(result, a, value);
+    overflowcalc(result, A, value);
     signcalc(result);
 
     saveaccum(result);
@@ -179,7 +179,7 @@ static void adc() {
 static void and() {
     penaltyop = 1;
     value = getvalue();
-    result = a & value;
+    result = A & value;
 
     zerocalc(result);
     signcalc(result);
@@ -218,7 +218,7 @@ static void bvs() { branch( V); }
 
 static void bit() {
     value = getvalue();
-    result = a & value;
+    result = A & value;
 
     zerocalc(result);
     N = value & 0x80;
@@ -241,28 +241,28 @@ static void clv() { V = 0; }
 static void cmp() {
     penaltyop = 1;
     value = getvalue();
-    result = a - value;
+    result = A - value;
 
-    C = a >= (value & 0xff);
-    Z = a == (value & 0xff);
+    C = A >= (value & 0xff);
+    Z = A == (value & 0xff);
     signcalc(result);
 }
 
 static void cpx() {
     value = getvalue();
-    result = x - value;
+    result = X - value;
 
-    C = x >= (value & 0xff);
-    Z = x == (value & 0xff);
+    C = X >= (value & 0xff);
+    Z = X == (value & 0xff);
     signcalc(result);
 }
 
 static void cpy() {
     value = getvalue();
-    result = y - value;
+    result = Y - value;
 
-    C = y >= (value & 0xff);
-    Z = y == (value & 0xff);
+    C = Y >= (value & 0xff);
+    Z = Y == (value & 0xff);
     signcalc(result);
 }
 
@@ -277,23 +277,23 @@ static void dec() {
 }
 
 static void dex() {
-    x--;
+    X--;
 
-    zerocalc(x);
-    signcalc(x);
+    zerocalc(X);
+    signcalc(X);
 }
 
 static void dey() {
-    y--;
+    Y--;
 
-    zerocalc(y);
-    signcalc(y);
+    zerocalc(Y);
+    signcalc(Y);
 }
 
 static void eor() {
     penaltyop = 1;
     value = getvalue();
-    result = a ^ value;
+    result = A ^ value;
 
     zerocalc(result);
     signcalc(result);
@@ -312,17 +312,17 @@ static void inc() {
 }
 
 static void inx() {
-    x++;
+    X++;
 
-    zerocalc(x);
-    signcalc(x);
+    zerocalc(X);
+    signcalc(X);
 }
 
 static void iny() {
-    y++;
+    Y++;
 
-    zerocalc(y);
-    signcalc(y);
+    zerocalc(Y);
+    signcalc(Y);
 }
 
 static void jmp() {
@@ -337,28 +337,28 @@ static void jsr() {
 static void lda() {
     penaltyop = 1;
     value = getvalue();
-    a = value;
+    A = value;
 
-    zerocalc(a);
-    signcalc(a);
+    zerocalc(A);
+    signcalc(A);
 }
 
 static void ldx() {
     penaltyop = 1;
     value = getvalue();
-    x = value;
+    X = value;
 
-    zerocalc(x);
-    signcalc(x);
+    zerocalc(X);
+    signcalc(X);
 }
 
 static void ldy() {
     penaltyop = 1;
     value = getvalue();
-    y = value;
+    Y = value;
 
-    zerocalc(y);
-    signcalc(y);
+    zerocalc(Y);
+    signcalc(Y);
 }
 
 static void lsr() {
@@ -388,7 +388,7 @@ static void nop() {
 static void ora() {
     penaltyop = 1;
     value = getvalue();
-    result = a | value;
+    result = A | value;
 
     zerocalc(result);
     signcalc(result);
@@ -397,7 +397,7 @@ static void ora() {
 }
 
 static void pha() {
-    push8(a);
+    push8(A);
 }
 
 static void php() {
@@ -405,10 +405,10 @@ static void php() {
 }
 
 static void pla() {
-    a = pull8();
+    A = pull8();
 
-    zerocalc(a);
-    signcalc(a);
+    zerocalc(A);
+    signcalc(A);
 }
 
 static void plp() {
@@ -454,18 +454,18 @@ static void sbc() {
     bool cC = C;
     penaltyop = 1;
     value = getvalue() ^ 0xff;
-    result = a + value + C;
+    result = A + value + C;
     carrycalc(result);
     zerocalc(result);
-    overflowcalc(result, a, value);
+    overflowcalc(result, A, value);
     signcalc(result);
 
     if (D) {
         uint16_t AL, B;
         B = value ^ 0xff;
-        AL = (a & 0x0f) - (B & 0x0f) + cC - 1;
+        AL = (A & 0x0f) - (B & 0x0f) + cC - 1;
         if(AL & 0x8000)  AL =  ((AL - 0x06) & 0x0f) - 0x10;
-        result = (a & 0xf0) - (B & 0xf0) + AL;
+        result = (A & 0xf0) - (B & 0xf0) + AL;
         if(result & 0x8000) result -= 0x60;
         clockticks6502++;
     }
@@ -478,54 +478,54 @@ static void sed() { D = 1; }
 static void sei() { I = 1; }
 
 static void sta() {
-    putvalue(a);
+    putvalue(A);
 }
 
 static void stx() {
-    putvalue(x);
+    putvalue(X);
 }
 
 static void sty() {
-    putvalue(y);
+    putvalue(Y);
 }
 
 static void tax() {
-    x = a;
+    X = A;
 
-    zerocalc(x);
-    signcalc(x);
+    zerocalc(X);
+    signcalc(X);
 }
 
 static void tay() {
-    y = a;
+    Y = A;
 
-    zerocalc(y);
-    signcalc(y);
+    zerocalc(Y);
+    signcalc(Y);
 }
 
 static void tsx() {
-    x = SP;
+    X = SP;
 
-    zerocalc(x);
-    signcalc(x);
+    zerocalc(X);
+    signcalc(X);
 }
 
 static void txa() {
-    a = x;
+    A = X;
 
-    zerocalc(a);
-    signcalc(a);
+    zerocalc(A);
+    signcalc(A);
 }
 
 static void txs() {
-    SP = x;
+    SP = X;
 }
 
 static void tya() {
-    a = y;
+    A = Y;
 
-    zerocalc(a);
-    signcalc(a);
+    zerocalc(A);
+    signcalc(A);
 }
 
 static void lax() {
@@ -536,7 +536,7 @@ static void lax() {
 static void sax() {
     sta();
     stx();
-    putvalue(a & x);
+    putvalue(A & X);
     if (penaltyop && penaltyaddr) clockticks6502--;
 }
 

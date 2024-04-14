@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 extern uint16_t PC;
-extern uint8_t SP, a, x, y, status;
+extern uint8_t SP, A, X, Y, status;
 
 extern uint64_t instructions;
 extern uint32_t clockticks6502;
