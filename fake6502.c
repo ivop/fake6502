@@ -69,8 +69,8 @@ void reset6502() {
     SP = 0xFD;
 }
 
-static uint16_t read6502pc16() {
-    return read6502(PC) | (read6502(PC+1) << 8);
+static uint16_t read6502word(uint16_t addr) {
+    return read6502(addr) | (read6502(addr+1) << 8);
 }
 
 static void imp()  { }
@@ -79,8 +79,7 @@ static void imm()  { ea = PC++; }
 static void zp()   { ea = read6502(PC++); }
 static void zpx()  { ea = (read6502(PC++) + X) & 0xff; }
 static void zpy()  { ea = (read6502(PC++) + Y) & 0xff; }
-static void abso() { ea = read6502pc16(); PC += 2; }
-
+static void abso() { ea = read6502word(PC); PC += 2; }
 
 static void rel() {
     reladdr = read6502(PC++);
@@ -88,7 +87,7 @@ static void rel() {
 }
 
 static void absx() {
-    ea = read6502pc16();
+    ea = read6502word(PC);
     uint16_t startpage = ea & 0xff00;
     ea += X;
     penaltyaddr = startpage != ea & 0xff00;     // page crossing
@@ -96,7 +95,7 @@ static void absx() {
 }
 
 static void absy() {
-    ea = read6502pc16();
+    ea = read6502word(PC);
     uint16_t startpage = ea & 0xff00;
     ea += Y;
     penaltyaddr = startpage != ea & 0xff00;     // page crossing
@@ -104,7 +103,7 @@ static void absy() {
 }
 
 static void ind() {
-    ea = read6502pc16();
+    ea = read6502word(PC);
     uint16_t ea2 = (ea & 0xff00) | ((ea + 1) & 0xff); // page wrap bug!
     ea = read6502(ea) | (read6502(ea2) << 8);
     PC += 2;
@@ -181,6 +180,31 @@ static void bmi() { branch( N); }
 static void bvc() { branch(!V); }
 static void bvs() { branch( V); }
 
+static void clc() { C = 0; }
+static void sec() { C = 1; }
+static void cld() { D = 0; }
+static void sed() { D = 1; }
+static void cli() { I = 0; }
+static void sei() { I = 1; }
+static void clv() { V = 0; }
+
+static void inx() { calcZN(++X); }
+static void iny() { calcZN(++Y); }
+static void dex() { calcZN(--X); }
+static void dey() { calcZN(--Y); }
+
+static void jmp() { PC = ea; }
+static void jsr() { push16(PC - 1); PC = ea; }
+
+static inline void compare(uint8_t reg, uint8_t value) {
+    calcN(reg - value);
+    C = reg >= value & 0xff;
+    Z = reg == value & 0xff;
+}
+static void cmp() { compare(A, getvalue()); penaltyop = 1; }
+static void cpx() { compare(X, getvalue()); }
+static void cpy() { compare(Y, getvalue()); }
+
 static void bit() {
     uint16_t value = getvalue();
     calcZ(A & value);
@@ -192,44 +216,13 @@ static void brk() {
     push16(++PC);                 // address before next instruction
     push8(makeP | FLAG_BREAK);
     I = 1;
-    PC = read6502(0xFFFE) | (read6502(0xFFFF) << 8);
-}
-
-static void clc() { C = 0; }
-static void cld() { D = 0; }
-static void cli() { I = 0; }
-static void clv() { V = 0; }
-
-static void compare(uint8_t reg, uint8_t value) {
-    calcN(reg - value);
-    C = reg >= value & 0xff;
-    Z = reg == value & 0xff;
-}
-static void cmp() {
-    penaltyop = 1;
-    compare(A, getvalue());
-}
-
-static void cpx() {
-    compare(X, getvalue());
-}
-
-static void cpy() {
-    compare(Y, getvalue());
+    PC = read6502word(0xfffe);
 }
 
 static void dec() {
     uint16_t result = getvalue() - 1;
     calcZN(result);
     putvalue(result);
-}
-
-static void dex() {
-    calcZN(--X);
-}
-
-static void dey() {
-    calcZN(--Y);
 }
 
 static void eor() {
@@ -242,23 +235,6 @@ static void inc() {
     uint16_t result = getvalue() + 1;
     calcZN(result);
     putvalue(result);
-}
-
-static void inx() {
-    calcZN(++X);
-}
-
-static void iny() {
-    calcZN(++Y);
-}
-
-static void jmp() {
-    PC = ea;
-}
-
-static void jsr() {
-    push16(PC - 1);
-    PC = ea;
 }
 
 static void lda() {
@@ -368,10 +344,6 @@ static void sbc() {
 
     A = result;
 }
-
-static void sec() { C = 1; }
-static void sed() { D = 1; }
-static void sei() { I = 1; }
 
 static void sta() {
     putvalue(A);
@@ -526,14 +498,14 @@ void nmi6502() {
     push16(PC);
     push8(makeP);
     I = 1;
-    PC = read6502(0xFFFA) | (read6502(0xFFFB) << 8);
+    PC = read6502word(0xfffa);
 }
 
 void irq6502() {
     push16(PC);
     push8(makeP);
     I = 1;
-    PC = read6502(0xFFFE) | (read6502(0xFFFF) << 8);
+    PC = read6502word(0xfffe);
 }
 
 uint8_t callexternal = 0;
