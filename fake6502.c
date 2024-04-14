@@ -62,7 +62,8 @@ void push8(uint8_t pushval) {
 
 uint16_t pull16() {
     sp += 2;
-    return read6502(BASE_STACK + ((sp - 1) & 0xFF)) | ((uint16_t)read6502(BASE_STACK + ((sp) & 0xFF)) << 8);
+    return read6502(BASE_STACK + ((sp - 1) & 0xFF)) | \
+          (read6502(BASE_STACK + ((sp    ) & 0xFF)) << 8);
 }
 
 uint8_t pull8() {
