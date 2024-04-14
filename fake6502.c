@@ -9,6 +9,10 @@
 extern uint8_t read6502(uint16_t address);
 extern void write6502(uint16_t address, uint8_t value);
 
+static void (*addrtable[256])();
+static void (*optable[256])();
+static uint8_t penaltyop, penaltyaddr;
+
 #define FLAG_BREAK     0x10
 #define FLAG_CONSTANT  0x20
 #define BASE_STACK     0x100
@@ -19,20 +23,17 @@ extern void write6502(uint16_t address, uint8_t value);
 #define carrycalc(n)        C = (n) & 0xff00
 #define overflowcalc(n,m,o) V = ((n) ^ (uint16_t)(m)) & ((n) ^ (o)) & 0x80
 
-uint16_t pc;
-uint8_t sp, a, x, y;
-bool C, Z, I, D, B, V, N;
-
 #define makeP ((N<<7)|(V<<6)|(1<<5)|(B<<4)|(D<<3)|(I<<2)|(Z<<1)|C)
 #define splitP(x) \
     N=(x)&0x80, V=(x)&0x40, B=(x)&0x10, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1
 
+uint16_t pc;
+uint8_t sp, a, x, y;
+bool C, Z, I, D, B, V, N;
 uint64_t instructions = 0; //keep track of total instructions executed
 uint32_t clockticks6502 = 0, clockgoal6502 = 0;
 static uint16_t ea, reladdr, value, result;
 static uint8_t opcode, oldstatus;
-
-//a few general functions used by various other functions
 static void push16(uint16_t pushval) {
     write6502(BASE_STACK + sp, (pushval >> 8) & 0xFF);
     write6502(BASE_STACK + ((sp - 1) & 0xFF), pushval & 0xFF);
@@ -61,12 +62,6 @@ void reset6502() {
     sp = 0xFD;
 }
 
-
-static void (*addrtable[256])();
-static void (*optable[256])();
-static uint8_t penaltyop, penaltyaddr;
-
-//addressing mode functions, calculates effective addresses
 static void imp() { //implied
 }
 
