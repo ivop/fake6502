@@ -62,9 +62,7 @@ static uint8_t pull8() {
 
 void reset6502() {
     PC = (uint16_t)read6502(0xFFFC) | ((uint16_t)read6502(0xFFFD) << 8);
-    A = 0;
-    X = 0;
-    Y = 0;
+    A = X = Y = 0;
     SP = 0xFD;
 }
 
