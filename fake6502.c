@@ -29,8 +29,7 @@ static void (*loopexternal)();
 uint16_t PC;
 uint8_t SP, A, X, Y;
 bool C, Z, I, D, B, V, N;
-uint64_t instructions = 0; //keep track of total instructions executed
-uint32_t clockticks6502 = 0, clockgoal6502 = 0;
+uint64_t instructions, clockticks6502, clockgoal6502;
 static uint16_t ea, reladdr;
 static uint8_t opcode, oldstatus;
 
