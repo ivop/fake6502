@@ -6,13 +6,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-//externally supplied functions
 extern uint8_t read6502(uint16_t address);
 extern void write6502(uint16_t address, uint8_t value);
 
 #define FLAG_BREAK     0x10
 #define FLAG_CONSTANT  0x20
-
 #define BASE_STACK     0x100
 
 #define saveaccum(n)        a = (n) & 0xff
@@ -21,7 +19,6 @@ extern void write6502(uint16_t address, uint8_t value);
 #define carrycalc(n)        C = (n) & 0xff00
 #define overflowcalc(n,m,o) V = ((n) ^ (uint16_t)(m)) & ((n) ^ (o)) & 0x80
 
-//6502 CPU registers and flags
 uint16_t pc;
 uint8_t sp, a, x, y;
 bool C, Z, I, D, B, V, N;
@@ -30,7 +27,6 @@ bool C, Z, I, D, B, V, N;
 #define splitP(x) \
     N=(x)&0x80, V=(x)&0x40, B=(x)&0x10, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1
 
-//helper variables
 uint64_t instructions = 0; //keep track of total instructions executed
 uint32_t clockticks6502 = 0, clockgoal6502 = 0;
 static uint16_t ea, reladdr, value, result;
@@ -167,7 +163,7 @@ static inline void putvalue(uint16_t saveval) {
 static void adc() {
     penaltyop = 1;
     value = getvalue();
-    result = (uint16_t)a + value + C;
+    result = a + value + C;
     zerocalc(result);
 
     if (D) {
@@ -188,7 +184,7 @@ static void adc() {
 static void and() {
     penaltyop = 1;
     value = getvalue();
-    result = (uint16_t)a & value;
+    result = a & value;
 
     zerocalc(result);
     signcalc(result);
@@ -209,9 +205,9 @@ static void asl() {
 
 static void branch(bool condition) {
     if (condition) {
-        uint16_t oldpc = pc;
+        uint16_t oldpc = pc;    // for page cross check
         pc += reladdr;
-        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
+        if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2;
             else clockticks6502++;
     }
 }
@@ -227,7 +223,7 @@ static void bvs() { branch( V); }
 
 static void bit() {
     value = getvalue();
-    result = (uint16_t)a & value;
+    result = a & value;
 
     zerocalc(result);
     N = value & 0x80;
@@ -236,23 +232,21 @@ static void bit() {
 
 static void brk() {
     pc++;
-    push16(pc); //push next instruction address onto stack
-    push8(makeP | FLAG_BREAK); //push CPU status to stack
-    //setinterrupt(); //set interrupt flag
+    push16(pc);                 // address before next instruction
+    push8(makeP | FLAG_BREAK);
     I = 1;
-    pc = (uint16_t)read6502(0xFFFE) | ((uint16_t)read6502(0xFFFF) << 8);
+    pc = read6502(0xFFFE) | (read6502(0xFFFF) << 8);
 }
 
 static void clc() { C = 0; }
 static void cld() { D = 0; }
 static void cli() { I = 0; }
-
 static void clv() { V = 0; }
 
 static void cmp() {
     penaltyop = 1;
     value = getvalue();
-    result = (uint16_t)a - value;
+    result = a - value;
 
     C = a >= (value & 0xff);
     Z = a == (value & 0xff);
@@ -261,7 +255,7 @@ static void cmp() {
 
 static void cpx() {
     value = getvalue();
-    result = (uint16_t)x - value;
+    result = x - value;
 
     C = x >= (value & 0xff);
     Z = x == (value & 0xff);
@@ -270,7 +264,7 @@ static void cpx() {
 
 static void cpy() {
     value = getvalue();
-    result = (uint16_t)y - value;
+    result = y - value;
 
     C = y >= (value & 0xff);
     Z = y == (value & 0xff);
@@ -304,7 +298,7 @@ static void dey() {
 static void eor() {
     penaltyop = 1;
     value = getvalue();
-    result = (uint16_t)a ^ value;
+    result = a ^ value;
 
     zerocalc(result);
     signcalc(result);
@@ -348,7 +342,7 @@ static void jsr() {
 static void lda() {
     penaltyop = 1;
     value = getvalue();
-    a = (uint8_t)(value & 0x00FF);
+    a = value;
 
     zerocalc(a);
     signcalc(a);
@@ -357,7 +351,7 @@ static void lda() {
 static void ldx() {
     penaltyop = 1;
     value = getvalue();
-    x = (uint8_t)(value & 0x00FF);
+    x = value;
 
     zerocalc(x);
     signcalc(x);
@@ -366,7 +360,7 @@ static void ldx() {
 static void ldy() {
     penaltyop = 1;
     value = getvalue();
-    y = (uint8_t)(value & 0x00FF);
+    y = value;
 
     zerocalc(y);
     signcalc(y);
@@ -399,7 +393,7 @@ static void nop() {
 static void ora() {
     penaltyop = 1;
     value = getvalue();
-    result = (uint16_t)a | value;
+    result = a | value;
 
     zerocalc(result);
     signcalc(result);
@@ -651,14 +645,14 @@ void nmi6502() {
     push16(pc);
     push8(makeP);
     I = 1;
-    pc = (uint16_t)read6502(0xFFFA) | ((uint16_t)read6502(0xFFFB) << 8);
+    pc = read6502(0xFFFA) | (read6502(0xFFFB) << 8);
 }
 
 void irq6502() {
     push16(pc);
     push8(makeP);
     I = 1;
-    pc = (uint16_t)read6502(0xFFFE) | ((uint16_t)read6502(0xFFFF) << 8);
+    pc = read6502(0xFFFE) | (read6502(0xFFFF) << 8);
 }
 
 uint8_t callexternal = 0;
