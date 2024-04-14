@@ -12,7 +12,7 @@ void write6502(uint16_t address, uint8_t value) {
     memory[address] = value;
 }
 
-void test(const char *filename, uint16_t run, uint16_t success) {
+void test(const char *filename, uint16_t success) {
     printf("Test: %s -- ", filename);
     FILE *f = fopen(filename,"rb");
     if (!f) {
@@ -23,7 +23,7 @@ void test(const char *filename, uint16_t run, uint16_t success) {
         fprintf(stderr, "premature EOF\n");
         return;
     }
-    pc = run;
+    reset6502();
     while (1) {
         uint16_t save = pc;
         step6502();
@@ -37,7 +37,7 @@ void test(const char *filename, uint16_t run, uint16_t success) {
 }
 
 void main(void) {
-    test("test/6502_functional_test.bin", 0x0400, 0x3469);
+    test("test/6502_functional_test.bin", 0x3469);
     instructions = 0;
-    test("test/6502_decimal_test.bin", 0x0400, 0x044b);
+    test("test/6502_decimal_test.bin", 0x044b);
 }
