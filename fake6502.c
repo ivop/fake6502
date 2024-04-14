@@ -51,7 +51,7 @@ static uint16_t pull16() {
 }
 
 static uint8_t pull8() {
-    return (read6502(BASE_STACK + ++SP));
+    return read6502(BASE_STACK + ++SP);
 }
 
 void reset6502() {
@@ -62,89 +62,76 @@ void reset6502() {
     SP = 0xFD;
 }
 
-static void imp() { //implied
+static void imp() {
 }
 
-static void acc() { //accumulator
+static void acc() {
 }
 
-static void imm() { //immediate
+static void imm() {
     ea = PC++;
 }
 
-static void zp() { //zero-page
-    ea = (uint16_t)read6502((uint16_t)PC++);
+static void zp() {
+    ea = read6502(PC++);
 }
 
-static void zpx() { //zero-page,X
-    ea = ((uint16_t)read6502((uint16_t)PC++) + (uint16_t)X) & 0xFF; //zero-page wraparound
+static void zpx() {
+    ea = (read6502(PC++) + X) & 0xff;
 }
 
-static void zpy() { //zero-page,Y
-    ea = ((uint16_t)read6502((uint16_t)PC++) + (uint16_t)Y) & 0xFF; //zero-page wraparound
+static void zpy() {
+    ea = (read6502(PC++) + Y) & 0xff;
 }
 
-static void rel() { //relative for branch ops (8-bit immediate value, sign-extended)
-    reladdr = (uint16_t)read6502(PC++);
+static void rel() {
+    reladdr = read6502(PC++);
     if (reladdr & 0x80) reladdr |= 0xFF00;
 }
 
-static void abso() { //absolute
-    ea = (uint16_t)read6502(PC) | ((uint16_t)read6502(PC+1) << 8);
+static uint16_t read6502pc16() {
+    return read6502(PC) | (read6502(PC+1) << 8);
+}
+
+static void abso() {
+    ea = read6502pc16();
     PC += 2;
 }
 
-static void absx() { //absolute,X
-    uint16_t startpage;
-    ea = ((uint16_t)read6502(PC) | ((uint16_t)read6502(PC+1) << 8));
-    startpage = ea & 0xFF00;
-    ea += (uint16_t)X;
-
-    if (startpage != (ea & 0xFF00)) { //one cycle penlty for page-crossing on some opcodes
-        penaltyaddr = 1;
-    }
-
+static void absx() {
+    ea = read6502pc16();
+    uint16_t startpage = ea & 0xff00;
+    ea += X;
+    penaltyaddr = startpage != ea & 0xff00;     // page crossing
     PC += 2;
 }
 
-static void absy() { //absolute,Y
-    uint16_t startpage;
-    ea = ((uint16_t)read6502(PC) | ((uint16_t)read6502(PC+1) << 8));
-    startpage = ea & 0xFF00;
-    ea += (uint16_t)Y;
-
-    if (startpage != (ea & 0xFF00)) { //one cycle penlty for page-crossing on some opcodes
-        penaltyaddr = 1;
-    }
-
+static void absy() {
+    ea = read6502pc16();
+    uint16_t startpage = ea & 0xff00;
+    ea += Y;
+    penaltyaddr = startpage != ea & 0xff00;     // page crossing
     PC += 2;
 }
 
-static void ind() { //indirect
-    uint16_t eahelp, eahelp2;
-    eahelp = (uint16_t)read6502(PC) | (uint16_t)((uint16_t)read6502(PC+1) << 8);
-    eahelp2 = (eahelp & 0xFF00) | ((eahelp + 1) & 0x00FF); //replicate 6502 page-boundary wraparound bug
-    ea = (uint16_t)read6502(eahelp) | ((uint16_t)read6502(eahelp2) << 8);
+static void ind() {
+    ea = read6502pc16();
+    uint16_t ea2 = (ea & 0xff00) | ((ea + 1) & 0xff); // page wrap bug!
+    ea = read6502(ea) | (read6502(ea2) << 8);
     PC += 2;
 }
 
-static void indx() { // (indirect,X)
-    uint16_t eahelp;
-    eahelp = (uint16_t)(((uint16_t)read6502(PC++) + (uint16_t)X) & 0xFF); //zero-page wraparound for table pointer
-    ea = (uint16_t)read6502(eahelp & 0x00FF) | ((uint16_t)read6502((eahelp+1) & 0x00FF) << 8);
+static void indx() {
+    ea = ((read6502(PC++) + X) & 0xff);             // page wraparound
+    ea = read6502(ea) | (read6502((ea+1) & 0xff) << 8);
 }
 
 static void indy() { // (indirect),Y
-    uint16_t eahelp, eahelp2, startpage;
-    eahelp = (uint16_t)read6502(PC++);
-    eahelp2 = (eahelp & 0xFF00) | ((eahelp + 1) & 0x00FF); //zero-page wraparound
-    ea = (uint16_t)read6502(eahelp) | ((uint16_t)read6502(eahelp2) << 8);
-    startpage = ea & 0xFF00;
-    ea += (uint16_t)Y;
-
-    if (startpage != (ea & 0xFF00)) { //one cycle penlty for page-crossing on some opcodes
-        penaltyaddr = 1;
-    }
+    ea = read6502(PC++);
+    ea = read6502(ea) | (read6502((ea+1) & 0xff) << 8);  // page wrap
+    uint16_t startpage = ea & 0xff00;
+    ea += Y;
+    penaltyaddr = startpage != ea & 0xff00;     // page cross penalty
 }
 
 static inline uint16_t getvalue() {
@@ -217,8 +204,7 @@ static void bit() {
 }
 
 static void brk() {
-    PC++;
-    push16(PC);                 // address before next instruction
+    push16(++PC);                 // address before next instruction
     push8(makeP | FLAG_BREAK);
     I = 1;
     PC = read6502(0xFFFE) | (read6502(0xFFFF) << 8);
