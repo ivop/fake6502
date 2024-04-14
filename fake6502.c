@@ -30,7 +30,7 @@ uint16_t PC;
 uint8_t SP, A, X, Y;
 bool C, Z, I, D, B, V, N;
 uint64_t instructions, clockticks6502, clockgoal6502;
-static uint16_t ea, reladdr;
+static uint16_t ea;
 static uint8_t opcode, oldstatus;
 
 static inline void calcZ  (uint8_t  x) { Z = !x; }
@@ -80,11 +80,7 @@ static void zp()   { ea = read6502(PC++); }
 static void zpx()  { ea = (read6502(PC++) + X) & 0xff; }
 static void zpy()  { ea = (read6502(PC++) + Y) & 0xff; }
 static void abso() { ea = read6502word(PC); PC += 2; }
-
-static void rel() {
-    reladdr = read6502(PC++);
-    if (reladdr & 0x80) reladdr |= 0xFF00;
-}
+static void rel()  { ea = PC + (int8_t) read6502(PC++); }
 
 static void absx() {
     ea = read6502word(PC);
@@ -165,7 +161,7 @@ static void asl() {
 static void branch(bool condition) {
     if (condition) {
         uint16_t oldpc = PC;    // for page cross check
-        PC += reladdr;
+        PC = ea;
         if ((oldpc & 0xFF00) != (PC & 0xFF00)) clockticks6502 += 2;
             else clockticks6502++;
     }
