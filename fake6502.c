@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 //externally supplied functions
 extern uint8_t read6502(uint16_t address);
@@ -13,61 +14,34 @@ extern void write6502(uint16_t address, uint8_t value);
 #define UNDOCUMENTED //when this is defined, undocumented opcodes are handled.
                      //otherwise, they're simply treated as NOPs.
 
+#define FLAG_BREAK     0x10
+#define FLAG_CONSTANT  0x20
+
+#if 0
 #define FLAG_CARRY     0x01
 #define FLAG_ZERO      0x02
 #define FLAG_INTERRUPT 0x04
 #define FLAG_DECIMAL   0x08
-#define FLAG_BREAK     0x10
-#define FLAG_CONSTANT  0x20
 #define FLAG_OVERFLOW  0x40
 #define FLAG_SIGN      0x80
+#endif
 
 #define BASE_STACK     0x100
 
-#define saveaccum(n) a = (uint8_t)((n) & 0x00FF)
+#define saveaccum(n)        a = (n) & 0xff
+#define zerocalc(n)         Z = !((n) & 0xff)
+#define signcalc(n)         N = (n) & 0x80
+#define carrycalc(n)        C = (n) & 0xff00
+#define overflowcalc(n,m,o) V = ((n) ^ (uint16_t)(m)) & ((n) ^ (o)) & 0x80
 
-
-//flag modifier macros
-#define setcarry() status |= FLAG_CARRY
-#define clearcarry() status &= (~FLAG_CARRY)
-#define setzero() status |= FLAG_ZERO
-#define clearzero() status &= (~FLAG_ZERO)
-#define setinterrupt() status |= FLAG_INTERRUPT
-#define clearinterrupt() status &= (~FLAG_INTERRUPT)
-#define setdecimal() status |= FLAG_DECIMAL
-#define cleardecimal() status &= (~FLAG_DECIMAL)
-#define setoverflow() status |= FLAG_OVERFLOW
-#define clearoverflow() status &= (~FLAG_OVERFLOW)
-#define setsign() status |= FLAG_SIGN
-#define clearsign() status &= (~FLAG_SIGN)
-
-
-//flag calculation macros
-#define zerocalc(n) {\
-    if ((n) & 0x00FF) clearzero();\
-        else setzero();\
-}
-
-#define signcalc(n) {\
-    if ((n) & 0x0080) setsign();\
-        else clearsign();\
-}
-
-#define carrycalc(n) {\
-    if ((n) & 0xFF00) setcarry();\
-        else clearcarry();\
-}
-
-#define overflowcalc(n, m, o) { /* n = result, m = accumulator, o = memory */ \
-    if (((n) ^ (uint16_t)(m)) & ((n) ^ (o)) & 0x0080) setoverflow();\
-        else clearoverflow();\
-}
-
-
-//6502 CPU registers
+//6502 CPU registers and flags
 uint16_t pc;
-uint8_t sp, a, x, y, status = FLAG_CONSTANT;
+uint8_t sp, a, x, y;
+bool C, Z, I, D, B, V, N;
 
+#define makeP ((N<<7)|(V<<6)|(1<<5)|(B<<4)|(D<<3)|(I<<2)|(Z<<1)|C)
+#define splitP(x) \
+    N=(x)&0x80, V=(x)&0x40, B=(x)&0x10, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1
 
 //helper variables
 uint64_t instructions = 0; //keep track of total instructions executed
@@ -103,7 +77,6 @@ void reset6502() {
     x = 0;
     y = 0;
     sp = 0xFD;
-    status |= FLAG_CONSTANT;
 }
 
 
@@ -212,11 +185,11 @@ static void putvalue(uint16_t saveval) {
 static void adc() {
     penaltyop = 1;
     value = getvalue();
-    result = (uint16_t)a + value + (uint16_t)(status & FLAG_CARRY);
+    result = (uint16_t)a + value + C;
     zerocalc(result);
 
-    if (status & FLAG_DECIMAL) {
-        uint8_t B = (a & 0x0f) + (value & 0x0f) + (status & FLAG_CARRY);
+    if (D) {
+        uint8_t B = (a & 0x0f) + (value & 0x0f) + C;
         if (B >= 0x0a) B = ((B + 0x06) & 0x0f) + 0x10;
         result = (a & 0xf0) + (value & 0xf0) + B;
         if (result >= 0xa0) result += 0x60;
@@ -253,7 +226,7 @@ static void asl() {
 }
 
 static void bcc() {
-    if ((status & FLAG_CARRY) == 0) {
+    if (!C) {
         oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
@@ -262,7 +235,7 @@ static void bcc() {
 }
 
 static void bcs() {
-    if ((status & FLAG_CARRY) == FLAG_CARRY) {
+    if (C) {
         oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
@@ -271,7 +244,7 @@ static void bcs() {
 }
 
 static void beq() {
-    if ((status & FLAG_ZERO) == FLAG_ZERO) {
+    if (Z) {
         oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
@@ -284,11 +257,12 @@ static void bit() {
     result = (uint16_t)a & value;
 
     zerocalc(result);
-    status = (status & 0x3F) | (uint8_t)(value & 0xC0);
+    N = value & 0x80;
+    V = value & 0x40;
 }
 
 static void bmi() {
-    if ((status & FLAG_SIGN) == FLAG_SIGN) {
+    if (N) {
         oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
@@ -297,7 +271,7 @@ static void bmi() {
 }
 
 static void bne() {
-    if ((status & FLAG_ZERO) == 0) {
+    if (!Z) {
         oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
@@ -306,7 +280,7 @@ static void bne() {
 }
 
 static void bpl() {
-    if ((status & FLAG_SIGN) == 0) {
+    if (!N) {
         oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
@@ -317,13 +291,14 @@ static void bpl() {
 static void brk() {
     pc++;
     push16(pc); //push next instruction address onto stack
-    push8(status | FLAG_BREAK); //push CPU status to stack
-    setinterrupt(); //set interrupt flag
+    push8(makeP | FLAG_BREAK); //push CPU status to stack
+    //setinterrupt(); //set interrupt flag
+    I = 1;
     pc = (uint16_t)read6502(0xFFFE) | ((uint16_t)read6502(0xFFFF) << 8);
 }
 
 static void bvc() {
-    if ((status & FLAG_OVERFLOW) == 0) {
+    if (!V) {
         oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
@@ -332,7 +307,7 @@ static void bvc() {
 }
 
 static void bvs() {
-    if ((status & FLAG_OVERFLOW) == FLAG_OVERFLOW) {
+    if (V) {
         oldpc = pc;
         pc += reladdr;
         if ((oldpc & 0xFF00) != (pc & 0xFF00)) clockticks6502 += 2; //check if jump crossed a page boundary
@@ -340,31 +315,19 @@ static void bvs() {
     }
 }
 
-static void clc() {
-    clearcarry();
-}
+static void clc() { C = 0; }
+static void cld() { D = 0; }
+static void cli() { I = 0; }
 
-static void cld() {
-    cleardecimal();
-}
-
-static void cli() {
-    clearinterrupt();
-}
-
-static void clv() {
-    clearoverflow();
-}
+static void clv() { V = 0; }
 
 static void cmp() {
     penaltyop = 1;
     value = getvalue();
     result = (uint16_t)a - value;
 
-    if (a >= (uint8_t)(value & 0x00FF)) setcarry();
-        else clearcarry();
-    if (a == (uint8_t)(value & 0x00FF)) setzero();
-        else clearzero();
+    C = a >= (value & 0xff);
+    Z = a == (value & 0xff);
     signcalc(result);
 }
 
@@ -372,10 +335,8 @@ static void cpx() {
     value = getvalue();
     result = (uint16_t)x - value;
 
-    if (x >= (uint8_t)(value & 0x00FF)) setcarry();
-        else clearcarry();
-    if (x == (uint8_t)(value & 0x00FF)) setzero();
-        else clearzero();
+    C = x >= (value & 0xff);
+    Z = x == (value & 0xff);
     signcalc(result);
 }
 
@@ -383,10 +344,8 @@ static void cpy() {
     value = getvalue();
     result = (uint16_t)y - value;
 
-    if (y >= (uint8_t)(value & 0x00FF)) setcarry();
-        else clearcarry();
-    if (y == (uint8_t)(value & 0x00FF)) setzero();
-        else clearzero();
+    C = y >= (value & 0xff);
+    Z = y == (value & 0xff);
     signcalc(result);
 }
 
@@ -489,8 +448,7 @@ static void lsr() {
     value = getvalue();
     result = value >> 1;
 
-    if (value & 1) setcarry();
-        else clearcarry();
+    C = value & 1;
     zerocalc(result);
     signcalc(result);
 
@@ -526,7 +484,7 @@ static void pha() {
 }
 
 static void php() {
-    push8(status | FLAG_BREAK);
+    push8(makeP | FLAG_BREAK);
 }
 
 static void pla() {
@@ -537,12 +495,13 @@ static void pla() {
 }
 
 static void plp() {
-    status = pull8() | FLAG_CONSTANT;
+    uint8_t P = pull8();
+    splitP(P);
 }
 
 static void rol() {
     value = getvalue();
-    result = (value << 1) | (status & FLAG_CARRY);
+    result = (value << 1) | C;
 
     carrycalc(result);
     zerocalc(result);
@@ -553,10 +512,9 @@ static void rol() {
 
 static void ror() {
     value = getvalue();
-    result = (value >> 1) | ((status & FLAG_CARRY) << 7);
+    result = (value >> 1) | (C << 7);
 
-    if (value & 1) setcarry();
-        else clearcarry();
+    C = value & 1;
     zerocalc(result);
     signcalc(result);
 
@@ -564,7 +522,8 @@ static void ror() {
 }
 
 static void rti() {
-    status = pull8();
+    uint8_t P = pull8();
+    splitP(P);
     value = pull16();
     pc = value;
 }
@@ -575,7 +534,7 @@ static void rts() {
 }
 
 static void sbc() {
-    uint16_t C = status & FLAG_CARRY;
+    bool cC = C;
     penaltyop = 1;
     value = getvalue() ^ 0xff;
     result = a + value + C;
@@ -584,10 +543,10 @@ static void sbc() {
     overflowcalc(result, a, value);
     signcalc(result);
 
-    if (status & FLAG_DECIMAL) {
+    if (D) {
         uint16_t AL, B;
         B = value ^ 0xff;
-        AL = (a & 0x0f) - (B & 0x0f) + C - 1;
+        AL = (a & 0x0f) - (B & 0x0f) + cC - 1;
         if(AL & 0x8000)  AL =  ((AL - 0x06) & 0x0f) - 0x10;
         result = (a & 0xf0) - (B & 0xf0) + AL;
         if(result & 0x8000) result -= 0x60;
@@ -597,17 +556,9 @@ static void sbc() {
     saveaccum(result);
 }
 
-static void sec() {
-    setcarry();
-}
-
-static void sed() {
-    setdecimal();
-}
-
-static void sei() {
-    setinterrupt();
-}
+static void sec() { C = 1; }
+static void sed() { D = 1; }
+static void sei() { I = 1; }
 
 static void sta() {
     putvalue(a);
@@ -784,15 +735,15 @@ static const uint32_t ticktable[256] = {
 
 void nmi6502() {
     push16(pc);
-    push8(status);
-    status |= FLAG_INTERRUPT;
+    push8(makeP);
+    I = 1;
     pc = (uint16_t)read6502(0xFFFA) | ((uint16_t)read6502(0xFFFB) << 8);
 }
 
 void irq6502() {
     push16(pc);
-    push8(status);
-    status |= FLAG_INTERRUPT;
+    push8(makeP);
+    I = 1;
     pc = (uint16_t)read6502(0xFFFE) | ((uint16_t)read6502(0xFFFF) << 8);
 }
 

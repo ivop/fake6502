@@ -30,6 +30,7 @@ void test(const char *filename, uint16_t run, uint16_t success) {
         if (save == pc) {
             printf("%s ", pc != success ? "FAIL!" : "PASS");
             printf("pc = $%04x, instructions = %ld\n", pc, instructions);
+            printf("\tA=%02x X=%02x Y=%02x SP=%02x\n", a, x, y, sp);
             return;
         }
     }
