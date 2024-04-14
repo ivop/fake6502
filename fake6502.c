@@ -17,15 +17,6 @@ extern void write6502(uint16_t address, uint8_t value);
 #define FLAG_BREAK     0x10
 #define FLAG_CONSTANT  0x20
 
-#if 0
-#define FLAG_CARRY     0x01
-#define FLAG_ZERO      0x02
-#define FLAG_INTERRUPT 0x04
-#define FLAG_DECIMAL   0x08
-#define FLAG_OVERFLOW  0x40
-#define FLAG_SIGN      0x80
-#endif
-
 #define BASE_STACK     0x100
 
 #define saveaccum(n)        a = (n) & 0xff
