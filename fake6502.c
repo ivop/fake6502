@@ -35,7 +35,9 @@ static uint8_t opcode, oldstatus;
 
 static inline void calcZ(uint8_t  x) { Z = !x; }
 static inline void calcN(uint8_t  x) { N = x & 0x80; }
+static inline void calcZN(uint8_t x) { calcZ(x), calcN(x); }
 static inline void calcC(uint16_t x) { C = x & 0xff00; }
+static inline void calcCZN(uint16_t x) { calcC(x), calcZN(x); }
 static inline void calcV(uint16_t result, uint8_t accu, uint16_t value) {
     V = (result ^ accu) & (result ^ value) & 0x80;
 }
@@ -152,15 +154,12 @@ static void adc() {
 static void and() {
     penaltyop = 1;
     A = A & getvalue();
-    calcZ(A);
-    calcN(A);
+    calcZN(A);
 }
 
 static void asl() {
     uint16_t result = getvalue() << 1;
-    calcC(result);
-    calcZ(result);
-    calcN(result);
+    calcCZN(result);
     putvalue(result);
 }
 
@@ -225,43 +224,36 @@ static void cpy() {
 
 static void dec() {
     uint16_t result = getvalue() - 1;
-    calcZ(result);
-    calcN(result);
+    calcZN(result);
     putvalue(result);
 }
 
 static void dex() {
-    calcZ(--X);
-    calcN(X);
+    calcZN(--X);
 }
 
 static void dey() {
-    calcZ(--Y);
-    calcN(Y);
+    calcZN(--Y);
 }
 
 static void eor() {
     penaltyop = 1;
     A = A ^ getvalue();
-    calcZ(A);
-    calcN(A);
+    calcZN(A);
 }
 
 static void inc() {
     uint16_t result = getvalue() + 1;
-    calcZ(result);
-    calcN(result);
+    calcZN(result);
     putvalue(result);
 }
 
 static void inx() {
-    calcZ(++X);
-    calcN(X);
+    calcZN(++X);
 }
 
 static void iny() {
-    calcZ(++Y);
-    calcN(Y);
+    calcZN(++Y);
 }
 
 static void jmp() {
@@ -276,30 +268,26 @@ static void jsr() {
 static void lda() {
     penaltyop = 1;
     A = getvalue();
-    calcZ(A);
-    calcN(A);
+    calcZN(A);
 }
 
 static void ldx() {
     penaltyop = 1;
     X = getvalue();
-    calcZ(X);
-    calcN(X);
+    calcZN(X);
 }
 
 static void ldy() {
     penaltyop = 1;
     Y = getvalue();
-    calcZ(Y);
-    calcN(Y);
+    calcZN(Y);
 }
 
 static void lsr() {
     uint16_t value = getvalue();
     uint16_t result = value >> 1;
     C = value & 1;
-    calcZ(result);
-    calcN(result);
+    calcZN(result);
     putvalue(result);
 }
 
@@ -319,8 +307,7 @@ static void nop() {
 static void ora() {
     penaltyop = 1;
     A |= getvalue();
-    calcZ(A);
-    calcN(A);
+    calcZN(A);
 }
 
 static void pha() {
@@ -333,8 +320,7 @@ static void php() {
 
 static void pla() {
     A = pull8();
-    calcZ(A);
-    calcN(A);
+    calcZN(A);
 }
 
 static void plp() {
@@ -344,9 +330,7 @@ static void plp() {
 
 static void rol() {
     uint16_t result = (getvalue() << 1) | C;
-    calcC(result);
-    calcZ(result);
-    calcN(result);
+    calcCZN(result);
     putvalue(result);
 }
 
@@ -354,8 +338,7 @@ static void ror() {
     uint16_t value = getvalue();
     uint16_t result = (value >> 1) | (C << 7);
     C = value & 1;
-    calcZ(result);
-    calcN(result);
+    calcZN(result);
     putvalue(result);
 }
 
@@ -374,9 +357,7 @@ static void sbc() {
     penaltyop = 1;
     uint16_t value = getvalue() ^ 0xff;
     uint16_t result = A + value + C;
-    calcC(result);
-    calcZ(result);
-    calcN(result);
+    calcCZN(result);
     calcV(result, A, value);
 
     if (D) {
@@ -410,26 +391,22 @@ static void sty() {
 
 static void tax() {
     X = A;
-    calcZ(X);
-    calcN(X);
+    calcZN(X);
 }
 
 static void tay() {
     Y = A;
-    calcZ(Y);
-    calcN(Y);
+    calcZN(Y);
 }
 
 static void tsx() {
     X = SP;
-    calcZ(X);
-    calcN(X);
+    calcZN(X);
 }
 
 static void txa() {
     A = X;
-    calcZ(A);
-    calcN(A);
+    calcZN(A);
 }
 
 static void txs() {
@@ -438,8 +415,7 @@ static void txs() {
 
 static void tya() {
     A = Y;
-    calcZ(A);
-    calcN(A);
+    calcZN(A);
 }
 
 static void lax() {
