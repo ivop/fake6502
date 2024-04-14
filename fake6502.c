@@ -37,27 +37,27 @@ bool C, Z, I, D, B, V, N;
 //helper variables
 uint64_t instructions = 0; //keep track of total instructions executed
 uint32_t clockticks6502 = 0, clockgoal6502 = 0;
-uint16_t oldpc, ea, reladdr, value, result;
-uint8_t opcode, oldstatus;
+static uint16_t oldpc, ea, reladdr, value, result;
+static uint8_t opcode, oldstatus;
 
 //a few general functions used by various other functions
-void push16(uint16_t pushval) {
+static void push16(uint16_t pushval) {
     write6502(BASE_STACK + sp, (pushval >> 8) & 0xFF);
     write6502(BASE_STACK + ((sp - 1) & 0xFF), pushval & 0xFF);
     sp -= 2;
 }
 
-void push8(uint8_t pushval) {
+static void push8(uint8_t pushval) {
     write6502(BASE_STACK + sp--, pushval);
 }
 
-uint16_t pull16() {
+static uint16_t pull16() {
     sp += 2;
     return read6502(BASE_STACK + ((sp - 1) & 0xFF)) | \
           (read6502(BASE_STACK + ((sp    ) & 0xFF)) << 8);
 }
 
-uint8_t pull8() {
+static uint8_t pull8() {
     return (read6502(BASE_STACK + ++sp));
 }
 
@@ -72,7 +72,7 @@ void reset6502() {
 
 static void (*addrtable[256])();
 static void (*optable[256])();
-uint8_t penaltyop, penaltyaddr;
+static uint8_t penaltyop, penaltyaddr;
 
 //addressing mode functions, calculates effective addresses
 static void imp() { //implied
