@@ -178,23 +178,16 @@ static void adc() {
 
 static void and() {
     penaltyop = 1;
-    value = getvalue();
-    result = A & value;
-
-    zerocalc(result);
-    signcalc(result);
-
-    saveaccum(result);
+    A = A & getvalue();
+    zerocalc(A);
+    signcalc(A);
 }
 
 static void asl() {
-    value = getvalue();
-    result = value << 1;
-
+    result = getvalue() << 1;
     carrycalc(result);
     zerocalc(result);
     signcalc(result);
-
     putvalue(result);
 }
 
@@ -218,9 +211,7 @@ static void bvs() { branch( V); }
 
 static void bit() {
     value = getvalue();
-    result = A & value;
-
-    zerocalc(result);
+    zerocalc(A & value);
     N = value & 0x80;
     V = value & 0x40;
 }
@@ -241,87 +232,64 @@ static void clv() { V = 0; }
 static void cmp() {
     penaltyop = 1;
     value = getvalue();
-    result = A - value;
-
+    signcalc(A - value);
     C = A >= (value & 0xff);
     Z = A == (value & 0xff);
-    signcalc(result);
 }
 
 static void cpx() {
     value = getvalue();
-    result = X - value;
-
+    signcalc(X - value);
     C = X >= (value & 0xff);
     Z = X == (value & 0xff);
-    signcalc(result);
 }
 
 static void cpy() {
     value = getvalue();
-    result = Y - value;
-
+    signcalc(Y - value);
     C = Y >= (value & 0xff);
     Z = Y == (value & 0xff);
-    signcalc(result);
 }
 
 static void dec() {
-    value = getvalue();
-    result = value - 1;
-
+    result = getvalue() - 1;
     zerocalc(result);
     signcalc(result);
-
     putvalue(result);
 }
 
 static void dex() {
-    X--;
-
-    zerocalc(X);
+    zerocalc(--X);
     signcalc(X);
 }
 
 static void dey() {
-    Y--;
-
-    zerocalc(Y);
+    zerocalc(--Y);
     signcalc(Y);
 }
 
 static void eor() {
     penaltyop = 1;
-    value = getvalue();
-    result = A ^ value;
-
+    result = A ^ getvalue();
     zerocalc(result);
     signcalc(result);
-
     saveaccum(result);
 }
 
 static void inc() {
-    value = getvalue();
-    result = value + 1;
-
+    result = getvalue() + 1;
     zerocalc(result);
     signcalc(result);
-
     putvalue(result);
 }
 
 static void inx() {
-    X++;
-
-    zerocalc(X);
+    zerocalc(++X);
     signcalc(X);
 }
 
 static void iny() {
-    Y++;
-
-    zerocalc(Y);
+    zerocalc(++Y);
     signcalc(Y);
 }
 
@@ -336,27 +304,21 @@ static void jsr() {
 
 static void lda() {
     penaltyop = 1;
-    value = getvalue();
-    A = value;
-
+    A = getvalue();
     zerocalc(A);
     signcalc(A);
 }
 
 static void ldx() {
     penaltyop = 1;
-    value = getvalue();
-    X = value;
-
+    X = getvalue();
     zerocalc(X);
     signcalc(X);
 }
 
 static void ldy() {
     penaltyop = 1;
-    value = getvalue();
-    Y = value;
-
+    Y = getvalue();
     zerocalc(Y);
     signcalc(Y);
 }
@@ -364,11 +326,9 @@ static void ldy() {
 static void lsr() {
     value = getvalue();
     result = value >> 1;
-
     C = value & 1;
     zerocalc(result);
     signcalc(result);
-
     putvalue(result);
 }
 
@@ -387,13 +347,9 @@ static void nop() {
 
 static void ora() {
     penaltyop = 1;
-    value = getvalue();
-    result = A | value;
-
-    zerocalc(result);
-    signcalc(result);
-
-    saveaccum(result);
+    A |= getvalue();
+    zerocalc(A);
+    signcalc(A);
 }
 
 static void pha() {
@@ -406,7 +362,6 @@ static void php() {
 
 static void pla() {
     A = pull8();
-
     zerocalc(A);
     signcalc(A);
 }
@@ -417,37 +372,30 @@ static void plp() {
 }
 
 static void rol() {
-    value = getvalue();
-    result = (value << 1) | C;
-
+    result = (getvalue() << 1) | C;
     carrycalc(result);
     zerocalc(result);
     signcalc(result);
-
     putvalue(result);
 }
 
 static void ror() {
     value = getvalue();
     result = (value >> 1) | (C << 7);
-
     C = value & 1;
     zerocalc(result);
     signcalc(result);
-
     putvalue(result);
 }
 
 static void rti() {
     uint8_t P = pull8();
     splitP(P);
-    value = pull16();
-    PC = value;
+    PC = pull16();
 }
 
 static void rts() {
-    value = pull16();
-    PC = value + 1;
+    PC = pull16() + 1;
 }
 
 static void sbc() {
@@ -457,8 +405,8 @@ static void sbc() {
     result = A + value + C;
     carrycalc(result);
     zerocalc(result);
-    overflowcalc(result, A, value);
     signcalc(result);
+    overflowcalc(result, A, value);
 
     if (D) {
         uint16_t AL, B;
@@ -491,28 +439,24 @@ static void sty() {
 
 static void tax() {
     X = A;
-
     zerocalc(X);
     signcalc(X);
 }
 
 static void tay() {
     Y = A;
-
     zerocalc(Y);
     signcalc(Y);
 }
 
 static void tsx() {
     X = SP;
-
     zerocalc(X);
     signcalc(X);
 }
 
 static void txa() {
     A = X;
-
     zerocalc(A);
     signcalc(A);
 }
@@ -523,7 +467,6 @@ static void txs() {
 
 static void tya() {
     A = Y;
-
     zerocalc(A);
     signcalc(A);
 }
