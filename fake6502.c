@@ -33,11 +33,12 @@ uint32_t clockticks6502 = 0, clockgoal6502 = 0;
 static uint16_t ea, reladdr;
 static uint8_t opcode, oldstatus;
 
-static inline void calcZ(uint8_t  x) { Z = !x; }
-static inline void calcN(uint8_t  x) { N = x & 0x80; }
-static inline void calcZN(uint8_t x) { calcZ(x), calcN(x); }
-static inline void calcC(uint16_t x) { C = x & 0xff00; }
+static inline void calcZ  (uint8_t  x) { Z = !x; }
+static inline void calcN  (uint8_t  x) { N = x & 0x80; }
+static inline void calcZN (uint8_t x)  { calcZ(x), calcN(x); }
+static inline void calcC  (uint16_t x) { C = x & 0xff00; }
 static inline void calcCZN(uint16_t x) { calcC(x), calcZN(x); }
+
 static inline void calcV(uint16_t result, uint8_t accu, uint16_t value) {
     V = (result ^ accu) & (result ^ value) & 0x80;
 }
@@ -153,8 +154,7 @@ static void adc() {
 
 static void and() {
     penaltyop = 1;
-    A = A & getvalue();
-    calcZN(A);
+    calcZN(A = A & getvalue());
 }
 
 static void asl() {
@@ -200,26 +200,22 @@ static void cld() { D = 0; }
 static void cli() { I = 0; }
 static void clv() { V = 0; }
 
+static void compare(uint8_t reg, uint8_t value) {
+    calcN(reg - value);
+    C = reg >= value & 0xff;
+    Z = reg == value & 0xff;
+}
 static void cmp() {
     penaltyop = 1;
-    uint16_t value = getvalue();
-    calcN(A - value);
-    C = A >= (value & 0xff);
-    Z = A == (value & 0xff);
+    compare(A, getvalue());
 }
 
 static void cpx() {
-    uint16_t value = getvalue();
-    calcN(X - value);
-    C = X >= (value & 0xff);
-    Z = X == (value & 0xff);
+    compare(X, getvalue());
 }
 
 static void cpy() {
-    uint16_t value = getvalue();
-    calcN(Y - value);
-    C = Y >= (value & 0xff);
-    Z = Y == (value & 0xff);
+    compare(Y, getvalue());
 }
 
 static void dec() {
