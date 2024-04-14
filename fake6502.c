@@ -1,6 +1,12 @@
-/* Fake6502 CPU emulator core v1.1 *******************
- * (c)2011-2013 Mike Chambers                        *
- *****************************************************/
+/*
+ * Fake6502 -- MOS6502 CPU Emulator
+ *
+ * Copyright © 2011-2013 Mike Chambers
+ * Copyright © 2024 Ivo van poorten
+ *
+ * This file is licensed under the terms of the 2-clause BSD license. Please
+ * see the LICENSE file in the root project directory for the full text.
+ */
 
 #include <stdio.h>
 #include <stdint.h>
