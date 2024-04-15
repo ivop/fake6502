@@ -449,6 +449,7 @@ static void TAS() { }
 static void LAS() { }
 static void LXA() { }
 static void ANE() { }
+static void JAM() { nop(); }
 
 // ----------------------------------------------------------------------------
 
@@ -474,22 +475,22 @@ static void (*addrtable[256])() = {
 
 static void (*optable[256])() = {
 //   0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
-    brk,ora,nop,SLO,nop,ora,asl,SLO,php,ora,asl,ANC,nop,ora,asl,SLO, // 0
-    bpl,ora,nop,SLO,nop,ora,asl,SLO,clc,ora,nop,SLO,nop,ora,asl,SLO, // 1
-    jsr,and,nop,RLA,bit,and,rol,RLA,plp,and,rol,ANC,bit,and,rol,RLA, // 2
-    bmi,and,nop,RLA,nop,and,rol,RLA,sec,and,nop,RLA,nop,and,rol,RLA, // 3
-    rti,eor,nop,SRE,nop,eor,lsr,SRE,pha,eor,lsr,ALR,jmp,eor,lsr,SRE, // 4
-    bvc,eor,nop,SRE,nop,eor,lsr,SRE,cli,eor,nop,SRE,nop,eor,lsr,SRE, // 5
-    rts,adc,nop,RRA,nop,adc,ror,RRA,pla,adc,ror,ARR,jmp,adc,ror,RRA, // 6
-    bvs,adc,nop,RRA,nop,adc,ror,RRA,sei,adc,nop,RRA,nop,adc,ror,RRA, // 7
+    brk,ora,JAM,SLO,nop,ora,asl,SLO,php,ora,asl,ANC,nop,ora,asl,SLO, // 0
+    bpl,ora,JAM,SLO,nop,ora,asl,SLO,clc,ora,nop,SLO,nop,ora,asl,SLO, // 1
+    jsr,and,JAM,RLA,bit,and,rol,RLA,plp,and,rol,ANC,bit,and,rol,RLA, // 2
+    bmi,and,JAM,RLA,nop,and,rol,RLA,sec,and,nop,RLA,nop,and,rol,RLA, // 3
+    rti,eor,JAM,SRE,nop,eor,lsr,SRE,pha,eor,lsr,ALR,jmp,eor,lsr,SRE, // 4
+    bvc,eor,JAM,SRE,nop,eor,lsr,SRE,cli,eor,nop,SRE,nop,eor,lsr,SRE, // 5
+    rts,adc,JAM,RRA,nop,adc,ror,RRA,pla,adc,ror,ARR,jmp,adc,ror,RRA, // 6
+    bvs,adc,JAM,RRA,nop,adc,ror,RRA,sei,adc,nop,RRA,nop,adc,ror,RRA, // 7
     nop,sta,nop,SAX,sty,sta,stx,SAX,dey,nop,txa,ANE,sty,sta,stx,SAX, // 8
-    bcc,sta,nop,SHA,sty,sta,stx,SAX,tya,sta,txs,TAS,SHY,sta,SHX,SHA, // 9
+    bcc,sta,JAM,SHA,sty,sta,stx,SAX,tya,sta,txs,TAS,SHY,sta,SHX,SHA, // 9
     ldy,lda,ldx,LAX,ldy,lda,ldx,LAX,tay,lda,tax,LXA,ldy,lda,ldx,LAX, // A
-    bcs,lda,nop,LAX,ldy,lda,ldx,LAX,clv,lda,tsx,LAS,ldy,lda,ldx,LAX, // B
+    bcs,lda,JAM,LAX,ldy,lda,ldx,LAX,clv,lda,tsx,LAS,ldy,lda,ldx,LAX, // B
     cpy,cmp,nop,DCP,cpy,cmp,dec,DCP,iny,cmp,dex,SBX,cpy,cmp,dec,DCP, // C
-    bne,cmp,nop,DCP,nop,cmp,dec,DCP,cld,cmp,nop,DCP,nop,cmp,dec,DCP, // D
+    bne,cmp,JAM,DCP,nop,cmp,dec,DCP,cld,cmp,nop,DCP,nop,cmp,dec,DCP, // D
     cpx,sbc,nop,ISC,cpx,sbc,inc,ISC,inx,sbc,nop,sbc,cpx,sbc,inc,ISC, // E
-    beq,sbc,nop,ISC,nop,sbc,inc,ISC,sed,sbc,nop,ISC,nop,sbc,inc,ISC  // F
+    beq,sbc,JAM,ISC,nop,sbc,inc,ISC,sed,sbc,nop,ISC,nop,sbc,inc,ISC  // F
 };
 
 static const uint32_t ticktable[256] = {
