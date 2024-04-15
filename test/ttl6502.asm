@@ -1,12 +1,18 @@
 ; TTL-6502 program
 
+.ifndef ATARI
+    opt h-
+    opt f+
+    org $0000
+    dta 0
+.endif
 
-.eq Test	= $03
-.eq TmpZP0	= $10
-.eq TmpAB0	= $1000
+Test	= $03
+TmpZP0	= $10
+TmpAB0	= $1000
 
 
-.ba $E000
+    org $E000
 
 Reset
 		nop
@@ -264,7 +270,10 @@ L40b
 		sec
 		bcs	L40z
 		
-.fb $EA, 14
+;.fb $EA, 14
+    .rept 14
+        dta $ea
+    .endr
 
 L40m		bcc	L40b
 						
@@ -5094,7 +5103,8 @@ L997
 		jmp	L997
 
 
-.ba $FFEC
+.ifndef ATARI
+    org $FFEC
 ;**  Part of testing JMP
 L999
 		jmp	L005
@@ -5110,7 +5120,7 @@ L999c
 
 
 
-.ba $FFF4
+    org $FFF4
 IRQ
 NMI
 		nop
@@ -5121,9 +5131,8 @@ NMI
 		
 		rti
 
+    .word NMI, Reset, IRQ
+.else
+    run Reset
+.endif
 
-.wo NMI
-.wo Reset
-.wo IRQ
-
-.en
