@@ -5071,7 +5071,8 @@ M394
 		adc	#$19
 		sta	$04		; to check possible bug in T65 	
 M397
-		bne	M397
+;		bne	M397
+        beq M397    ; fix bug in test
 M398
 		bcc	M398
 M399

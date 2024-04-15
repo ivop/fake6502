@@ -3851,7 +3851,8 @@ $00F5D7     18                          clc
 $00F5D8     69 19                       adc     #$19
 $00F5DA     85 04                       sta     $04             ; to check possible bug in T65  
 $00F5DC                 M397
-$00F5DC     D0 FE                       bne     M397
+(((($00F5DC     D0 FE                       bne     M397    ; bug fixed ))))
+$00F5DC     F0 FE                       beq     M397
 $00F5DE                 M398
 $00F5DE     90 FE                       bcc     M398
 $00F5E0                 M399
