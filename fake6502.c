@@ -33,9 +33,7 @@ uint64_t instructions, clockticks6502, clockgoal6502;
 static uint16_t ea;
 static uint8_t opcode, oldstatus;
 
-uint8_t getP(void) {
-    return makeP;
-}
+// ----------------------------------------------------------------------------
 
 static inline void calcZ  (uint8_t  x) { Z = !x; }
 static inline void calcN  (uint8_t  x) { N = x & 0x80; }
@@ -46,6 +44,10 @@ static inline void calcCZN(uint16_t x) { calcC(x), calcZN(x); }
 static inline void calcV(uint16_t result, uint8_t accu, uint16_t value) {
     V = (result ^ accu) & (result ^ value) & 0x80;
 }
+
+uint8_t getP(void) { return makeP; }
+
+// ----------------------------------------------------------------------------
 
 static void push16(uint16_t pushval) {
     write6502(BASE_STACK + SP, (pushval >> 8) & 0xFF);
@@ -76,6 +78,8 @@ void reset6502() {
 static uint16_t read6502word(uint16_t addr) {
     return read6502(addr) | (read6502(addr+1) << 8);
 }
+
+// ----------------------------------------------------------------------------
 
 static void imp()  { }
 static void acc()  { }
@@ -122,6 +126,8 @@ static void indy() { // (indirect),Y
     penaltyaddr = startpage != ea & 0xff00;     // page cross penalty
 }
 
+// ----------------------------------------------------------------------------
+
 static inline uint16_t getvalue() {
     return addrtable[opcode] == acc ? A : read6502(ea);
 }
@@ -129,6 +135,8 @@ static inline uint16_t getvalue() {
 static inline void putvalue(uint16_t saveval) {
     if (addrtable[opcode] == acc) A = saveval; else write6502(ea, saveval);
 }
+
+// ----------------------------------------------------------------------------
 
 static void adc() {
     penaltyop = 1;
@@ -386,53 +394,69 @@ static void tya() {
     calcZN(A);
 }
 
-static void lax() {
+// ------------------ Undocumented opcodes ------------------------------------
+
+static void LAX() {
     lda();
     ldx();
 }
 
-static void sax() {
+static void SAX() {
     sta();
     stx();
     putvalue(A & X);
     if (penaltyop && penaltyaddr) clockticks6502--;
 }
 
-static void dcp() {
+static void DCP() {
     dec();
     cmp();
     if (penaltyop && penaltyaddr) clockticks6502--;
 }
 
-static void isb() {
+static void ISC() {
     inc();
     sbc();
     if (penaltyop && penaltyaddr) clockticks6502--;
 }
 
-static void slo() {
+static void SLO() {
     asl();
     ora();
     if (penaltyop && penaltyaddr) clockticks6502--;
 }
 
-static void rla() {
+static void RLA() {
     rol();
     and();
     if (penaltyop && penaltyaddr) clockticks6502--;
 }
 
-static void sre() {
+static void SRE() {
     lsr();
     eor();
     if (penaltyop && penaltyaddr) clockticks6502--;
 }
 
-static void rra() {
+static void RRA() {
     ror();
     adc();
     if (penaltyop && penaltyaddr) clockticks6502--;
 }
+
+static void ANC() { }
+static void ALR() { }
+static void ARR() { }
+static void SBX() { }
+static void SHA() { }
+static void SHY() { }
+static void SHX() { }
+static void TAS() { }
+static void LAS() { }
+static void LXA() { }
+static void ANE() { }
+
+// ----------------------------------------------------------------------------
 
 static void (*addrtable[256])() = {
 // 0    1   2    3   4   5   6   7   8    9   A    B    C    D    E    F
@@ -456,22 +480,22 @@ static void (*addrtable[256])() = {
 
 static void (*optable[256])() = {
 //   0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
-    brk,ora,nop,slo,nop,ora,asl,slo,php,ora,asl,nop,nop,ora,asl,slo, // 0
-    bpl,ora,nop,slo,nop,ora,asl,slo,clc,ora,nop,slo,nop,ora,asl,slo, // 1
-    jsr,and,nop,rla,bit,and,rol,rla,plp,and,rol,nop,bit,and,rol,rla, // 2
-    bmi,and,nop,rla,nop,and,rol,rla,sec,and,nop,rla,nop,and,rol,rla, // 3
-    rti,eor,nop,sre,nop,eor,lsr,sre,pha,eor,lsr,nop,jmp,eor,lsr,sre, // 4
-    bvc,eor,nop,sre,nop,eor,lsr,sre,cli,eor,nop,sre,nop,eor,lsr,sre, // 5
-    rts,adc,nop,rra,nop,adc,ror,rra,pla,adc,ror,nop,jmp,adc,ror,rra, // 6
-    bvs,adc,nop,rra,nop,adc,ror,rra,sei,adc,nop,rra,nop,adc,ror,rra, // 7
-    nop,sta,nop,sax,sty,sta,stx,sax,dey,nop,txa,nop,sty,sta,stx,sax, // 8
-    bcc,sta,nop,nop,sty,sta,stx,sax,tya,sta,txs,nop,nop,sta,nop,nop, // 9
-    ldy,lda,ldx,lax,ldy,lda,ldx,lax,tay,lda,tax,nop,ldy,lda,ldx,lax, // A
-    bcs,lda,nop,lax,ldy,lda,ldx,lax,clv,lda,tsx,lax,ldy,lda,ldx,lax, // B
-    cpy,cmp,nop,dcp,cpy,cmp,dec,dcp,iny,cmp,dex,nop,cpy,cmp,dec,dcp, // C
-    bne,cmp,nop,dcp,nop,cmp,dec,dcp,cld,cmp,nop,dcp,nop,cmp,dec,dcp, // D
-    cpx,sbc,nop,isb,cpx,sbc,inc,isb,inx,sbc,nop,sbc,cpx,sbc,inc,isb, // E
-    beq,sbc,nop,isb,nop,sbc,inc,isb,sed,sbc,nop,isb,nop,sbc,inc,isb  // F
+    brk,ora,nop,SLO,nop,ora,asl,SLO,php,ora,asl,ANC,nop,ora,asl,SLO, // 0
+    bpl,ora,nop,SLO,nop,ora,asl,SLO,clc,ora,nop,SLO,nop,ora,asl,SLO, // 1
+    jsr,and,nop,RLA,bit,and,rol,RLA,plp,and,rol,ANC,bit,and,rol,RLA, // 2
+    bmi,and,nop,RLA,nop,and,rol,RLA,sec,and,nop,RLA,nop,and,rol,RLA, // 3
+    rti,eor,nop,SRE,nop,eor,lsr,SRE,pha,eor,lsr,ALR,jmp,eor,lsr,SRE, // 4
+    bvc,eor,nop,SRE,nop,eor,lsr,SRE,cli,eor,nop,SRE,nop,eor,lsr,SRE, // 5
+    rts,adc,nop,RRA,nop,adc,ror,RRA,pla,adc,ror,ARR,jmp,adc,ror,RRA, // 6
+    bvs,adc,nop,RRA,nop,adc,ror,RRA,sei,adc,nop,RRA,nop,adc,ror,RRA, // 7
+    nop,sta,nop,SAX,sty,sta,stx,SAX,dey,nop,txa,ANE,sty,sta,stx,SAX, // 8
+    bcc,sta,nop,SHA,sty,sta,stx,SAX,tya,sta,txs,TAS,SHY,sta,SHX,SHA, // 9
+    ldy,lda,ldx,LAX,ldy,lda,ldx,LAX,tay,lda,tax,LXA,ldy,lda,ldx,LAX, // A
+    bcs,lda,nop,LAX,ldy,lda,ldx,LAX,clv,lda,tsx,LAS,ldy,lda,ldx,LAX, // B
+    cpy,cmp,nop,DCP,cpy,cmp,dec,DCP,iny,cmp,dex,SBX,cpy,cmp,dec,DCP, // C
+    bne,cmp,nop,DCP,nop,cmp,dec,DCP,cld,cmp,nop,DCP,nop,cmp,dec,DCP, // D
+    cpx,sbc,nop,ISC,cpx,sbc,inc,ISC,inx,sbc,nop,sbc,cpx,sbc,inc,ISC, // E
+    beq,sbc,nop,ISC,nop,sbc,inc,ISC,sed,sbc,nop,ISC,nop,sbc,inc,ISC  // F
 };
 
 static const uint32_t ticktable[256] = {
