@@ -1,0 +1,180 @@
+mads 2.1.7
+Source: cpu_decimal.s
+     1
+     2 				.ifndef ATARI
+     3 				    opt h-
+     4 				    opt f+
+     5 				    org $0000
+     6 0000 00			    dta 0
+     7 				.endif
+     8
+     9 				; CRC-32 based on my implementation in cc65 / zlib
+    10
+    11 = 0008			D_FLAG	equ	8
+    12 = 0001			C_FLAG	equ	1
+    13 = 00ED			CRC_POLY3	equ	$ed
+    14 = 00B8			CRC_POLY2	equ	$b8
+    15 = 0083			CRC_POLY1	equ	$83
+    16 = 0020			CRC_POLY0	equ	$20
+    17
+    18 = 003D			OK3	equ	$3d
+    19 = 00D8			OK2	equ	$d8
+    20 = 004D			OK1	equ	$4d
+    21 = 002A			OK0	equ	$2a
+    22
+    23 = 0080			crc	equ	$80	; 4 bytes
+    24 = 0084			zpdata	equ	$84
+    25 = 0085			zpflags	equ	$85
+    26 = 0086			scrptr	equ	$86	; 2 bytes
+    27
+    28 0001				org	$3000
+    29 3000			main
+    30 3000 20 7F 30			jsr	init_crc
+    31 3003 A9 00			lda	#0
+    32 3005 20 3D 30			jsr	test_adc_sbc
+    33 3008 A9 01			lda	#C_FLAG
+    34 300A 20 3D 30			jsr	test_adc_sbc
+    35 300D A9 08			lda	#D_FLAG
+    36 300F 20 3D 30			jsr	test_adc_sbc
+    37 3012 A9 09			lda	#D_FLAG|C_FLAG
+    38 3014 20 3D 30			jsr	test_adc_sbc
+    39
+    40 3017 A5 83			lda	crc+3
+    41 3019 C9 3D			cmp	#OK3
+    42 301B D0 19			bne	error
+    43 301D A5 82			lda	crc+2
+    44 301F C9 D8			cmp	#OK2
+    45 3021 D0 13			bne	error
+    46 3023 A5 81			lda	crc+1
+    47 3025 C9 4D			cmp	#OK1
+    48 3027 D0 0D			bne	error
+    49 3029 A5 80			lda	crc
+    50 302B C9 2A			cmp	#OK0
+    51 302D D0 07			bne	error
+    52 302F 4C 2F 30			jmp	*
+    53 3032 30 21 33 33		    .byte "PASS"
+    54
+    55 3036			error
+    56 3036 4C 36 30			jmp	*
+    57 3039 26 21 29 2C		    .byte "FAIL"
+    58
+    59 303D			test_adc_sbc
+    60 303D 85 85			sta	zpflags
+    61 303F A9 00 85 84			mva	#0	zpdata
+    62 3043 A0 00			ldy	#0
+    63 3045			test_adc_sbc_byte
+    64 3045 A5 84 8D 6E 30		mva	zpdata	arr+1
+    65
+    66 304A A5 85 48			lda:pha	zpflags
+    67 304D 98				tya
+    68 304E 28				plp
+    69 304F 65 84			adc	zpdata
+    70 3051 08				php
+    71 3052 20 D8 30			jsr	do_crc
+    72 3055 68				pla
+    73 3056 20 D8 30			jsr	do_crc
+    74
+    75 3059 A5 85 48			lda:pha	zpflags
+    76 305C 98				tya
+    77 305D 28				plp
+    78 305E E5 84			sbc	zpdata
+    79 3060 08				php
+    80 3061 20 D8 30			jsr	do_crc
+    81 3064 68				pla
+    82 3065 20 D8 30			jsr	do_crc
+    83
+    84 3068 A5 85 48			lda:pha	zpflags
+    85 306B 98				tya
+    86 306C 28				plp
+    87 306D 6B 00		arr	dta	$6b,0
+    88 306F 08				php
+    89 3070 20 D8 30			jsr	do_crc
+    90 3073 68				pla
+    91 3074 20 D8 30			jsr	do_crc
+    92
+    93 3077 C8				iny
+    94 3078 D0 CB			bne	test_adc_sbc_byte
+    95 307A E6 84			inc	zpdata
+    96 307C D0 C7			bne	test_adc_sbc_byte
+    97 307E 60				rts
+    98
+    99 307F			init_crc
+   100 307F A2 00			ldx	#0
+   101 3081			init_crc_entry
+   102 3081 A9 00			lda	#0
+   103 3083 85 81			sta	crc+1
+   104 3085 85 82			sta	crc+2
+   105 3087 85 83			sta	crc+3
+   106 3089 A0 08			ldy	#8
+   107 308B 8A				txa
+   108 308C			init_crc_bit
+   109 308C 85 80			sta	crc
+   110 308E 4A				lsr	@
+   111 308F 90 1C			bcc	init_crc_noxor
+   112 3091 A5 83			lda	crc+3
+   113 3093 4A				lsr	@
+   114 3094 49 ED			eor	#CRC_POLY3
+   115 3096 85 83			sta	crc+3
+   116 3098 A5 82			lda	crc+2
+   117 309A 6A				ror	@
+   118 309B 49 B8			eor	#CRC_POLY2
+   119 309D 85 82			sta	crc+2
+   120 309F A5 81			lda	crc+1
+   121 30A1 6A				ror	@
+   122 30A2 49 83			eor	#CRC_POLY1
+   123 30A4 85 81			sta	crc+1
+   124 30A6 A5 80			lda	crc
+   125 30A8 6A				ror	@
+   126 30A9 49 20			eor	#CRC_POLY0
+   127 30AB B0 08			bcs	init_crc_nextbit ; branch always
+   128 30AD			init_crc_noxor
+   129 30AD 2A				rol	@
+   130 30AE 46 83			lsr	crc+3
+   131 30B0 66 82			ror	crc+2
+   132 30B2 66 81			ror	crc+1
+   133 30B4 6A				ror	@
+   134 30B5			init_crc_nextbit
+   135 30B5 88				dey
+   136 30B6 D0 D4			bne	init_crc_bit
+   137 30B8 9D 18 31			sta	crc_table_0,x
+   138 30BB A5 81 9D 18 32		mva	crc+1	crc_table_1,x
+   139 30C0 A5 82 9D 18 33		mva	crc+2	crc_table_2,x
+   140 30C5 A5 83 9D 18 34		mva	crc+3	crc_table_3,x
+   141 30CA E8				inx
+   142 30CB D0 B4			bne	init_crc_entry
+   143 30CD A9 00 85 80 85 81		mwa	#0	crc
+   144 30D3 85 82			sta	crc+2
+   145 30D5 85 83			sta	crc+3
+   146 30D7 60				rts
+   147
+   148 				; crc = (crc >> 8) ^ crc_table[(crc & 0xff) ^ input];
+   149 30D8			do_crc
+   150 30D8 45 80			eor	crc
+   151 30DA AA				tax
+   152 30DB BD 18 31			lda	crc_table_0,x
+   153 30DE 45 81			eor	crc+1
+   154 30E0 85 80			sta	crc
+   155 30E2 BD 18 32			lda	crc_table_1,x
+   156 30E5 45 82			eor	crc+2
+   157 30E7 85 81			sta	crc+1
+   158 30E9 BD 18 33			lda	crc_table_2,x
+   159 30EC 85 83			sta	crc+3
+   160 30EE 85 82			sta	crc+2
+   161 30F0 BD 18 34 85 83		mva	crc_table_3,x	crc+3
+   162 30F5 60				rts
+   163
+   164 30F6 43 50 55 3A 20 44 + title	dta	c'CPU: Decimal mode...',0
+   165 310B 50 61 73 73 9B 00	pass	dta	c'Pass',$9b,0
+   166 3111 46 41 49 4C 2E 9B + fail	dta	c'FAIL.',$9b,0
+   167
+   168 3118			crc_table_0	org	*+256
+   169 3218			crc_table_1	org	*+256
+   170 3318			crc_table_2	org	*+256
+   171 3418			crc_table_3	org	*+256
+   172
+   173 				.ifdef ATARI
+   174 				    run main
+   175 				.else
+   176 3518			    org $fffa
+   177 FFFA 00 00 00 30 00 00	    dta a(0),a(main),a(0)
+   178 				.endif

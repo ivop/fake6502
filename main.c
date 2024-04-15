@@ -44,4 +44,6 @@ void main(void) {
     test("test/bird6502.bin", 0x861c);
     instructions = 0;
     test("test/ttl6502.bin", 0xf5ea);
+    instructions = 0;
+    test("test/cpu_decimal.bin", 0x302f);
 }
