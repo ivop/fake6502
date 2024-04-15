@@ -69,12 +69,6 @@ static uint8_t pull8() {
     return read6502(BASE_STACK + ++SP);
 }
 
-void reset6502() {
-    PC = (uint16_t)read6502(0xFFFC) | ((uint16_t)read6502(0xFFFD) << 8);
-    A = X = Y = 0;
-    SP = 0xFD;
-}
-
 static uint16_t read6502word(uint16_t addr) {
     return read6502(addr) | (read6502(addr+1) << 8);
 }
@@ -523,6 +517,12 @@ void nmi6502() {
     push8(makeP);
     I = 1;
     PC = read6502word(0xfffa);
+}
+
+void reset6502() {
+    PC = read6502word(0xfffc);
+    A = X = Y = 0;
+    SP = 0xFD;
 }
 
 void irq6502() {
