@@ -390,52 +390,44 @@ static void tya() {
 
 // ------------------ Undocumented opcodes ------------------------------------
 
-static void LAX() {
-    lda();
-    ldx();
+static void SLO() {
+    asl();
+    ora();
+}
+
+static void RLA() {
+    rol();
+    and();
+}
+
+static void SRE() {
+    lsr();
+    eor();
+}
+
+static void RRA() {
+    ror();
+    adc();
 }
 
 static void SAX() {
-    sta();
-    stx();
     putvalue(A & X);
+}
+
+static void LAX() {
+    lda();
+    ldx();
     if (penaltyop && penaltyaddr) clockticks6502--;
 }
 
 static void DCP() {
     dec();
     cmp();
-    if (penaltyop && penaltyaddr) clockticks6502--;
 }
 
 static void ISC() {
     inc();
     sbc();
-    if (penaltyop && penaltyaddr) clockticks6502--;
-}
-
-static void SLO() {
-    asl();
-    ora();
-    if (penaltyop && penaltyaddr) clockticks6502--;
-}
-
-static void RLA() {
-    rol();
-    and();
-    if (penaltyop && penaltyaddr) clockticks6502--;
-}
-
-static void SRE() {
-    lsr();
-    eor();
-    if (penaltyop && penaltyaddr) clockticks6502--;
-}
-
-static void RRA() {
-    ror();
-    adc();
-    if (penaltyop && penaltyaddr) clockticks6502--;
 }
 
 static void ANC() { }
