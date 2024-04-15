@@ -11,15 +11,30 @@ Test	= $03
 TmpZP0	= $10
 TmpAB0	= $1000
 
-
 .ifndef ATARI
     .align $e000,0
     org $E000
+Reset
 .else
     org $a000
-.endif
 
 Reset
+    sei
+    lda #0
+    sta $d40e
+    sta $d20e
+    cli
+    tax
+@:
+    sta 0,x
+    inx
+    bne @-
+    lda #$fe
+    sta $d301
+    mwa #IRQ $fffe
+    mwa #NMI $fffa
+.endif
+
 		nop
 
 
@@ -5090,7 +5105,8 @@ M397
 M398
 		bcc	M398
 M399
-		bmi	M399
+;		bmi	M399
+		bpl	M399    ; fix another bug in test
 
 
 ;**  SBC  (3)             	Test SBC in decimal mode
@@ -5138,6 +5154,20 @@ NMI
 
     .word NMI, Reset, IRQ
 .else
+IRQ
+NMI
+    nop
+    lda #$ff
+    pha
+    plp
+    rti
+
+L999
+    jmp L005
+    nop
+    sec
+    bcs *
+    nop
     run Reset
 .endif
 
