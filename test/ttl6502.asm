@@ -12,7 +12,12 @@ TmpZP0	= $10
 TmpAB0	= $1000
 
 
+.ifndef ATARI
+    .align $e000,0
     org $E000
+.else
+    org $a000
+.endif
 
 Reset
 		nop
