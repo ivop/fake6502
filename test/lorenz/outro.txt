@@ -1,0 +1,5 @@
+
+.ifndef ATARI
+    org $fffa
+    dta a(0),a(main),a(0)
+.endif

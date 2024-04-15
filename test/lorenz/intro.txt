@@ -1,0 +1,11 @@
+.ifndef ATARI
+    opt h-
+    opt f+
+    org 0
+    dta 0
+    .align $0801,0
+.else
+    org $0801
+.endif
+
+main
