@@ -517,12 +517,14 @@ void nmi6502() {
     push8(makeP);
     I = 1;
     PC = read6502word(0xfffa);
+    clockticks6502 += 7;
 }
 
 void reset6502() {
     PC = read6502word(0xfffc);
     A = X = Y = 0;
     SP = 0xFD;
+    clockticks6502 += 7;
 }
 
 void irq6502() {
@@ -530,6 +532,7 @@ void irq6502() {
     push8(makeP);
     I = 1;
     PC = read6502word(0xfffe);
+    clockticks6502 += 7;
 }
 
 void exec6502(uint32_t tickcount) {
