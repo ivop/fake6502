@@ -138,20 +138,23 @@ static void adc() {
     uint16_t result = A + value + C;
     calcZ(result);
 
-    if (D) {
-        uint8_t B = (A & 0x0f) + (value & 0x0f) + C;
-        if (B >= 0x0a) B = ((B + 0x06) & 0x0f) + 0x10;
-        result = (A & 0xf0) + (value & 0xf0) + B;
+    if (!D) {
+        calcC(result);
+        calcV(result, A, value);
+        calcN(result);
+    } else {
+        result = (A & 0x0f) + (value & 0x0f) + C;
+        if (result >= 0x0a) result = ((result + 0x06) & 0x0f) + 0x10;
+        result += (A & 0xf0) + (value & 0xf0);
+        calcN(result);
+        calcV(result, A, value);
         if (result >= 0xa0) result += 0x60;
+        calcC(result);
         clockticks6502++;
     }
 
-    calcC(result);
-    calcV(result, A, value);
-    calcN(result);
-
     A = result;
-}
+ }
 
 static void and() {
     penaltyop = 1;
@@ -430,9 +433,42 @@ static void ISC() {
     sbc();
 }
 
-static void ANC() { }
-static void ALR() { }
-static void ARR() { }
+static void ANC() {
+    and();
+    C = A & 0x80;
+}
+static void ALR() {
+    and();
+    C = A & 1;
+    A >>= 1;
+    calcZN(A);
+}
+
+static void ARR() {
+    and();
+
+    uint8_t inA = A;
+
+    A >>= 1;
+    A |= C << 7;
+    calcZN(A);
+
+    if (!D) {
+        C = A & 0x40;
+        V = C ^ ((A >> 5) & 1);
+    } else {
+        V = (A ^ inA) & 0x40;
+        if (((inA & 0x0f) + (inA & 0x01)) > 0x05)
+            A = (A & 0xf0) | ((A + 0x06) & 0x0f);
+        if ((uint16_t)inA + (inA & 0x10) >= 0x60) {
+            A += 0x60;
+            C = 1;
+        } else {
+            C = 0;
+        }
+    }
+}
+
 static void SBX() { }
 static void SHA() { }
 static void SHY() { }
