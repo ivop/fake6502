@@ -45,7 +45,7 @@ void main(void) {
     instructions = 0;
     test("test/ttl6502.bin", 0xf5ea);
     instructions = 0;
-    test("test/6502DecimalMode.bin", 0x80b5);
+    test("test/6502DecimalMode.bin", 0x8133);
     instructions = 0;
     test("test/cpu_decimal.bin", 0x302f);
 }

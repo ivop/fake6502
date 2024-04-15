@@ -1,0 +1,427 @@
+mads 2.1.7
+Source: 6502DecimalMode.s
+     1
+     2 				; tests from Visual6502wiki/6502DecimalMode
+     3 				; program by Ivo van Poorten
+     4 				; assembler: mads by tebe
+     5
+     6 				    .macro testN0
+     7 				        bmi *
+     8 				    .endm
+     9 				    .macro testN1
+    10 				        bpl *
+    11 				    .endm
+    12 				    .macro testV0
+    13 				        bvs *
+    14 				    .endm
+    15 				    .macro testV1
+    16 				        bvc *
+    17 				    .endm
+    18 				    .macro testZ0
+    19 				        beq *
+    20 				    .endm
+    21 				    .macro testZ1
+    22 				        bne *
+    23 				    .endm
+    24 				    .macro testC0
+    25 				        bcs *
+    26 				    .endm
+    27 				    .macro testC1
+    28 				        bcc *
+    29 				    .endm
+    30 				    .macro testA value
+    31 				        cmp #:value
+    32 				        bne *
+    33 				    .endm
+    34 				    .macro testADC init value carry result Nflag Vflag Zflag Cflag
+    35 				        clv
+    36 				        .if :carry = 1
+    37 				            sec
+    38 				        .else
+    39 				            clc
+    40 				        .endif
+    41 				        lda #:init
+    42 				        adc #:value
+    43 				        .if :Nflag = 1
+    44 				            testN1
+    45 				        .else
+    46 				            testN0
+    47 				        .endif
+    48 				        .if :Vflag = 1
+    49 				            testV1
+    50 				        .else
+    51 				            testV0
+    52 				        .endif
+    53 				        .if :Zflag = 1
+    54 				            testZ1
+    55 				        .else
+    56 				            testZ0
+    57 				        .endif
+    58 				        .if :Cflag = 1
+    59 				            testC1
+    60 				        .else
+    61 				            testC0
+    62 				        .endif
+    63 				        testA :result
+    64 				    .endm
+    65 				    .macro testSBC init value carry result Nflag Vflag Zflag Cflag
+    66 				        clv
+    67 				        .if :carry = 1
+    68 				            sec
+    69 				        .else
+    70 				            clc
+    71 				        .endif
+    72 				        lda #:init
+    73 				        sbc #:value
+    74 				        .if :Nflag = 1
+    75 				            testN1
+    76 				        .else
+    77 				            testN0
+    78 				        .endif
+    79 				        .if :Vflag = 1
+    80 				            testV1
+    81 				        .else
+    82 				            testV0
+    83 				        .endif
+    84 				        .if :Zflag = 1
+    85 				            testZ1
+    86 				        .else
+    87 				            testZ0
+    88 				        .endif
+    89 				        .if :Cflag = 1
+    90 				            testC1
+    91 				        .else
+    92 				            testC0
+    93 				        .endif
+    94 				        testA :result
+    95 				    .endm
+    96
+    97 				.ifndef ATARI
+    98 				    opt h-
+    99 				    opt f+
+   100
+   101 				    org $0000
+   102 0000 00			    dta 0
+   103 				.endif
+   104
+   105 0001			    org $8000
+   106
+   107 8000			main:
+   108 8000 F8			    sed
+   109
+   110 8001			    testADC $00 $00 0 $00 0 0 1 0
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 8001 B8			        clv
+     5 8002 18			            clc
+     7 8003 A9 00		        lda #$00
+     8 8005 69 00		        adc #$00
+     1 8007 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 8009 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 800B D0 FE		        bne *
+Source: 6502DecimalMode.s
+     1 800D B0 FE		        bcs *
+Source: 6502DecimalMode.s
+     1 800F C9 00		        cmp #$00
+     2 8011 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   111 8013			    testADC $79 $00 1 $80 1 1 0 0
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 8013 B8			        clv
+     3 8014 38			            sec
+     7 8015 A9 79		        lda #$79
+     8 8017 69 00		        adc #$00
+     1 8019 10 FE		        bpl *
+Source: 6502DecimalMode.s
+     1 801B 50 FE		        bvc *
+Source: 6502DecimalMode.s
+     1 801D F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 801F B0 FE		        bcs *
+Source: 6502DecimalMode.s
+     1 8021 C9 80		        cmp #$80
+     2 8023 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   112 8025			    testADC $24 $56 0 $80 1 1 0 0
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 8025 B8			        clv
+     5 8026 18			            clc
+     7 8027 A9 24		        lda #$24
+     8 8029 69 56		        adc #$56
+     1 802B 10 FE		        bpl *
+Source: 6502DecimalMode.s
+     1 802D 50 FE		        bvc *
+Source: 6502DecimalMode.s
+     1 802F F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 8031 B0 FE		        bcs *
+Source: 6502DecimalMode.s
+     1 8033 C9 80		        cmp #$80
+     2 8035 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   113 8037			    testADC $93 $82 0 $75 0 1 0 1
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 8037 B8			        clv
+     5 8038 18			            clc
+     7 8039 A9 93		        lda #$93
+     8 803B 69 82		        adc #$82
+     1 803D 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 803F 50 FE		        bvc *
+Source: 6502DecimalMode.s
+     1 8041 F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 8043 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 8045 C9 75		        cmp #$75
+     2 8047 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   114 8049			    testADC $89 $76 0 $65 0 0 0 1
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 8049 B8			        clv
+     5 804A 18			            clc
+     7 804B A9 89		        lda #$89
+     8 804D 69 76		        adc #$76
+     1 804F 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 8051 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 8053 F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 8055 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 8057 C9 65		        cmp #$65
+     2 8059 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   115 805B			    testADC $89 $76 1 $66 0 0 1 1
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 805B B8			        clv
+     3 805C 38			            sec
+     7 805D A9 89		        lda #$89
+     8 805F 69 76		        adc #$76
+     1 8061 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 8063 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 8065 D0 FE		        bne *
+Source: 6502DecimalMode.s
+     1 8067 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 8069 C9 66		        cmp #$66
+     2 806B D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   116 806D			    testADC $80 $f0 0 $d0 0 1 0 1
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 806D B8			        clv
+     5 806E 18			            clc
+     7 806F A9 80		        lda #$80
+     8 8071 69 F0		        adc #$F0
+     1 8073 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 8075 50 FE		        bvc *
+Source: 6502DecimalMode.s
+     1 8077 F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 8079 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 807B C9 D0		        cmp #$D0
+     2 807D D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   117 807F			    testADC $80 $fa 0 $e0 1 0 0 1
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 807F B8			        clv
+     5 8080 18			            clc
+     7 8081 A9 80		        lda #$80
+     8 8083 69 FA		        adc #$FA
+     1 8085 10 FE		        bpl *
+Source: 6502DecimalMode.s
+     1 8087 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 8089 F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 808B 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 808D C9 E0		        cmp #$E0
+     2 808F D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   118 8091			    testADC $2f $4f 0 $74 0 0 0 0
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 8091 B8			        clv
+     5 8092 18			            clc
+     7 8093 A9 2F		        lda #$2F
+     8 8095 69 4F		        adc #$4F
+     1 8097 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 8099 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 809B F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 809D B0 FE		        bcs *
+Source: 6502DecimalMode.s
+     1 809F C9 74		        cmp #$74
+     2 80A1 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   119 80A3			    testADC $6f $00 1 $76 0 0 0 0
+Macro: TESTADC [Source: 6502DecimalMode.s]
+     1 80A3 B8			        clv
+     3 80A4 38			            sec
+     7 80A5 A9 6F		        lda #$6F
+     8 80A7 69 00		        adc #$00
+     1 80A9 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 80AB 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 80AD F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 80AF B0 FE		        bcs *
+Source: 6502DecimalMode.s
+     1 80B1 C9 76		        cmp #$76
+     2 80B3 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   120
+   121 80B5			    testSBC $00 $00 0 $99 1 0 0 0
+Macro: TESTSBC [Source: 6502DecimalMode.s]
+     1 80B5 B8			        clv
+     5 80B6 18			            clc
+     7 80B7 A9 00		        lda #$00
+     8 80B9 E9 00		        sbc #$00
+     1 80BB 10 FE		        bpl *
+Source: 6502DecimalMode.s
+     1 80BD 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 80BF F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 80C1 B0 FE		        bcs *
+Source: 6502DecimalMode.s
+     1 80C3 C9 99		        cmp #$99
+     2 80C5 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   122 80C7			    testSBC $00 $00 1 $00 0 0 1 1
+Macro: TESTSBC [Source: 6502DecimalMode.s]
+     1 80C7 B8			        clv
+     3 80C8 38			            sec
+     7 80C9 A9 00		        lda #$00
+     8 80CB E9 00		        sbc #$00
+     1 80CD 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 80CF 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 80D1 D0 FE		        bne *
+Source: 6502DecimalMode.s
+     1 80D3 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 80D5 C9 00		        cmp #$00
+     2 80D7 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   123 80D9			    testSBC $00 $01 1 $99 1 0 0 0
+Macro: TESTSBC [Source: 6502DecimalMode.s]
+     1 80D9 B8			        clv
+     3 80DA 38			            sec
+     7 80DB A9 00		        lda #$00
+     8 80DD E9 01		        sbc #$01
+     1 80DF 10 FE		        bpl *
+Source: 6502DecimalMode.s
+     1 80E1 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 80E3 F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 80E5 B0 FE		        bcs *
+Source: 6502DecimalMode.s
+     1 80E7 C9 99		        cmp #$99
+     2 80E9 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   124 80EB			    testSBC $0a $00 1 $0a 0 0 0 1
+Macro: TESTSBC [Source: 6502DecimalMode.s]
+     1 80EB B8			        clv
+     3 80EC 38			            sec
+     7 80ED A9 0A		        lda #$0A
+     8 80EF E9 00		        sbc #$00
+     1 80F1 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 80F3 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 80F5 F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 80F7 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 80F9 C9 0A		        cmp #$0A
+     2 80FB D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   125 80FD			    testSBC $0b $00 0 $0a 0 0 0 1
+Macro: TESTSBC [Source: 6502DecimalMode.s]
+     1 80FD B8			        clv
+     5 80FE 18			            clc
+     7 80FF A9 0B		        lda #$0B
+     8 8101 E9 00		        sbc #$00
+     1 8103 30 FE		        bmi *
+Source: 6502DecimalMode.s
+     1 8105 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 8107 F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 8109 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 810B C9 0A		        cmp #$0A
+     2 810D D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   126 810F			    testSBC $9a $00 1 $9a 1 0 0 1
+Macro: TESTSBC [Source: 6502DecimalMode.s]
+     1 810F B8			        clv
+     3 8110 38			            sec
+     7 8111 A9 9A		        lda #$9A
+     8 8113 E9 00		        sbc #$00
+     1 8115 10 FE		        bpl *
+Source: 6502DecimalMode.s
+     1 8117 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 8119 F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 811B 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 811D C9 9A		        cmp #$9A
+     2 811F D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   127 8121			    testSBC $9b $00 0 $9a 1 0 0 1
+Macro: TESTSBC [Source: 6502DecimalMode.s]
+     1 8121 B8			        clv
+     5 8122 18			            clc
+     7 8123 A9 9B		        lda #$9B
+     8 8125 E9 00		        sbc #$00
+     1 8127 10 FE		        bpl *
+Source: 6502DecimalMode.s
+     1 8129 70 FE		        bvs *
+Source: 6502DecimalMode.s
+     1 812B F0 FE		        beq *
+Source: 6502DecimalMode.s
+     1 812D 90 FE		        bcc *
+Source: 6502DecimalMode.s
+     1 812F C9 9A		        cmp #$9A
+     2 8131 D0 FE		        bne *
+Source: 6502DecimalMode.s
+Source: 6502DecimalMode.s
+   128
+   129 8133 4C 33 81		    jmp *
+   130
+   131 				.ifndef ATARI
+   132 8136			    org $fffa
+   133 FFFA 00 00 00 80 00 00	    dta a(0), a(main), a(0)
+   134 				.else
+   135 				    run main
+   136 				.endif

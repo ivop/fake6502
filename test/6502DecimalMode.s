@@ -1,4 +1,8 @@
 
+; tests from Visual6502wiki/6502DecimalMode
+; program by Ivo van Poorten
+; assembler: mads by tebe
+
     .macro testN0
         bmi *
     .endm
@@ -58,6 +62,37 @@
         .endif
         testA :result
     .endm
+    .macro testSBC init value carry result Nflag Vflag Zflag Cflag
+        clv
+        .if :carry = 1
+            sec
+        .else
+            clc
+        .endif
+        lda #:init
+        sbc #:value
+        .if :Nflag = 1
+            testN1
+        .else
+            testN0
+        .endif
+        .if :Vflag = 1
+            testV1
+        .else
+            testV0
+        .endif
+        .if :Zflag = 1
+            testZ1
+        .else
+            testZ0
+        .endif
+        .if :Cflag = 1
+            testC1
+        .else
+            testC0
+        .endif
+        testA :result
+    .endm
 
 .ifndef ATARI
     opt h-
@@ -82,6 +117,14 @@ main:
     testADC $80 $fa 0 $e0 1 0 0 1
     testADC $2f $4f 0 $74 0 0 0 0
     testADC $6f $00 1 $76 0 0 0 0
+
+    testSBC $00 $00 0 $99 1 0 0 0
+    testSBC $00 $00 1 $00 0 0 1 1
+    testSBC $00 $01 1 $99 1 0 0 0
+    testSBC $0a $00 1 $0a 0 0 0 1
+    testSBC $0b $00 0 $0a 0 0 0 1
+    testSBC $9a $00 1 $9a 1 0 0 1
+    testSBC $9b $00 0 $9a 1 0 0 1
 
     jmp *
 
