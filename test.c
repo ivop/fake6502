@@ -123,6 +123,7 @@ int main(void) {
     test("tests/6502DecimalMode.bin", 0x8133, false);
     printf("\nPiotr Fusik tests.\n");
     test("tests/cpu_decimal.bin", 0x302f, false);
+    test("tests/cpu_las.bin", 0x304f, false);
 #endif
     return 0;
 }

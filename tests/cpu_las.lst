@@ -1,0 +1,93 @@
+mads 2.1.7
+Source: cpu_las.s
+     1 = 0080			s	equ	$80
+     2 = 0081			y	equ	$81
+     3 = 0082			addr	equ	$82	; 2 bytes
+     4 = 0084			data	equ	$84
+     5 = 0086			exp	equ	$86
+     6 = 0087			expnz	equ	$87
+     7 = 0089			pos	equ	$89
+     8 = 008A			scrptr	equ	$8a	; 2 bytes
+     9 = 008C			printptr	equ	$8c	; 2 bytes
+    10
+    11 = 2E00			area	equ	$2e00
+    12
+    13 				.ifndef ATARI
+    14 				    opt h-
+    15 				    opt f+
+    16 				    org $0000
+    17 0000 00			    dta 0
+    18 0001 00 00 00 00 00 00 +     .align $3000,0
+    19 				.endif
+    20
+    21 3000				org	$3000
+    22 3000			main
+    23 3000 A9 2E 85 83			mva	>area	addr+1
+    24 3004 A2 00			ldx	#0
+    25 3006			loop
+    26 3006 86 89			stx	pos
+    27 3008 BD 55 30 85 80		mva	input,x	s
+    28 300D BD 56 30 85 81		mva	input+1,x	y
+    29 3012 BD 57 30 85 82		mva	input+2,x	addr
+    30 3017 8D 33 30			sta	las+1
+    31 301A BD 58 30 85 84		mva	input+3,x	data
+    32
+    33 301F A5 80			lda	s
+    34 3021 25 84			and	data
+    35 3023 85 86			sta	exp
+    36 3025 08 68			php:pla
+    37 3027 85 87			sta	expnz
+    38
+    39 3029 A4 81			ldy	y
+    40 302B A5 84 91 82			mva	data	(addr),y
+    41 302F A6 80			ldx	s
+    42 3031 9A				txs
+    43 3032 BB 00 2E		las	dta	$bb,a(area)
+    44 3035 08				php
+    45 3036 C5 86			cmp	exp
+    46 3038 D0 18			bne	error
+    47 303A E4 86			cpx	exp
+    48 303C D0 14			bne	error
+    49 303E 68				pla
+    50 303F 45 87			eor	expnz
+    51 3041 29 80			and	#$80	; TODO: #$82, but Z is unstable
+    52 3043 D0 0D			bne	error
+    53 3045 BA				tsx
+    54 3046 E4 86			cpx	exp
+    55 3048 D0 08			bne	error
+    56
+    57 304A A6 89			ldx	pos
+    58 304C E8				inx
+    59 304D D0 B7			bne	loop
+    60
+    61 304F			success
+    62 304F 4C 4F 30			jmp	*
+    63
+    64 3052			error
+    65 3052 4C 52 30			jmp	*
+    66
+    67 				; just some random data
+    68 3055			input
+    69 3055 73 C3 26 17 3B 9B + 	dta	$73,$c3,$26,$17,$3b,$9b,$82,$06,$6e,$f8,$c6,$74,$83,$6c,$d6,$7c
+    70 3065 5B 4F 33 72 EF 55 + 	dta	$5b,$4f,$33,$72,$ef,$55,$69,$3f,$64,$f1,$02,$21,$ea,$51,$ad,$d8
+    71 3075 55 41 BD CC C9 B3 + 	dta	$55,$41,$bd,$cc,$c9,$b3,$a7,$30,$78,$41,$ab,$ac,$bc,$61,$49,$94
+    72 3085 95 A0 B4 37 DA AA + 	dta	$95,$a0,$b4,$37,$da,$aa,$e2,$50,$0f,$5f,$66,$12,$4d,$c4,$b7,$f4
+    73 3095 1B 1A 18 A2 A2 DF + 	dta	$1b,$1a,$18,$a2,$a2,$df,$b6,$36,$27,$f7,$33,$3a,$33,$e2,$49,$6e
+    74 30A5 4D 25 94 F2 B4 C4 + 	dta	$4d,$25,$94,$f2,$b4,$c4,$50,$be,$f8,$0d,$10,$13,$e3,$82,$32,$cb
+    75 30B5 9A 1A 1E 2A 52 BB + 	dta	$9a,$1a,$1e,$2a,$52,$bb,$14,$25,$90,$1d,$96,$b9,$54,$e8,$2d,$45
+    76 30C5 19 5B 9B 86 0E 34 + 	dta	$19,$5b,$9b,$86,$0e,$34,$3a,$2c,$77,$35,$9b,$91,$9d,$f8,$17,$a9
+    77 30D5 2A 70 7A 9E 6B CE + 	dta	$2a,$70,$7a,$9e,$6b,$ce,$6f,$35,$4e,$1d,$d2,$6c,$95,$53,$95,$77
+    78 30E5 17 27 5A 83 7E 76 + 	dta	$17,$27,$5a,$83,$7e,$76,$74,$65,$6e,$74,$6a,$a5,$75,$79,$ac,$02
+    79 30F5 AF B5 A2 E1 89 87 + 	dta	$af,$b5,$a2,$e1,$89,$87,$be,$c3,$87,$cd,$ae,$41,$74,$ea,$69,$8e
+    80 3105 ED D6 2A 1D A3 EB + 	dta	$ed,$d6,$2a,$1d,$a3,$eb,$17,$5a,$43,$d2,$a7,$0e,$6b,$43,$7b,$73
+    81 3115 92 EC D3 7A 50 3B + 	dta	$92,$ec,$d3,$7a,$50,$3b,$3e,$57,$e6,$65,$b9,$c9,$75,$5f,$d8,$3a
+    82 3125 CA 1E 2C 33 26 DD + 	dta	$ca,$1e,$2c,$33,$26,$dd,$85,$28,$e9,$bd,$45,$34,$8a,$79,$59,$c1
+    83 3135 C7 7C 10 9D 6B 28 + 	dta	$c7,$7c,$10,$9d,$6b,$28,$75,$9e,$a0,$89,$4a,$40,$26,$49,$5b,$54
+    84 3145 64 1A 48 49 B5 7E + 	dta	$64,$1a,$48,$49,$b5,$7e,$68,$0f,$d6,$0e,$00,$27,$e2,$26,$62,$d7
+    85
+    86 				.ifndef ATARI
+    87 3155			    org $fffa
+    88 FFFA 00 00 00 30 00 00	    dta a(0),a(main),a(0)
+    89 				.else
+    90 				    run main
+    91 				.endif
