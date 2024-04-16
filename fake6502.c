@@ -322,22 +322,9 @@ static void RRA() { ror(); adc(); }
 static void SAX() { putvalue(A & X); }
 static void LAX() { penaltyop = 1; lda(); ldx(); }
 static void DCP() { dec(); cmp(); }
-
-static void ISC() {
-    inc();
-    sbc();
-}
-
-static void ANC() {
-    and();
-    C = A & 0x80;
-}
-static void ALR() {
-    and();
-    C = A & 1;
-    A >>= 1;
-    calcZN(A);
-}
+static void ISC() { inc(); sbc(); }
+static void ANC() { and(); C = A & 0x80; }
+static void ALR() { and(); C = A & 1; A >>= 1; calcZN(A); }
 
 static void ARR() {
     and();

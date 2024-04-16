@@ -36,7 +36,8 @@ void test(const char *filename, uint16_t success, bool trace) {
             printf("A=%02x X=%02x Y=%02x SP=%02x P=%02x\n", A, X, Y, SP, getP());
         }
         if (save == PC) {
-            printf("%s --- ", PC != success ? "FAIL!" : "pass");
+            printf("%s --- ", PC != success ? "\x1b[1;31mFAIL!\x1b[0m" :
+                                              "\x1b[1;32mpass\x1b[0m");
             printf("PC=%04x ", PC);
             printf("A=%02x X=%02x Y=%02x SP=%02x P=%02x\n", A, X, Y, SP, getP());
             return;
@@ -90,7 +91,6 @@ int main(void) {
     test("test/lorenz/laxiy.bin", 0x08a8, false);
     test("test/lorenz/laxz.bin", 0x0891, false);
     test("test/lorenz/laxzy.bin", 0x089a, false);
-#endif
     test("test/lorenz/dcp_dcma.bin", 0x088c, false);
     test("test/lorenz/dcp_dcmax.bin", 0x08a2, false);
     test("test/lorenz/dcp_dcmay.bin", 0x08a2, false);
@@ -98,5 +98,13 @@ int main(void) {
     test("test/lorenz/dcp_dcmiy.bin", 0x08a6, false);
     test("test/lorenz/dcp_dcmz.bin", 0x088f, false);
     test("test/lorenz/dcp_dcmzx.bin", 0x0898, false);
+#endif
+    test("test/lorenz/isc_insa.bin", 0x088c, false);
+    test("test/lorenz/isc_insax.bin", 0x08a2, false);
+    test("test/lorenz/isc_insay.bin", 0x08a2, false);
+    test("test/lorenz/isc_insix.bin", 0x089c, false);
+    test("test/lorenz/isc_insiy.bin", 0x08a6, false);
+    test("test/lorenz/isc_insz.bin", 0x088f, false);
+    test("test/lorenz/isc_inszx.bin", 0x0898, false);
     return 0;
 }

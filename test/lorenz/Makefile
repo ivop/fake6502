@@ -1,5 +1,5 @@
 
-all: slo rla sre rra sax lax dcp
+all: slo rla sre rra sax lax dcp isc
 
 slo:
 	mads -l -o:slo_asoa.bin slo_asoa.asm
@@ -104,6 +104,22 @@ dcp:
 	mads -d:ATARI=1 -o:dcp_dcmz.xex dcp_dcmz.asm
 	mads -l -o:dcp_dcmzx.bin dcp_dcmzx.asm
 	mads -d:ATARI=1 -o:dcp_dcmzx.xex dcp_dcmzx.asm
+
+isc:
+	mads -l -o:isc_insa.bin isc_insa.asm
+	mads -d:ATARI=1 -o:isc_insa.xex isc_insa.asm
+	mads -l -o:isc_insax.bin isc_insax.asm
+	mads -d:ATARI=1 -o:isc_insax.xex isc_insax.asm
+	mads -l -o:isc_insay.bin isc_insay.asm
+	mads -d:ATARI=1 -o:isc_insay.xex isc_insay.asm
+	mads -l -o:isc_insix.bin isc_insix.asm
+	mads -d:ATARI=1 -o:isc_insix.xex isc_insix.asm
+	mads -l -o:isc_insiy.bin isc_insiy.asm
+	mads -d:ATARI=1 -o:isc_insiy.xex isc_insiy.asm
+	mads -l -o:isc_insz.bin isc_insz.asm
+	mads -d:ATARI=1 -o:isc_insz.xex isc_insz.asm
+	mads -l -o:isc_inszx.bin isc_inszx.asm
+	mads -d:ATARI=1 -o:isc_inszx.xex isc_inszx.asm
 
 clean:
 	rm -f *~ *.bin *.xex *.lst
