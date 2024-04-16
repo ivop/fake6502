@@ -1,7 +1,7 @@
 
 # Note: no dependencies, just assemble everything
 
-all: slo rla sre rra sax lax dcp isc anc alr arr sbx las sha shx shy
+all: slo rla sre rra sax lax dcp isc anc alr arr sbx las sha shx shy tas
 
 slo:
 	mads -l -o:slo_asoa.bin slo_asoa.asm
@@ -156,6 +156,10 @@ shx:
 shy:
 	mads -l -o:shyax.bin shyax.asm
 	mads -d:ATARI=1 -o:shyax.xex shyax.asm
+
+tas:
+	mads -l -o:tas_shsay.bin tas_shsay.asm
+	mads -d:ATARI=1 -o:tas_shsay.xex tas_shsay.asm
 
 clean:
 	rm -f *~ *.bin *.xex *.lst

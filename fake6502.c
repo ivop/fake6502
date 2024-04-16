@@ -370,7 +370,10 @@ static void JAM() { nop(); }
 static void SHA() { putvalue(A & X & ((ea >> 8) + 1)); }
 static void SHX() { putvalue(X & ((ea >> 8) + 1)); }
 static void SHY() { putvalue(Y & ((ea >> 8) + 1)); }
-static void TAS() { }
+static void TAS() {
+    SP = A & X;
+    putvalue(SP & ((ea >> 8) + 1));
+}
 
 // ------------------ Magic constants undocumented opcodes --------------------
 
