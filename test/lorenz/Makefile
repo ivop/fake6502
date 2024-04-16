@@ -1,5 +1,5 @@
 
-all: slo rla sre rra sax lax
+all: slo rla sre rra sax lax dcp
 
 slo:
 	mads -l -o:slo_asoa.bin slo_asoa.asm
@@ -88,6 +88,22 @@ lax:
 	mads -d:ATARI=1 -o:laxz.xex laxz.asm
 	mads -l -o:laxzy.bin laxzy.asm
 	mads -d:ATARI=1 -o:laxzy.xex laxzy.asm
+
+dcp:
+	mads -l -o:dcp_dcma.bin dcp_dcma.asm
+	mads -d:ATARI=1 -o:dcp_dcma.xex dcp_dcma.asm
+	mads -l -o:dcp_dcmax.bin dcp_dcmax.asm
+	mads -d:ATARI=1 -o:dcp_dcmax.xex dcp_dcmax.asm
+	mads -l -o:dcp_dcmay.bin dcp_dcmay.asm
+	mads -d:ATARI=1 -o:dcp_dcmay.xex dcp_dcmay.asm
+	mads -l -o:dcp_dcmix.bin dcp_dcmix.asm
+	mads -d:ATARI=1 -o:dcp_dcmix.xex dcp_dcmix.asm
+	mads -l -o:dcp_dcmiy.bin dcp_dcmiy.asm
+	mads -d:ATARI=1 -o:dcp_dcmiy.xex dcp_dcmiy.asm
+	mads -l -o:dcp_dcmz.bin dcp_dcmz.asm
+	mads -d:ATARI=1 -o:dcp_dcmz.xex dcp_dcmz.asm
+	mads -l -o:dcp_dcmzx.bin dcp_dcmzx.asm
+	mads -d:ATARI=1 -o:dcp_dcmzx.xex dcp_dcmzx.asm
 
 clean:
 	rm -f *~ *.bin *.xex *.lst

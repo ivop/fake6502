@@ -84,12 +84,19 @@ int main(void) {
     test("test/lorenz/sax_axsix.bin", 0x0897, false);
     test("test/lorenz/sax_axsz.bin", 0x0890, false);
     test("test/lorenz/sax_axszy.bin", 0x0899, false);
-#endif
     test("test/lorenz/laxa.bin", 0x088e, false);
     test("test/lorenz/laxay.bin", 0x08a4, false);
     test("test/lorenz/laxix.bin", 0x089e, false);
     test("test/lorenz/laxiy.bin", 0x08a8, false);
     test("test/lorenz/laxz.bin", 0x0891, false);
     test("test/lorenz/laxzy.bin", 0x089a, false);
+#endif
+    test("test/lorenz/dcp_dcma.bin", 0x088c, false);
+    test("test/lorenz/dcp_dcmax.bin", 0x08a2, false);
+    test("test/lorenz/dcp_dcmay.bin", 0x08a2, false);
+    test("test/lorenz/dcp_dcmix.bin", 0x089c, false);
+    test("test/lorenz/dcp_dcmiy.bin", 0x08a6, false);
+    test("test/lorenz/dcp_dcmz.bin", 0x088f, false);
+    test("test/lorenz/dcp_dcmzx.bin", 0x0898, false);
     return 0;
 }

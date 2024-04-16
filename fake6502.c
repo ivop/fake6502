@@ -321,11 +321,7 @@ static void SRE() { lsr(); eor(); }
 static void RRA() { ror(); adc(); }
 static void SAX() { putvalue(A & X); }
 static void LAX() { penaltyop = 1; lda(); ldx(); }
-
-static void DCP() {
-    dec();
-    cmp();
-}
+static void DCP() { dec(); cmp(); }
 
 static void ISC() {
     inc();
