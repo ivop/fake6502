@@ -46,7 +46,7 @@ void test(const char *filename, uint16_t success, bool trace) {
 }
 
 int main(void) {
-#if 0
+#if 1
     test("test/6502_functional_test.bin", 0x3469, false);
     test("test/6502_decimal_test.bin", 0x044b, false);
     test("test/bird6502.bin", 0x861c, false);
@@ -105,8 +105,9 @@ int main(void) {
     test("test/lorenz/isc_insiy.bin", 0x08a6, false);
     test("test/lorenz/isc_insz.bin", 0x088f, false);
     test("test/lorenz/isc_inszx.bin", 0x0898, false);
-#endif
     test("test/lorenz/ancb.bin", 0x08d8, false);
     test("test/lorenz/alrb.bin", 0x08aa, false);
+    test("test/lorenz/arrb.bin", 0x0947, false);
+#endif
     return 0;
 }

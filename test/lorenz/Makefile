@@ -1,5 +1,5 @@
 
-all: slo rla sre rra sax lax dcp isc anc alr
+all: slo rla sre rra sax lax dcp isc anc alr arr
 
 slo:
 	mads -l -o:slo_asoa.bin slo_asoa.asm
@@ -128,6 +128,10 @@ anc:
 alr:
 	mads -l -o:alrb.bin alrb.asm
 	mads -d:ATARI=1 -o:alrb.xex alrb.asm
+
+arr:
+	mads -l -o:arrb.bin arrb.asm
+	mads -d:ATARI=1 -o:arrb.xex arrb.asm
 
 clean:
 	rm -f *~ *.bin *.xex *.lst

@@ -1,0 +1,230 @@
+mads 2.1.7
+Source: arrb.asm
+     1
+     2 				.ifndef ATARI
+     3 				    opt h-
+     4 				    opt f+
+     5 				    org 0
+     6 0000 00			    dta 0
+     7 0001 00 00 00 00 00 00 +     .align $0801,0
+     8 				.else
+     9 				    org $0801
+    10 				.endif
+    11
+    12 0801			main
+    13 0801 A9 1B		         lda #%00011011
+    14 0803 8D 4A 09		         sta db
+    15 0806 A9 C6		         lda #%11000110
+    16 0808 8D 4B 09		         sta ab
+    17 080B A9 B1		         lda #%10110001
+    18 080D 8D 4C 09		         sta xb
+    19 0810 A9 6C		         lda #%01101100
+    20 0812 8D 4D 09		         sta yb
+    21 0815 A9 00		         lda #0
+    22 0817 8D 4E 09		         sta pb
+    23 081A BA			         tsx
+    24 081B 8E 4F 09		         stx sb
+    25
+    26 081E A9 00		         lda #0
+    27 0820 8D 4A 09		         sta db
+    28 0823 8D 4B 09		         sta ab
+    29
+    30 0826 AD 4A 09		next     lda db
+    31 0829 8D 50 09		         sta da
+    32 082C 8D 56 09		         sta dr
+    33 082F 8D 08 09		         sta cmd+1
+    34
+    35 0832 A9 08		         lda #%00001000
+    36 0834 2C 4E 09		         bit pb
+    37 0837 D0 41		         bne decimal
+    38
+    39 0839 AD 4E 09		         lda pb
+    40 083C 4A			         lsr
+    41 083D AD 4B 09		         lda ab
+    42 0840 2D 4A 09		         and db
+    43 0843 6A			         ror
+    44 0844 8D 57 09		         sta ar
+    45
+    46 0847 AD 4E 09		         lda pb
+    47 084A 09 30		         ora #%00110000
+    48 084C 29 3C		         and #%00111100
+    49 084E AE 57 09		         ldx ar
+    50 0851 D0 02		         bne nozero
+    51 0853 09 02		         ora #%00000010
+    52 0855			nozero
+    53 0855 AE 57 09		         ldx ar
+    54 0858 10 02		         bpl nominus
+    55 085A 09 80		         ora #%10000000
+    56 085C			nominus
+    57 085C AA			         tax
+    58 085D AD 57 09		         lda ar
+    59 0860 29 40		         and #%01000000
+    60 0862 F0 01		         beq nocarry
+    61 0864 E8			         inx
+    62 0865			nocarry
+    63 0865 AD 57 09		         lda ar
+    64 0868 29 60		         and #%01100000
+    65 086A F0 08		         beq noover
+    66 086C C9 60		         cmp #%01100000
+    67 086E F0 04		         beq noover
+    68 0870 8A			         txa
+    69 0871 09 40		         ora #%01000000
+    70 0873 AA			         tax
+    71 0874			noover
+    72 0874 8E 5A 09		         stx pr
+    73 0877 4C E3 08		         jmp nodecimal
+    74
+    75 087A			decimal
+    76 087A AD 4E 09		         lda pb
+    77 087D 4A			         lsr
+    78 087E AD 4B 09		         lda ab
+    79 0881 2D 4A 09		         and db
+    80 0884 8D 51 09		         sta aa
+    81 0887 6A			         ror
+    82 0888 8D 57 09		         sta ar
+    83
+    84 088B AD 4E 09		         lda pb
+    85 088E 09 30		         ora #%00110000
+    86 0890 29 3C		         and #%00111100
+    87 0892 AE 57 09		         ldx ar
+    88 0895 D0 02		         bne dnozero
+    89 0897 09 02		         ora #%00000010
+    90 0899			dnozero
+    91 0899 AE 57 09		         ldx ar
+    92 089C 10 02		         bpl dnominus
+    93 089E 09 80		         ora #%10000000
+    94 08A0			dnominus
+    95 08A0 AA			         tax
+    96 08A1 AD 57 09		         lda ar
+    97 08A4 4D 51 09		         eor aa
+    98 08A7 29 40		         and #%01000000
+    99 08A9 F0 04		         beq dnoover
+   100 08AB 8A			         txa
+   101 08AC 09 40		         ora #%01000000
+   102 08AE AA			         tax
+   103 08AF			dnoover
+   104 08AF AD 51 09		         lda aa
+   105 08B2 29 0F		         and #$0f
+   106 08B4 C9 05		         cmp #$05
+   107 08B6 90 15		         bcc noadjustlow
+   108 08B8 AD 57 09		         lda ar
+   109 08BB 29 F0		         and #$f0
+   110 08BD 8D C9 08		         sta andlow+1
+   111 08C0 AD 57 09		         lda ar
+   112 08C3 18			         clc
+   113 08C4 69 06		         adc #$06
+   114 08C6 29 0F		         and #$0f
+   115 08C8 09 11		andlow   ora #$11
+   116 08CA 8D 57 09		         sta ar
+   117 08CD			noadjustlow
+   118 08CD AD 51 09		         lda aa
+   119 08D0 29 F0		         and #$f0
+   120 08D2 C9 50		         cmp #$50
+   121 08D4 90 0A		         bcc noadjusthigh
+   122 08D6 E8			         inx
+   123 08D7 AD 57 09		         lda ar
+   124 08DA 18			         clc
+   125 08DB 69 60		         adc #$60
+   126 08DD 8D 57 09		         sta ar
+   127 08E0			noadjusthigh
+   128 08E0 8E 5A 09		         stx pr
+   129
+   130 08E3			nodecimal
+   131 08E3 AD 4C 09		         lda xb
+   132 08E6 8D 58 09		         sta xr
+   133
+   134 08E9 AD 4D 09		         lda yb
+   135 08EC 8D 59 09		         sta yr
+   136
+   137 08EF AD 4F 09		         lda sb
+   138 08F2 8D 5B 09		         sta sr
+   139
+   140 08F5 AE 4F 09		         ldx sb
+   141 08F8 9A			         txs
+   142 08F9 AD 4E 09		         lda pb
+   143 08FC 48			         pha
+   144 08FD AD 4B 09		         lda ab
+   145 0900 AE 4C 09		         ldx xb
+   146 0903 AC 4D 09		         ldy yb
+   147 0906 28			         plp
+   148
+   149 0907 6B			cmd      .byte $6b
+   150 0908 00			         .byte 0
+   151
+   152 0909 08			         php
+   153 090A D8			         cld
+   154 090B 8D 51 09		         sta aa
+   155 090E 8E 52 09		         stx xa
+   156 0911 8C 53 09		         sty ya
+   157 0914 68			         pla
+   158 0915 8D 54 09		         sta pa
+   159 0918 BA			         tsx
+   160 0919 8E 55 09		         stx sa
+   161 091C 20 5C 09		         jsr check
+   162
+   163 091F 18			         clc
+   164 0920 AD 4A 09		         lda db
+   165 0923 69 11		         adc #17
+   166 0925 8D 4A 09		         sta db
+   167 0928 90 1A		         bcc jmpnext
+   168 092A A9 00		         lda #0
+   169 092C 8D 4A 09		         sta db
+   170 092F 18			         clc
+   171 0930 AD 4B 09		         lda ab
+   172 0933 69 11		         adc #17
+   173 0935 8D 4B 09		         sta ab
+   174 0938 90 0A		         bcc jmpnext
+   175 093A A9 00		         lda #0
+   176 093C 8D 4B 09		         sta ab
+   177 093F EE 4E 09		         inc pb
+   178 0942 F0 03		         beq nonext
+   179 0944 4C 26 08		jmpnext  jmp next
+   180 0947			nonext
+   181 0947 4C 47 09		success jmp *
+   182
+   183 094A 00			db       .byte 0
+   184 094B 00			ab       .byte 0
+   185 094C 00			xb       .byte 0
+   186 094D 00			yb       .byte 0
+   187 094E 00			pb       .byte 0
+   188 094F 00			sb       .byte 0
+   189 0950 00			da       .byte 0
+   190 0951 00			aa       .byte 0
+   191 0952 00			xa       .byte 0
+   192 0953 00			ya       .byte 0
+   193 0954 00			pa       .byte 0
+   194 0955 00			sa       .byte 0
+   195 0956 00			dr       .byte 0
+   196 0957 00			ar       .byte 0
+   197 0958 00			xr       .byte 0
+   198 0959 00			yr       .byte 0
+   199 095A 00			pr       .byte 0
+   200 095B 00			sr       .byte 0
+   201
+   202 095C			check
+   203 095C AD 50 09		         lda da
+   204 095F CD 56 09		         cmp dr
+   205 0962 D0 29		         bne error
+   206 0964 AD 51 09		         lda aa
+   207 0967 CD 57 09		         cmp ar
+   208 096A D0 21		         bne error
+   209 096C AD 52 09		         lda xa
+   210 096F CD 58 09		         cmp xr
+   211 0972 D0 19		         bne error
+   212 0974 AD 53 09		         lda ya
+   213 0977 CD 59 09		         cmp yr
+   214 097A D0 11		         bne error
+   215 097C AD 54 09		         lda pa
+   216 097F CD 5A 09		         cmp pr
+   217 0982 D0 09		         bne error
+   218 0984 AD 55 09		         lda sa
+   219 0987 CD 5B 09		         cmp sr
+   220 098A D0 01		         bne error
+   221 098C 60			         rts
+   222
+   223 098D 4C 8D 09		error    jmp *
+   224
+   225 				.ifndef ATARI
+   226 0990			    org $fffa
+   227 FFFA 00 00 01 08 00 00	    dta a(0),a(main),a(0)
+   228 				.endif
