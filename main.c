@@ -98,7 +98,6 @@ int main(void) {
     test("test/lorenz/dcp_dcmiy.bin", 0x08a6, false);
     test("test/lorenz/dcp_dcmz.bin", 0x088f, false);
     test("test/lorenz/dcp_dcmzx.bin", 0x0898, false);
-#endif
     test("test/lorenz/isc_insa.bin", 0x088c, false);
     test("test/lorenz/isc_insax.bin", 0x08a2, false);
     test("test/lorenz/isc_insay.bin", 0x08a2, false);
@@ -106,5 +105,7 @@ int main(void) {
     test("test/lorenz/isc_insiy.bin", 0x08a6, false);
     test("test/lorenz/isc_insz.bin", 0x088f, false);
     test("test/lorenz/isc_inszx.bin", 0x0898, false);
+#endif
+    test("test/lorenz/ancb.bin", 0x08d8, false);
     return 0;
 }
