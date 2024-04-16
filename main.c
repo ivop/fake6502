@@ -107,5 +107,6 @@ int main(void) {
     test("test/lorenz/isc_inszx.bin", 0x0898, false);
 #endif
     test("test/lorenz/ancb.bin", 0x08d8, false);
+    test("test/lorenz/alrb.bin", 0x08aa, false);
     return 0;
 }
