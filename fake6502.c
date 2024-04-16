@@ -318,11 +318,7 @@ static void sbc() {
 static void SLO() { asl(); ora(); }
 static void RLA() { rol(); and(); }
 static void SRE() { lsr(); eor(); }
-
-static void RRA() {
-    ror();
-    adc();
-}
+static void RRA() { ror(); adc(); }
 
 static void SAX() {
     putvalue(A & X);

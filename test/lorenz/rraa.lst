@@ -1,0 +1,131 @@
+mads 2.1.7
+Source: rraa.asm
+     1
+     2 				.ifndef ATARI
+     3 				    opt h-
+     4 				    opt f+
+     5 				    org 0
+     6 0000 00			    dta 0
+     7 0001 00 00 00 00 00 00 +     .align $0801,0
+     8 				.else
+     9 				    org $0801
+    10 				.endif
+    11
+    12 0801			main
+    13 0801 A9 1B		         lda #%00011011
+    14 0803 8D 8A 08		         sta db
+    15 0806 A9 C6		         lda #%11000110
+    16 0808 8D 8B 08		         sta ab
+    17 080B A9 B1		         lda #%10110001
+    18 080D 8D 8C 08		         sta xb
+    19 0810 A9 6C		         lda #%01101100
+    20 0812 8D 8D 08		         sta yb
+    21 0815 A9 00		         lda #0
+    22 0817 8D 8E 08		         sta pb
+    23 081A BA			         tsx
+    24 081B 8E 8F 08		         stx sb
+    25
+    26 081E A9 00		         lda #0
+    27 0820 8D 8A 08		         sta db
+    28
+    29 0823 AD 8E 08		next     lda pb
+    30 0826 48			         pha
+    31 0827 28			         plp
+    32 0828 AD 8A 08		         lda db
+    33 082B 8D 90 08		         sta da
+    34 082E 6A			         ror
+    35 082F 8D 96 08		         sta dr
+    36
+    37 0832 6D 8B 08		         adc ab
+    38 0835 8D 97 08		         sta ar
+    39
+    40 0838 08			         php
+    41 0839 68			         pla
+    42 083A 8D 9A 08		         sta pr
+    43
+    44 083D AD 8C 08		         lda xb
+    45 0840 8D 98 08		         sta xr
+    46
+    47 0843 AD 8D 08		         lda yb
+    48 0846 8D 99 08		         sta yr
+    49
+    50 0849 AD 8F 08		         lda sb
+    51 084C 8D 9B 08		         sta sr
+    52
+    53 084F AE 8F 08		         ldx sb
+    54 0852 9A			         txs
+    55 0853 AD 8E 08		         lda pb
+    56 0856 48			         pha
+    57 0857 AD 8B 08		         lda ab
+    58 085A AE 8C 08		         ldx xb
+    59 085D AC 8D 08		         ldy yb
+    60 0860 28			         plp
+    61
+    62 0861 6F			cmd      .byte $6f
+    63 0862 90 08		         .word da
+    64
+    65 0864 08			         php
+    66 0865 D8			         cld
+    67 0866 8D 91 08		         sta aa
+    68 0869 8E 92 08		         stx xa
+    69 086C 8C 93 08		         sty ya
+    70 086F 68			         pla
+    71 0870 8D 94 08		         sta pa
+    72 0873 BA			         tsx
+    73 0874 8E 95 08		         stx sa
+    74 0877 20 9C 08		         jsr check
+    75
+    76 087A EE 8A 08		         inc db
+    77 087D D0 05		         bne jmpnext
+    78 087F EE 8E 08		         inc pb
+    79 0882 F0 03		         beq nonext
+    80 0884 4C 23 08		jmpnext  jmp next
+    81 0887			nonext
+    82 0887 4C 87 08		success jmp *
+    83
+    84 088A 00			db       .byte 0
+    85 088B 00			ab       .byte 0
+    86 088C 00			xb       .byte 0
+    87 088D 00			yb       .byte 0
+    88 088E 00			pb       .byte 0
+    89 088F 00			sb       .byte 0
+    90 0890 00			da       .byte 0
+    91 0891 00			aa       .byte 0
+    92 0892 00			xa       .byte 0
+    93 0893 00			ya       .byte 0
+    94 0894 00			pa       .byte 0
+    95 0895 00			sa       .byte 0
+    96 0896 00			dr       .byte 0
+    97 0897 00			ar       .byte 0
+    98 0898 00			xr       .byte 0
+    99 0899 00			yr       .byte 0
+   100 089A 00			pr       .byte 0
+   101 089B 00			sr       .byte 0
+   102
+   103 089C			check
+   104 089C AD 90 08		         lda da
+   105 089F CD 96 08		         cmp dr
+   106 08A2 D0 29		         bne error
+   107 08A4 AD 91 08		         lda aa
+   108 08A7 CD 97 08		         cmp ar
+   109 08AA D0 21		         bne error
+   110 08AC AD 92 08		         lda xa
+   111 08AF CD 98 08		         cmp xr
+   112 08B2 D0 19		         bne error
+   113 08B4 AD 93 08		         lda ya
+   114 08B7 CD 99 08		         cmp yr
+   115 08BA D0 11		         bne error
+   116 08BC AD 94 08		         lda pa
+   117 08BF CD 9A 08		         cmp pr
+   118 08C2 D0 09		         bne error
+   119 08C4 AD 95 08		         lda sa
+   120 08C7 CD 9B 08		         cmp sr
+   121 08CA D0 01		         bne error
+   122 08CC 60			         rts
+   123
+   124 08CD 4C CD 08		error    jmp *
+   125
+   126 				.ifndef ATARI
+   127 08D0			    org $fffa
+   128 FFFA 00 00 01 08 00 00	    dta a(0),a(main),a(0)
+   129 				.endif

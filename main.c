@@ -73,6 +73,13 @@ int main(void) {
     test("test/lorenz/sre_lseiy.bin", 0x08c2, false);
     test("test/lorenz/sre_lsez.bin", 0x08ab, false);
     test("test/lorenz/sre_lsezx.bin", 0x08b4, false);
+    test("test/lorenz/rraa.bin", 0x0887, false);
+    test("test/lorenz/rraax.bin", 0x089d, false);
+    test("test/lorenz/rraay.bin", 0x089d, false);
+    test("test/lorenz/rraix.bin", 0x0897, false);
+    test("test/lorenz/rraiy.bin", 0x08a1, false);
+    test("test/lorenz/rraz.bin", 0x088a, false);
+    test("test/lorenz/rrazx.bin", 0x0893, false);
 #endif
     return 0;
 }
