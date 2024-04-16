@@ -22,18 +22,14 @@ static void (*loopexternal)();
 #define FLAG_CONSTANT  0x20
 #define BASE_STACK     0x100
 
-#define makeP ((N<<7)|(V<<6)|(1<<5)|(B<<4)|(D<<3)|(I<<2)|(Z<<1)|C)
-#define splitP(x) \
-    N=(x)&0x80, V=(x)&0x40, B=(x)&0x10, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1
-
 uint16_t PC;
 uint8_t SP, A, X, Y;
 bool C, Z, I, D, B, V, N;
 uint64_t instructions, clockticks6502, clockgoal6502;
 static uint16_t ea;
-static uint8_t opcode, oldstatus;
+static uint8_t opcode;
 
-// ----------------------------------------------------------------------------
+// ------------------ Flags ---------------------------------------------------
 
 static inline void calcZ  (uint8_t  x) { Z = !x; }
 static inline void calcN  (uint8_t  x) { N = x & 0x80; }
@@ -45,7 +41,11 @@ static inline void calcV(uint16_t result, uint8_t accu, uint16_t value) {
     V = (result ^ accu) & (result ^ value) & 0x80;
 }
 
-uint8_t getP(void) { return makeP; }
+static void splitP(uint8_t x) {
+    N=(x)&0x80, V=(x)&0x40, B=(x)&0x10, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1;
+}
+
+uint8_t getP(void){ return (N<<7)|(V<<6)|(1<<5)|(B<<4)|(D<<3)|(I<<2)|(Z<<1)|C;}
 
 // ----------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ static uint16_t read6502word(uint16_t addr) {
     return read6502(addr) | (read6502(addr+1) << 8);
 }
 
-// ----------------------------------------------------------------------------
+// ------------------ Addressing modes ----------------------------------------
 
 static void imp()  { }
 static void acc()  { }
@@ -130,7 +130,7 @@ static inline void putvalue(uint16_t saveval) {
     if (addrtable[opcode] == acc) A = saveval; else write6502(ea, saveval);
 }
 
-// ----------------------------------------------------------------------------
+// ------------------ Opcodes -------------------------------------------------
 
 static void and() { penaltyop = 1; calcZN(A = A & getvalue()); }
 static void eor() { penaltyop = 1; A = A ^ getvalue(); calcZN(A); }
@@ -187,7 +187,7 @@ static void cpx() { compare(X, getvalue()); }
 static void cpy() { compare(Y, getvalue()); }
 
 static void pha() { push8(A); }
-static void php() { push8(makeP | FLAG_BREAK); }
+static void php() { push8(getP() | FLAG_BREAK); }
 static void pla() { A = pull8(); calcZN(A); }
 static void plp() { uint8_t P = pull8(); splitP(P); }
 
@@ -210,7 +210,7 @@ static void bit() {
 
 static void brk() {
     push16(++PC);                 // address before next instruction
-    push8(makeP | FLAG_BREAK);
+    push8(getP() | FLAG_BREAK);
     I = 1;
     PC = read6502word(0xfffe);
 }
@@ -425,7 +425,7 @@ static const uint32_t ticktable[256] = {
 
 void nmi6502() {
     push16(PC);
-    push8(makeP);
+    push8(getP());
     I = 1;
     PC = read6502word(0xfffa);
     clockticks6502 += 7;
@@ -440,7 +440,7 @@ void reset6502() {
 
 void irq6502() {
     push16(PC);
-    push8(makeP);
+    push8(getP());
     I = 1;
     PC = read6502word(0xfffe);
     clockticks6502 += 7;
