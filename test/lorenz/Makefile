@@ -1,5 +1,5 @@
 
-all: slo rla
+all: slo rla sre
 
 slo:
 	mads -l -o:slo_asoa.bin slo_asoa.asm
@@ -32,6 +32,22 @@ rla:
 	mads -d:ATARI=1 -o:rlaz.xex rlaz.asm
 	mads -l -o:rlazx.bin rlazx.asm
 	mads -d:ATARI=1 -o:rlazx.xex rlazx.asm
+
+sre:
+	mads -l -o:sre_lsea.bin sre_lsea.asm
+	mads -d:ATARI=1 -o:sre_lsea.xex sre_lsea.asm
+	mads -l -o:sre_lseax.bin sre_lseax.asm
+	mads -d:ATARI=1 -o:sre_lseax.xex sre_lseax.asm
+	mads -l -o:sre_lseay.bin sre_lseay.asm
+	mads -d:ATARI=1 -o:sre_lseay.xex sre_lseay.asm
+	mads -l -o:sre_lseix.bin sre_lseix.asm
+	mads -d:ATARI=1 -o:sre_lseix.xex sre_lseix.asm
+	mads -l -o:sre_lseiy.bin sre_lseiy.asm
+	mads -d:ATARI=1 -o:sre_lseiy.xex sre_lseiy.asm
+	mads -l -o:sre_lsez.bin sre_lsez.asm
+	mads -d:ATARI=1 -o:sre_lsez.xex sre_lsez.asm
+	mads -l -o:sre_lsezx.bin sre_lsezx.asm
+	mads -d:ATARI=1 -o:sre_lsezx.xex sre_lsezx.asm
 
 clean:
 	rm -f *~ *.bin *.xex *.lst

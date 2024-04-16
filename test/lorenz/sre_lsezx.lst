@@ -1,0 +1,154 @@
+mads 2.1.7
+Source: sre_lsezx.asm
+     1
+     2 				.ifndef ATARI
+     3 				    opt h-
+     4 				    opt f+
+     5 				    org 0
+     6 0000 00			    dta 0
+     7 0001 00 00 00 00 00 00 +     .align $0801,0
+     8 				.else
+     9 				    org $0801
+    10 				.endif
+    11
+    12 0801			main
+    13 0801 A9 1B		         lda #%00011011
+    14 0803 8D B7 08		         sta db
+    15 0806 A9 C6		         lda #%11000110
+    16 0808 8D B8 08		         sta ab
+    17 080B A9 B1		         lda #%10110001
+    18 080D 8D B9 08		         sta xb
+    19 0810 A9 6C		         lda #%01101100
+    20 0812 8D BA 08		         sta yb
+    21 0815 A9 00		         lda #0
+    22 0817 8D BB 08		         sta pb
+    23 081A BA			         tsx
+    24 081B 8E BC 08		         stx sb
+    25
+    26 081E A9 00		         lda #0
+    27 0820 8D B7 08		         sta db
+    28 0823 8D B9 08		         sta xb
+    29
+    30 0826 AD B7 08		next     lda db
+    31 0829 85 AC		         sta 172
+    32 082B 4A			         lsr
+    33 082C 8D C3 08		         sta dr
+    34
+    35 082F 4D B8 08		         eor ab
+    36 0832 8D C4 08		         sta ar
+    37
+    38 0835 AD B9 08		         lda xb
+    39 0838 8D C5 08		         sta xr
+    40
+    41 083B AD BA 08		         lda yb
+    42 083E 8D C6 08		         sta yr
+    43
+    44 0841 AD BB 08		         lda pb
+    45 0844 09 30		         ora #%00110000
+    46 0846 29 7C		         and #%01111100
+    47 0848 AA			         tax
+    48 0849 AD C4 08		         lda ar
+    49 084C C9 00		         cmp #0
+    50 084E D0 07		         bne nozero
+    51 0850 8A			         txa
+    52 0851 09 02		         ora #%00000010
+    53 0853 AA			         tax
+    54 0854 AD C4 08		         lda ar
+    55 0857 0A			nozero   asl
+    56 0858 90 04		         bcc noneg
+    57 085A 8A			         txa
+    58 085B 09 80		         ora #%10000000
+    59 085D AA			         tax
+    60 085E AD B7 08		noneg    lda db
+    61 0861 29 01		         and #1
+    62 0863 F0 04		         beq nocarry
+    63 0865 8A			         txa
+    64 0866 09 01		         ora #%00000001
+    65 0868 AA			         tax
+    66 0869 8E C7 08		nocarry  stx pr
+    67
+    68 086C AD BC 08		         lda sb
+    69 086F 8D C8 08		         sta sr
+    70
+    71 0872 AE BC 08		         ldx sb
+    72 0875 9A			         txs
+    73 0876 AD BB 08		         lda pb
+    74 0879 48			         pha
+    75 087A AD B8 08		         lda ab
+    76 087D AE B9 08		         ldx xb
+    77 0880 AC BA 08		         ldy yb
+    78 0883 28			         plp
+    79
+    80 0884 57			cmd      .byte $57
+    81 0885 AC			         .byte 172
+    82
+    83 0886 08			         php
+    84 0887 D8			         cld
+    85 0888 8D BE 08		         sta aa
+    86 088B 8E BF 08		         stx xa
+    87 088E 8C C0 08		         sty ya
+    88 0891 68			         pla
+    89 0892 8D C1 08		         sta pa
+    90 0895 BA			         tsx
+    91 0896 8E C2 08		         stx sa
+    92 0899 A5 AC		         lda 172
+    93 089B 8D BD 08		         sta da
+    94 089E 20 C9 08		         jsr check
+    95
+    96 08A1 EE B9 08		         inc xb
+    97 08A4 CE 85 08		         dec cmd+1
+    98
+    99 08A7 EE B7 08		         inc db
+   100 08AA D0 05		         bne jmpnext
+   101 08AC EE BB 08		         inc pb
+   102 08AF F0 03		         beq nonext
+   103 08B1 4C 26 08		jmpnext  jmp next
+   104 08B4			nonext
+   105 08B4 4C B4 08		success jmp *
+   106
+   107 08B7 00			db       .byte 0
+   108 08B8 00			ab       .byte 0
+   109 08B9 00			xb       .byte 0
+   110 08BA 00			yb       .byte 0
+   111 08BB 00			pb       .byte 0
+   112 08BC 00			sb       .byte 0
+   113 08BD 00			da       .byte 0
+   114 08BE 00			aa       .byte 0
+   115 08BF 00			xa       .byte 0
+   116 08C0 00			ya       .byte 0
+   117 08C1 00			pa       .byte 0
+   118 08C2 00			sa       .byte 0
+   119 08C3 00			dr       .byte 0
+   120 08C4 00			ar       .byte 0
+   121 08C5 00			xr       .byte 0
+   122 08C6 00			yr       .byte 0
+   123 08C7 00			pr       .byte 0
+   124 08C8 00			sr       .byte 0
+   125
+   126 08C9			check
+   127 08C9 AD BD 08		         lda da
+   128 08CC CD C3 08		         cmp dr
+   129 08CF D0 29		         bne error
+   130 08D1 AD BE 08		         lda aa
+   131 08D4 CD C4 08		         cmp ar
+   132 08D7 D0 21		         bne error
+   133 08D9 AD BF 08		         lda xa
+   134 08DC CD C5 08		         cmp xr
+   135 08DF D0 19		         bne error
+   136 08E1 AD C0 08		         lda ya
+   137 08E4 CD C6 08		         cmp yr
+   138 08E7 D0 11		         bne error
+   139 08E9 AD C1 08		         lda pa
+   140 08EC CD C7 08		         cmp pr
+   141 08EF D0 09		         bne error
+   142 08F1 AD C2 08		         lda sa
+   143 08F4 CD C8 08		         cmp sr
+   144 08F7 D0 01		         bne error
+   145 08F9 60			         rts
+   146
+   147 08FA 4C FA 08		error    jmp *
+   148
+   149 				.ifndef ATARI
+   150 08FD			    org $fffa
+   151 FFFA 00 00 01 08 00 00	    dta a(0),a(main),a(0)
+   152 				.endif

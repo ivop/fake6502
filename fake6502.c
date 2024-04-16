@@ -316,16 +316,8 @@ static void sbc() {
 // ------------------ Undocumented opcodes ------------------------------------
 
 static void SLO() { asl(); ora(); }
-
-static void RLA() {
-    rol();
-    and();
-}
-
-static void SRE() {
-    lsr();
-    eor();
-}
+static void RLA() { rol(); and(); }
+static void SRE() { lsr(); eor(); }
 
 static void RRA() {
     ror();

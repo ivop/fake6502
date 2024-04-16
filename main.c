@@ -45,6 +45,7 @@ void test(const char *filename, uint16_t success, bool trace) {
 }
 
 int main(void) {
+#if 1
     test("test/6502_functional_test.bin", 0x3469, false);
     test("test/6502_decimal_test.bin", 0x044b, false);
     test("test/bird6502.bin", 0x861c, false);
@@ -65,5 +66,13 @@ int main(void) {
     test("test/lorenz/rlaiy.bin", 0x08c4, false);
     test("test/lorenz/rlaz.bin", 0x08ad, false);
     test("test/lorenz/rlazx.bin", 0x08b6, false);
+    test("test/lorenz/sre_lsea.bin", 0x08a8, false);
+    test("test/lorenz/sre_lseax.bin", 0x08be, false);
+    test("test/lorenz/sre_lseay.bin", 0x08be, false);
+    test("test/lorenz/sre_lseix.bin", 0x08b8, false);
+    test("test/lorenz/sre_lseiy.bin", 0x08c2, false);
+    test("test/lorenz/sre_lsez.bin", 0x08ab, false);
+    test("test/lorenz/sre_lsezx.bin", 0x08b4, false);
+#endif
     return 0;
 }
