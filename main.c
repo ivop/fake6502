@@ -110,5 +110,6 @@ int main(void) {
     test("test/lorenz/arrb.bin", 0x0947, false);
 #endif
     test("test/lorenz/sbxb.bin", 0x08c3, false);
+    test("test/lorenz/lasay.bin", 0x08f1, false);
     return 0;
 }

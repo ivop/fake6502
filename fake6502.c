@@ -313,7 +313,7 @@ static void sbc() {
     A = result;
 }
 
-// ------------------ Undocumented opcodes ------------------------------------
+// ------------------ Stable undocumented opcodes -----------------------------
 
 static void SLO() { asl(); ora(); }
 static void RLA() { rol(); and(); }
@@ -358,14 +358,24 @@ static void SBX() {
     X -= value;
 }
 
+static void LAS() {
+    penaltyop = 1;
+    calcZN(SP = A = X = getvalue() & SP);
+}
+
+static void JAM() { nop(); }
+
+// ------------------ Unstable undocumented opcodes ---------------------------
+
 static void SHA() { }
-static void SHY() { }
 static void SHX() { }
+static void SHY() { }
 static void TAS() { }
-static void LAS() { }
+
+// ------------------ Magic constants undocumented opcodes --------------------
+
 static void LXA() { }
 static void ANE() { }
-static void JAM() { nop(); }
 
 // ----------------------------------------------------------------------------
 

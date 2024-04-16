@@ -1,5 +1,7 @@
 
-all: slo rla sre rra sax lax dcp isc anc alr arr sbx
+# Note: no dependencies, just assemble everything
+
+all: slo rla sre rra sax lax dcp isc anc alr arr sbx las
 
 slo:
 	mads -l -o:slo_asoa.bin slo_asoa.asm
@@ -136,6 +138,10 @@ arr:
 sbx:
 	mads -l -o:sbxb.bin sbxb.asm
 	mads -d:ATARI=1 -o:sbxb.xex sbxb.asm
+
+las:
+	mads -l -o:lasay.bin lasay.asm
+	mads -d:ATARI=1 -o:lasay.xex lasay.asm
 
 clean:
 	rm -f *~ *.bin *.xex *.lst
