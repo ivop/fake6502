@@ -111,5 +111,9 @@ int main(void) {
 #endif
     test("test/lorenz/sbxb.bin", 0x08c3, false);
     test("test/lorenz/lasay.bin", 0x08f1, false);
+    test("test/lorenz/shaay.bin", 0x08d6, false);
+    test("test/lorenz/shaiy.bin", 0x08d9, false);
+    test("test/lorenz/shxay.bin", 0x08b5, false);
+    test("test/lorenz/shyax.bin", 0x08b5, false);
     return 0;
 }

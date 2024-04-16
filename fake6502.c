@@ -367,9 +367,9 @@ static void JAM() { nop(); }
 
 // ------------------ Unstable undocumented opcodes ---------------------------
 
-static void SHA() { }
-static void SHX() { }
-static void SHY() { }
+static void SHA() { putvalue(A & X & ((ea >> 8) + 1)); }
+static void SHX() { putvalue(X & ((ea >> 8) + 1)); }
+static void SHY() { putvalue(Y & ((ea >> 8) + 1)); }
 static void TAS() { }
 
 // ------------------ Magic constants undocumented opcodes --------------------
