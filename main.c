@@ -47,12 +47,14 @@ void test(const char *filename, uint16_t success, bool trace) {
 
 int main(void) {
 #if 1
+    printf("Klaus Dormann test suite.\n");
     test("test/6502_functional_test.bin", 0x3469, false);
     test("test/6502_decimal_test.bin", 0x044b, false);
+    printf("\nBird Computer test suite.\n");
     test("test/bird6502.bin", 0x861c, false);
+    printf("\nRuud Baltissen test suite.\n");
     test("test/ttl6502.bin", 0xf5ea, false);
-    test("test/6502DecimalMode.bin", 0x8133, false);
-    test("test/cpu_decimal.bin", 0x302f, false);
+    printf("\nLorenz test suite for undocumented opcodes.\n");
     test("test/lorenz/slo_asoa.bin", 0x08b3, false);
     test("test/lorenz/slo_asoax.bin", 0x08ca, false);
     test("test/lorenz/slo_asoay.bin", 0x08ca, false);
@@ -115,6 +117,12 @@ int main(void) {
     test("test/lorenz/shxay.bin", 0x08b5, false);
     test("test/lorenz/shyax.bin", 0x08b5, false);
     test("test/lorenz/tas_shsay.bin", 0x08f5, false);
+    test("test/lorenz/aneb.bin", 0x08cb, false);
+    test("test/lorenz/lxab.bin", 0x08c2, false);
+    printf("\nVisual6502 test for adc/sbc in BCD\n");
+    test("test/6502DecimalMode.bin", 0x8133, false);
+    printf("\nPiotr Fusik tests.\n");
+    test("test/cpu_decimal.bin", 0x302f, false);
 #endif
     return 0;
 }

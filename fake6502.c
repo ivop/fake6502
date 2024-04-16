@@ -325,6 +325,9 @@ static void DCP() { dec(); cmp(); }
 static void ISC() { inc(); sbc(); }
 static void ANC() { and(); C = A & 0x80; }
 static void ALR() { and(); C = A & 1; A >>= 1; calcZN(A); }
+static void LAS() { penaltyop = 1; calcZN(SP = A = X = getvalue() & SP); }
+static void JAM() { nop(); }
+
 
 static void ARR() {
     and();
@@ -358,27 +361,18 @@ static void SBX() {
     X -= value;
 }
 
-static void LAS() {
-    penaltyop = 1;
-    calcZN(SP = A = X = getvalue() & SP);
-}
-
-static void JAM() { nop(); }
-
 // ------------------ Unstable undocumented opcodes ---------------------------
 
 static void SHA() { putvalue(A & X & ((ea >> 8) + 1)); }
 static void SHX() { putvalue(X & ((ea >> 8) + 1)); }
 static void SHY() { putvalue(Y & ((ea >> 8) + 1)); }
-static void TAS() {
-    SP = A & X;
-    putvalue(SP & ((ea >> 8) + 1));
+static void TAS() { SP = A & X; putvalue(SP & ((ea >> 8) + 1));
 }
 
 // ------------------ Magic constants undocumented opcodes --------------------
 
-static void LXA() { }
-static void ANE() { }
+static void ANE() { A = (A | 0xef) & X & getvalue(); calcZN(A); }
+static void LXA() { A = X = ( A | 0xee) & getvalue(); calcZN(A); }
 
 // ----------------------------------------------------------------------------
 
