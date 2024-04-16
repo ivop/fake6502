@@ -36,8 +36,8 @@ void test(const char *filename, uint16_t success, bool trace) {
             printf("A=%02x X=%02x Y=%02x SP=%02x P=%02x\n", A, X, Y, SP, getP());
         }
         if (save == PC) {
-            printf("%s --- ", PC != success ? "\x1b[1;31mFAIL!\x1b[0m" :
-                                              "\x1b[1;32mpass\x1b[0m");
+            printf("%s -- ", PC != success ? "\x1b[1;31mFAIL!\x1b[0m" :
+                                             "\x1b[1;32mpass\x1b[0m");
             printf("PC=%04x ", PC);
             printf("A=%02x X=%02x Y=%02x SP=%02x P=%02x\n", A, X, Y, SP, getP());
             return;
@@ -119,7 +119,7 @@ int main(void) {
     test("test/lorenz/tas_shsay.bin", 0x08f5, false);
     test("test/lorenz/aneb.bin", 0x08cb, false);
     test("test/lorenz/lxab.bin", 0x08c2, false);
-    printf("\nVisual6502 test for adc/sbc in BCD\n");
+    printf("\nVisual6502 test for adc/sbc in decimal mode.\n");
     test("test/6502DecimalMode.bin", 0x8133, false);
     printf("\nPiotr Fusik tests.\n");
     test("test/cpu_decimal.bin", 0x302f, false);
