@@ -80,6 +80,10 @@ int main(void) {
     test("test/lorenz/rraiy.bin", 0x08a1, false);
     test("test/lorenz/rraz.bin", 0x088a, false);
     test("test/lorenz/rrazx.bin", 0x0893, false);
+    test("test/lorenz/sax_axsa.bin", 0x088d, false);
+    test("test/lorenz/sax_axsix.bin", 0x0897, false);
+    test("test/lorenz/sax_axsz.bin", 0x0890, false);
+    test("test/lorenz/sax_axszy.bin", 0x0899, false);
 #endif
     return 0;
 }
