@@ -46,7 +46,7 @@ void test(const char *filename, uint16_t success, bool trace) {
 }
 
 int main(void) {
-#if 1
+#if 0
     test("test/6502_functional_test.bin", 0x3469, false);
     test("test/6502_decimal_test.bin", 0x044b, false);
     test("test/bird6502.bin", 0x861c, false);
@@ -109,5 +109,6 @@ int main(void) {
     test("test/lorenz/alrb.bin", 0x08aa, false);
     test("test/lorenz/arrb.bin", 0x0947, false);
 #endif
+    test("test/lorenz/sbxb.bin", 0x08c3, false);
     return 0;
 }

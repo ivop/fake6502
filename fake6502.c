@@ -351,7 +351,13 @@ static void ARR() {
     }
 }
 
-static void SBX() { }
+static void SBX() {
+    uint8_t value = getvalue();
+    X &= A;
+    compare(X, value);
+    X -= value;
+}
+
 static void SHA() { }
 static void SHY() { }
 static void SHX() { }
