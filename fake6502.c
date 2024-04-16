@@ -320,11 +320,7 @@ static void RLA() { rol(); and(); }
 static void SRE() { lsr(); eor(); }
 static void RRA() { ror(); adc(); }
 static void SAX() { putvalue(A & X); }
-static void LAX() {
-    lda();
-    ldx();
-    if (penaltyop && penaltyaddr) clockticks6502++;
-}
+static void LAX() { penaltyop = 1; lda(); ldx(); }
 
 static void DCP() {
     dec();
