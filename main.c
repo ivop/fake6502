@@ -26,6 +26,7 @@ void test(const char *filename, uint16_t success, bool trace) {
         return;
     }
     fflush(stdout);
+    instructions = 0;
     reset6502();
     while (1) {
         uint16_t save = PC;
@@ -43,30 +44,26 @@ void test(const char *filename, uint16_t success, bool trace) {
     }
 }
 
-void main(void) {
+int main(void) {
     test("test/6502_functional_test.bin", 0x3469, false);
-    instructions = 0;
     test("test/6502_decimal_test.bin", 0x044b, false);
-    instructions = 0;
     test("test/bird6502.bin", 0x861c, false);
-    instructions = 0;
     test("test/ttl6502.bin", 0xf5ea, false);
-    instructions = 0;
     test("test/6502DecimalMode.bin", 0x8133, false);
-    instructions = 0;
     test("test/cpu_decimal.bin", 0x302f, false);
-    instructions = 0;
     test("test/lorenz/slo_asoa.bin", 0x08b3, false);
-    instructions = 0;
     test("test/lorenz/slo_asoax.bin", 0x08ca, false);
-    instructions = 0;
     test("test/lorenz/slo_asoay.bin", 0x08ca, false);
-    instructions = 0;
     test("test/lorenz/slo_asoix.bin", 0x08c4, false);
-    instructions = 0;
     test("test/lorenz/slo_asoiy.bin", 0x08ce, false);
-    instructions = 0;
     test("test/lorenz/slo_asoz.bin", 0x08b6, false);
-    instructions = 0;
     test("test/lorenz/slo_asozx.bin", 0x08c0, false);
+    test("test/lorenz/rlaa.bin", 0x08aa, false);
+    test("test/lorenz/rlaax.bin", 0x08c0, false);
+    test("test/lorenz/rlaay.bin", 0x08c0, false);
+    test("test/lorenz/rlaix.bin", 0x08ba, false);
+    test("test/lorenz/rlaiy.bin", 0x08c4, false);
+    test("test/lorenz/rlaz.bin", 0x08ad, false);
+    test("test/lorenz/rlazx.bin", 0x08b6, false);
+    return 0;
 }
