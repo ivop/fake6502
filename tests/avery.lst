@@ -1,0 +1,124 @@
+mads 2.1.7
+Source: avery.s
+     1 				; Altirra Acid800 test suite
+     2 				; Copyright (C) 2010 Avery Lee, All Rights Reserved.
+     3 				;
+     4 				; Permission is hereby granted, free of charge, to any person obtaining a copy
+     5 				; of this software and associated documentation files (the "Software"), to deal
+     6 				; in the Software without restriction, including without limitation the rights
+     7 				; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+     8 				; copies of the Software, and to permit persons to whom the Software is
+     9 				; furnished to do so, subject to the following conditions:
+    10 				;
+    11 				; The above copyright notice and this permission notice shall be included in
+    12 				; all copies or substantial portions of the Software.
+    13 				;
+    14 				; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    15 				; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    16 				; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    17 				; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    18 				; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    19 				; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    20 				; SOFTWARE. 
+    21
+    22 				.ifndef ATARI
+    23 				    opt h-
+    24 				    opt f+
+    25 				    org 0
+    26 0000 00			    dta 0
+    27 				.endif
+    28
+    29 = 00E0			d0 = $e0
+    30 = 00E1			d1 = $e1
+    31
+    32 0001			    org     $2000
+    33
+    34 2000			main:
+    35
+    36 				    ; ========== FLAGS ==========
+    37
+    38 				    ;push flags and check unused bit 5
+    39 2000 08			    php
+    40 2001 68			    pla
+    41 2002 AA			    tax
+    42 2003 29 20		    and     #$20
+    43 2005 D0 1F		    bne     bit5_ok
+    44 2007 4C 07 20		    jmp *
+    45 200A 55 6E 75 73 65 64 +     dta     c"Unused P bit 5 was not set.",0
+    46 2026			bit5_ok:
+    47
+    48 				    ;check bit 4 (break bit)
+    49 2026 8A			    txa
+    50 2027 29 10		    and     #$10
+    51 2029 D0 24		    bne     bit4_ok
+    52 202B 4C 2B 20		    jmp *
+    53 202E 42 72 65 61 6B 20 +     dta     c"Break bit (P bit 4) was not set.",0
+    54 204F			bit4_ok:
+    55
+    56 				    ;see if we can clear those bits
+    57 204F 8A			    txa
+    58 2050 29 BF		    and     #$bf
+    59 2052 48			    pha
+    60 2053 28			    plp
+    61 2054 08			    php
+    62 2055 68			    pla
+    63 2056 AA			    tax
+    64 				    
+    65 				    ;recheck bit 5
+    66 2057 29 20		    and     #$20
+    67 2059 D0 1E		    bne     bit5_still_ok
+    68 205B 4C 5B 20		    jmp *
+    69 205E 57 61 73 20 61 62 +     dta     c"Was able to clear P bit 5.",0
+    70 2079			bit5_still_ok:
+    71 				    ;recheck bit 4
+    72 2079 8A			    txa
+    73 207A 29 10		    and     #$10
+    74 207C D0 2A		    bne     bit4_still_ok
+    75 207E 4C 7E 20		    jmp *
+    76 2081 57 61 73 20 61 62 +     dta     c"Was able to clear break bit (P bit 4).",0
+    77 20A8			bit4_still_ok:
+    78
+    79 				    ; ========== BCD ==========
+    80
+    81 20A8 F8			    sed
+    82 20A9 18			    clc
+    83 20AA A9 06		    lda     #$06
+    84 20AC 69 19		    adc     #$19
+    85 20AE 85 E0		    sta     d0
+    86 20B0 08			    php
+    87 20B1 68			    pla
+    88 20B2 29 C3		    and     #$c3
+    89 20B4 85 E1		    sta     d1
+    90
+    91 20B6 A5 E0		    lda d0
+    92 20B8 C9 25		    cmp #$25
+    93 20BA D0 FE		    bne *       ; error
+    94 20BC A5 E1		    lda d1
+    95 20BE C9 00		    cmp #$00
+    96 20C0 D0 FE		    bne *       ; error
+    97
+    98 20C2 38			    sec
+    99 20C3 A9 7E		    lda     #$7e
+   100 20C5 69 11		    adc     #$11
+   101 20C7 85 E0		    sta     d0
+   102 20C9 08			    php
+   103 20CA 68			    pla
+   104 20CB 29 C3		    and     #$c3
+   105 20CD 85 E1		    sta     d1
+   106
+   107 20CF A5 E0		    lda d0
+   108 20D1 C9 96		    cmp #$96
+   109 20D3 D0 FE		    bne *
+   110 20D5 A5 E1		    lda d1
+   111 20D7 C9 C0		    cmp #$c0
+   112 20D9 D0 FE		    bne *
+   113
+   114 20DB			success
+   115 20DB 4C DB 20		    jmp *
+   116
+   117 				.ifndef ATARI
+   118 20DE			    org $fffa
+   119 FFFA 00 00 00 20 00 00	    dta a(0),a(main),a(0)
+   120 				.else
+   121 				    run main
+   122 				.endif
