@@ -24,7 +24,7 @@ static void (*loopexternal)();
 
 uint16_t PC;
 uint8_t SP, A, X, Y;
-bool C, Z, I, D, B, V, N;
+bool C, Z, I, D, V, N;
 uint64_t instructions, clockticks6502, clockgoal6502;
 static uint16_t ea;
 static uint8_t opcode;
@@ -42,10 +42,10 @@ static inline void calcV(uint16_t result, uint8_t accu, uint16_t value) {
 }
 
 static void splitP(uint8_t x) {
-    N=(x)&0x80, V=(x)&0x40, B=(x)&0x10, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1;
+    N=(x)&0x80, V=(x)&0x40, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1;
 }
 
-uint8_t getP(void){ return (N<<7)|(V<<6)|(1<<5)|(B<<4)|(D<<3)|(I<<2)|(Z<<1)|C;}
+uint8_t getP(void){ return (N<<7)|(V<<6)|(1<<5)|(0<<4)|(D<<3)|(I<<2)|(Z<<1)|C;}
 
 // ----------------------------------------------------------------------------
 
@@ -447,6 +447,7 @@ void nmi6502() {
 void reset6502() {
     PC = read6502word(0xfffc);
     A = X = Y = 0;
+    C = Z = I = D = V = N = 0;
     SP = 0xFD;
     clockticks6502 += 7;
 }

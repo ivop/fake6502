@@ -32,8 +32,10 @@ void test(const char *filename, uint16_t success, bool trace) {
         uint16_t save = PC;
         step6502();
         if (trace) {
-            printf("PC=%04x ", PC);
-            printf("A=%02x X=%02x Y=%02x SP=%02x P=%02x\n", A, X, Y, SP, getP());
+            printf("PC=%04X ", PC);
+            printf("SP=01%02X ", SP);
+            printf("A=%02X X=%02X Y=%02X ", A, X,  Y);
+            printf("P=%02X\n", getP());
         }
         if (save == PC) {
             printf("%s -- ", PC != success ? "\x1b[1;31mFAIL!\x1b[0m" :
@@ -124,6 +126,9 @@ int main(void) {
     printf("\nPiotr Fusik tests.\n");
     test("tests/cpu_decimal.bin", 0x302f, false);
     test("tests/cpu_las.bin", 0x304f, false);
+    printf("\nAvery Lee tests.\n");
+    test("tests/avery.bin", 0x20db, false);
+    test("tests/avery2.bin", 0x20fa, false);
 #endif
     return 0;
 }
