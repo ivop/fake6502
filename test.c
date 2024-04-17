@@ -26,7 +26,6 @@ void test(const char *filename, uint16_t success, bool trace) {
         return;
     }
     fflush(stdout);
-    instructions = 0;
     reset6502();
     while (1) {
         uint16_t save = PC;

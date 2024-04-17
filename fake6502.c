@@ -16,7 +16,7 @@
 static void (*addrtable[256])();
 static void (*optable[256])();
 static uint8_t penaltyop, penaltyaddr, callexternal;
-static void (*loopexternal)();
+static uint64_t clockticks6502;
 
 #define FLAG_BREAK     0x10
 #define FLAG_CONSTANT  0x20
@@ -25,7 +25,6 @@ static void (*loopexternal)();
 uint16_t PC;
 uint8_t SP, A, X, Y;
 bool C, Z, I, D, V, N;
-uint64_t instructions, clockticks6502, clockgoal6502;
 static uint16_t ea;
 static uint8_t opcode;
 
@@ -446,71 +445,40 @@ static const uint32_t ticktable[256] = {
     2, 5, 2, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7  // F
 };
 
-void nmi6502() {
+int nmi6502() {
     push16(PC);
     push8(getP());
     I = 1;
     PC = read6502word(0xfffa);
-    clockticks6502 += 7;
+    return 7;
 }
 
-void reset6502() {
+int reset6502() {
     PC = read6502word(0xfffc);
     A = X = Y = 0;
     C = Z = I = D = V = N = 0;
     SP = 0xFD;
-    clockticks6502 += 7;
+    return 7;
 }
 
-void irq6502() {
+int irq6502() {
     push16(PC);
     push8(getP());
     I = 1;
     PC = read6502word(0xfffe);
-    clockticks6502 += 7;
+    return 7;
 }
 
-void exec6502(uint32_t tickcount) {
-    clockgoal6502 += tickcount;
-
-    while (clockticks6502 < clockgoal6502) {
-        opcode = read6502(PC++);
-
-        penaltyop = 0;
-        penaltyaddr = 0;
-
-        (*addrtable[opcode])();
-        (*optable[opcode])();
-        clockticks6502 += ticktable[opcode];
-        if (penaltyop && penaltyaddr) clockticks6502++;
-
-        instructions++;
-
-        if (callexternal) (*loopexternal)();
-    }
-
-}
-
-void step6502() {
+int step6502() {
     opcode = read6502(PC++);
 
     penaltyop = 0;
     penaltyaddr = 0;
+    clockticks6502 = ticktable[opcode];
 
     (*addrtable[opcode])();
     (*optable[opcode])();
-    clockticks6502 += ticktable[opcode];
+
     if (penaltyop && penaltyaddr) clockticks6502++;
-    clockgoal6502 = clockticks6502;
-
-    instructions++;
-
-    if (callexternal) (*loopexternal)();
-}
-
-void hookexternal(void *funcptr) {
-    if (funcptr != (void *)NULL) {
-        loopexternal = funcptr;
-        callexternal = 1;
-    } else callexternal = 0;
+    return clockticks6502;
 }
