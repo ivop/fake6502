@@ -54,7 +54,12 @@ void test(const char *filename, uint16_t success, bool trace) {
 
 // expected cycles in program order, starting at timing:
 uint8_t exp_cycles[] = {
-    7,6,6,3,5,3,2,
+    7,6,6,3,5,3,2,2,4,6,                    // documented: 00-0f
+    2,2,2,3,4,2,5,2,6,4,6,2,4,5,2,4,5,7,    // documented: 10-1f
+    6,6,6,3,3,5,4,2,2,4,4,6,                // documented: 20-2f
+    2,2,2,3,4,2,5,2,6,4,6,2,4,5,4,5,7,      // documented: 30-3f
+    6,3,5,3,2,2,3,4,6,                      // documented: 40-4f
+    2,3,4,2,2,3,4,2,5,2,6,4,6,2,4,5,4,5,7,  // documented: 50-5f
     3
 };
 
@@ -70,12 +75,13 @@ void test_cycles(void) {
         if (PC == 0x3000) do_compare = true;
         int spent = step6502();
         if (do_compare) {
-            if (exp_cycles[idx++] != spent) {
-                printf("PC: %04X instr: $%02x spent: %d\n", save, instr, spent);
+            if (exp_cycles[idx] != spent) {
+                printf("PC: %04X instr: $%02x spent: %d expected: %d\n", save, instr, spent, exp_cycles[idx]);
                 goto errout;
             }
+            idx++;
         }
-        if (PC == 0x2008) break;
+        if (PC == 0x200a) break;
     }
     printf("%s\n", PASS);
     return;
@@ -84,7 +90,7 @@ errout:
 }
 
 int main(void) {
-#if 1
+#if 0
     printf("Klaus Dormann test suite.\n");
     test("tests/6502_functional_test.bin", 0x3469, false);
     test("tests/6502_decimal_test.bin", 0x044b, false);
@@ -169,7 +175,6 @@ int main(void) {
     printf("\nHCM6502 tests.\n");
     test("tests/AllSuiteA.bin", 0x45c0, false);
 #endif
-
     test_cycles();
     return 0;
 }

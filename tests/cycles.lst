@@ -16,52 +16,170 @@ Source: cycles.s
     14
     15 0080 12 34 56 78		    dta $12, $34, $56, $78
     16
-    17 0084			    org $2000
-    18
-    19 2000			main:
-    20
-    21 				    ; INIT
-    22
-    23 				.ifdef ATARI
-    24 				    sei
-    25 				    mva #0 $d20e
-    26 				    sta $d40e
-    27 				    mva #$fe $d301
-    28 				    mwa #nmi $fffa
-    29 				    mwa #irq $fffe
-    30 				.endif
-    31 2000 A2 00		    ldx #0      ; init to zero
-    32 2002 A0 00		    ldy #0
-    33
-    34 2004 4C 00 30		    jmp timing
-    35
-    36 2007			nmi:
-    37 2007			irq:
-    38 2007 40			    rti         ; $40 [6]
+    17 0084			    org $90
+    18 0090 F0 1F		    dta a($1ff0)
+    19
+    20 0092			    org $2000
+    21
+    22 2000			main:
+    23
+    24 				    ; INIT
+    25
+    26 				.ifdef ATARI
+    27 				    sei
+    28 				    mva #0 $d20e
+    29 				    sta $d40e
+    30 				    mva #$fe $d301
+    31 				    mwa #nmi $fffa
+    32 				    mwa #irq $fffe
+    33 				.endif
+    34 2000 A2 00		    ldx #0      ; init to zero
+    35 2002 A0 00		    ldy #0
+    36 2004 D8			    cld
+    37 2005 B8			    clv
+    38 2006 4C 00 30		    jmp timing
     39
-    40 2008			endless:
-    41 2008 4C 08 20		    jmp *       ;     [3]
-    42
-    43 200B			    org $3000
-    44
-    45 3000			timing:
-    46 3000 00 00		    dta 0,0     ; $00 [7] brk is a two byte instruction!
-    47 				                ; $40 [6] rti
-    48 3002 01 80		    ora ($80,x) ; $01 [6]
-    49 3004 05 80		    ora $80     ; $05 [3]
-    50 3006 06 80		    asl $80     ; $06 [5]
-    51 3008 08			    php         ; $08 [3]
-    52 3009 09 FF		    ora #$ff    ; $09 [2]
+    40 2009			nmi:
+    41 2009			irq:
+    42 2009 40			    rti         ; $40 [6]
+    43
+    44 200A			endless:
+    45 200A 4C 0A 20		    jmp *       ;     [3]
+    46
+    47 200D			subrout:
+    48 200D 60			    rts         ;     [6];
+    49 200E			    org $3000
+    50
+    51 3000			timing:
+    52 				                ; $00-$0f, documented opcodes --------------------------------
     53
-    54 300B 4C 08 20		    jmp endless ;     [3]
-    55
-    56 				.ifndef ATARI
-    57 300E			    org $fffa
-    58 FFFA 07 20 00 20 07 20	    dta a(nmi),a(main),a(irq)
-    59 				.else
-    60 				    run main
-    61 				.endif
-    62
-    63 				    .print "endless = ",endless
-    63 				endless = $2008
+    54 3000 00 00		    dta 0,0     ; $00 [7] brk is a two byte instruction!
+    55 				                ;     [6] rti
+    56 3002 01 80		    ora ($80,x) ; $01 [6]
+    57 3004 05 80		    ora $80     ; $05 [3]
+    58 3006 06 80		    asl $80     ; $06 [5]
+    59 3008 08			    php         ; $08 [3]
+    60 3009 09 FF		    ora #$ff    ; $09 [2] ...
+    61 300B 0A			    asl         ; $0a [2]
+    62 300C 0D 00 10		    ora $1000   ; $0d [4]
+    63 300F 0E 00 10		    asl $1000   ; $0e [6]
     64
+    65 				                ; $10-$1f, documented opcodes --------------------------------
+    66
+    67 3012 A2 FF		    ldx #-1     ;     [2] init for branch
+    68 3014 10 00		    bpl @+      ; $10 [2] not taken
+    69 				@:
+    70 3016 A2 00		    ldx #0      ;     [2]
+    71 3018 10 76		    bpl @+      ; $10 [3] taken
+    72 301A EA EA EA EA EA EA +     .align $3090,$ea
+    73 				@:
+    74 3090 10 6E		    bpl @+      ; $10 [4] taken, page cross
+    75 3092 EA EA EA EA EA EA +     .align $3100,$ea
+    76 				@:
+    77 3100 A0 00		    ldy #0      ;     [2]
+    78 3102 11 90		    ora ($90),y ; $11 [5]
+    79 3104 88			    dey         ;     [2]
+    80 3105 11 90		    ora ($90),y ; $11 [6]
+    81 3107 15 80		    ora $80,x   ; $15 [4]
+    82 3109 16 80		    asl $80,x   ; $16 [6]
+    83 310B 18			    clc         ; $18 [2]
+    84 310C 19 00 10		    ora $1000,y ; $19 [4]
+    85 310F 19 80 10		    ora $1080,y ; $19 [5]
+    86 3112 CA			    dex         ;     [2]
+    87 3113 1D 00 10		    ora $1000,x ; $1d [4]
+    88 3116 1D 80 10		    ora $1080,x ; $1d [5]
+    89 3119 1E 00 10		    asl $1000,x ; $1e [7]
+    90
+    91 				                ; $20-$2f, documented opcodes --------------------------------
+    92
+    93 311C 20 0D 20		    jsr subrout ; $20 [6]
+    94 				                ;     [6] rts
+    95 311F 21 80		    and ($80,x) ; $21 [6]
+    96 3121 24 80		    bit $80     ; $24 [3]
+    97 3123 25 80		    and $80     ; $25 [3]
+    98 3125 26 80		    rol $80     ; $26 [5]
+    99 3127 28			    plp         ; $28 [4]
+   100 3128 29 FF		    and #$ff    ; $29 [2]
+   101 312A 2A			    rol         ; $2a [2]
+   102 312B 2C 00 10		    bit $1000   ; $2c [4]
+   103 312E 2D 00 10		    and $1000   ; $2d [4]
+   104 3131 2E 00 10		    rol $1000   ; $2e [6]
+   105
+   106 				                ; $30-$3f, documented opcodes --------------------------------
+   107
+   108 3134 A2 00		    ldx #0      ;     [2]
+   109 3136 30 00		    bmi @+      ; $30 [2] not taken
+   110 				@:
+   111 3138 A2 FF		    ldx #-1     ;     [2]
+   112 313A 30 54		    bmi @+      ;     [3] taken
+   113 313C EA EA EA EA EA EA +     .align $3190,$ea
+   114 				@:
+   115 3190 30 6E		    bmi @+      ;     [4] taken, page cross
+   116 3192 EA EA EA EA EA EA +     .align $3200,$ea
+   117 				@:
+   118 3200 A0 00		    ldy #0      ;     [2]
+   119 3202 31 90		    and ($90),y ; $31 [5]
+   120 3204 88			    dey         ;     [2]
+   121 3205 31 90		    and ($90),y ;     [6]
+   122 3207 35 80		    and $80,x   ; $35 [4]
+   123 3209 36 80		    rol $80,x   ; $36 [6]
+   124 320B 38			    sec         ; $38 [2]
+   125 320C 39 00 10		    and $1000,y ; $39 [4]
+   126 320F 39 80 10		    and $1080,y ; $39 [5]
+   127 3212 3D 00 10		    and $1000,x ; $3a [4]
+   128 3215 3D 80 10		    and $1080,x ; $3d [5]
+   129 3218 3E 00 10		    rol $1000,x ; $3e [7]
+   130
+   131 				                ; $40-$4f, documented opcodes --------------------------------
+   132
+   133 				    ;rti        ; $40       skipped, already tested by brk
+   134 321B 41 80		    eor ($80,x) ; $41 [6]
+   135 321D 45 80		    eor $80     ; $45 [3]
+   136 321F 46 80		    lsr $80     ; $46 [5]
+   137 3221 48			    pha         ; $48 [3]
+   138 3222 49 FF		    eor #$ff    ; $49 [2]
+   139 3224 4A			    lsr         ; $4a [2]
+   140 3225 4C 28 32		    jmp next    ; $4c [3]
+   141 3228			next:
+   142 3228 4D 00 10		    eor $1000   ; $4d [4]
+   143 322B 4E 00 10		    lsr $1000   ; $4e [6]
+   144
+   145 				                ; $50-$5f, documented opcodes --------------------------------
+   146
+   147 322E A9 40		    lda #$40    ;     [2] set V
+   148 3230 48			    pha         ;     [3]
+   149 3231 28			    plp         ;     [4]
+   150 3232 50 00		    bvc @+      ; $50 [2] not taken
+   151 				@:
+   152 3234 B8			    clv         ;     [2]
+   153 3235 50 59		    bvc @+      ; $50 [3] taken
+   154 3237 EA EA EA EA EA EA +     .align $3290, $ea
+   155 				@:
+   156 3290 50 6E		    bvc @+      ; $50 [4] taken, page cross
+   157 3292 EA EA EA EA EA EA +     .align $3300, $ea
+   158 				@:
+   159 3300 A0 00		    ldy #0      ;     [2]
+   160 3302 51 90		    eor ($90),y ; $51 [5]
+   161 3304 88			    dey         ;     [2]
+   162 3305 51 90		    eor ($90),y ; $51 [6]
+   163 3307 55 80		    eor $80,x   ; $55 [4]
+   164 3309 56 80		    lsr $80,x   ; $56 [6]
+   165 330B 58			    cli         ; $58 [2]
+   166 330C 59 00 10		    eor $1000,y ; $59 [4]
+   167 330F 59 80 10		    eor $1080,y ; $59 [5]
+   168 3312 5D 00 10		    eor $1000,x ; $5d [4]
+   169 3315 5D 80 10		    eor $1080,x ; $5d [5]
+   170 3318 5E 00 10		    lsr $1000,x ; $5e [7]
+   171
+   172 331B 4C 0A 20		    jmp endless ;     [3]
+   173
+   174 				.ifndef ATARI
+   175 331E			    org $fffa
+   176 FFFA 09 20 00 20 09 20	    dta a(nmi),a(main),a(irq)
+   177 				.else
+   178 				    run main
+   179 				.endif
+   180
+   181 				    .print "endless = ",endless
+   181 				endless = $200A
+   182
