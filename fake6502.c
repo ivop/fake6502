@@ -87,7 +87,7 @@ static void absx() {
     ea = read6502word(PC);
     uint16_t startpage = ea & 0xff00;
     ea += X;
-    penaltyaddr = startpage != ea & 0xff00;     // page crossing
+    penaltyaddr = startpage != (ea & 0xff00);     // page crossing
     PC += 2;
 }
 
@@ -95,7 +95,7 @@ static void absy() {
     ea = read6502word(PC);
     uint16_t startpage = ea & 0xff00;
     ea += Y;
-    penaltyaddr = startpage != ea & 0xff00;     // page crossing
+    penaltyaddr = startpage != (ea & 0xff00);     // page crossing
     PC += 2;
 }
 
@@ -116,7 +116,7 @@ static void indy() { // (indirect),Y
     ea = read6502(ea) | (read6502((ea+1) & 0xff) << 8);  // page wrap
     uint16_t startpage = ea & 0xff00;
     ea += Y;
-    penaltyaddr = startpage != ea & 0xff00;     // page cross penalty
+    penaltyaddr = startpage != (ea & 0xff00);     // page cross penalty
 }
 
 // ----------------------------------------------------------------------------
