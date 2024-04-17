@@ -24,10 +24,9 @@
     opt f+
     org $0
     dta 0
-    .align $0080,0
-.else
-        org     $0080
 .endif
+
+        org     $0080
 
 dc_con  dta     $00         ;decompression control byte
 dc_in0  dta     $60         ;instruction
@@ -55,11 +54,7 @@ dc_conm dta     0           ;decompression: new control byte mask
 dc_conc dta     0           ;decompression: new control byte mask bit count
 dc_conv dta     0           ;decompression: tracked control byte
 
-.ifndef ATARI
-    .align $00c0,0
-.else
     org $c0
-.endif
 a0      dta a(0)
 a1      dta a(0)
 a2      dta a(0)
@@ -73,11 +68,7 @@ d5      dta 0
 d6      dta 0
 d7      dta 0
 
-.ifndef ATARI
-    .align $2000,0
-.else
         org     $2000
-.endif
 
 main:
         mwa     #test_start a0
@@ -208,26 +199,21 @@ same_opcode:
         ;compare registers
         lda     dc_a2
         cmp     d1
-        ;bne     fail
-        bne *
+        bne     fail
         
         cpx     dc_x2
-        ;bne     fail
-        bne *
+        bne     fail
         
         cpy     dc_y2
-        ;bne     fail
-        bne *
+        bne     fail
         
         lda     dc_p2
         cmp     d4
-        ;bne     fail
-        bne *
+        bne     fail
         
         lda     dc_m2
         cmp     d5
-        ;bne     fail
-        bne *
+        bne     fail
 
         ;go another round
         lda     a0      
