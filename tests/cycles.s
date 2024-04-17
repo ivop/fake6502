@@ -46,6 +46,10 @@ endless:
 
 subrout:
     rts         ;     [6];
+
+tramp:
+    dta a(land_here)
+
     org $3000
 
 timing:
@@ -168,6 +172,68 @@ next:
     eor $1000,x ; $5d [4]
     eor $1080,x ; $5d [5]
     lsr $1000,x ; $5e [7]
+
+                ; $60-$6f, documented opcodes --------------------------------
+
+    ;rts        ; $60     skipped, already tested by jsr
+    cld         ;     [2]
+    adc ($80,x) ; $61 [6]
+    adc $80     ; $65 [3]
+    adc #$ff    ; $69 [2]
+    adc $1000   ; $6d [4]
+
+    sed         ;     [2]   adc +1 cycle in decimal mode
+    adc ($80,x) ; $61 [7]
+    adc $80     ; $65 [4]
+    adc #$ff    ; $69 [3]
+    adc $1000   ; $6d [5]
+
+    ror $80     ; $66 [5]
+    pla         ; $68 [4]
+    ror         ; $6a [2]
+    jmp (tramp) ; $6c [5]
+land_here:
+    ror $1000   ; $6e [6]
+
+                ; $70-$7f, documented opcodes --------------------------------
+
+    clv         ;     [2]
+    bvs @+      ; $70 [2] not taken
+@:
+    lda #$40    ;     [2] set V
+    pha         ;     [3]
+    plp         ;     [4]
+    bvs @+      ; $70 [3] taken
+    .align $3390,$ea
+@:
+    bvs @+      ; $70 [4] taken, page cross
+    .align $3400,$ea
+@:
+    cld         ;     [2]
+    ldy #0      ;     [2]
+    adc ($90),y ; $71 [5]
+    dey         ;     [2]
+    adc ($90),y ; $71 [6]
+    adc $80,x   ; $75 [4]
+    adc $1000,y ; $79 [4]
+    adc $1080,y ; $79 [5]
+    adc $1000,x ; $7d [4]
+    adc $1080,x ; $7d [5]
+
+    sed         ;     [2]   decimal mode, same as above, +1
+    ldy #0      ;     [2]
+    adc ($90),y ; $71 [6]
+    dey         ;     [2]
+    adc ($90),y ; $71 [7]
+    adc $80,x   ; $75 [5]
+    adc $1000,y ; $79 [5]
+    adc $1080,y ; $79 [6]
+    adc $1000,x ; $7d [5]
+    adc $1080,x ; $7d [6]
+
+    ror $80,x   ; $76 [6]
+    sei         ; $78 [2]
+    ror $1000,x ; $7e [7]
 
     jmp endless ;     [3]
 

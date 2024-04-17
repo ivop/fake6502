@@ -52,7 +52,7 @@ void test(const char *filename, uint16_t success, bool trace) {
     }
 }
 
-// expected cycles in program order, starting at timing:
+// expected cycles in test program order, starting at timing:
 uint8_t exp_cycles[] = {
     7,6,6,3,5,3,2,2,4,6,                    // documented: 00-0f
     2,2,2,3,4,2,5,2,6,4,6,2,4,5,2,4,5,7,    // documented: 10-1f
@@ -60,6 +60,9 @@ uint8_t exp_cycles[] = {
     2,2,2,3,4,2,5,2,6,4,6,2,4,5,4,5,7,      // documented: 30-3f
     6,3,5,3,2,2,3,4,6,                      // documented: 40-4f
     2,3,4,2,2,3,4,2,5,2,6,4,6,2,4,5,4,5,7,  // documented: 50-5f
+    2,6,3,2,4,2,7,4,3,5,5,4,2,5,6,          // documented: 60-6f
+    2,2,2,3,4,3,4,2,2,5,2,6,4,4,5,4,5,      // documented: 70-7f
+    2,2,6,2,7,5,5,6,5,6,6,2,7,
     3
 };
 
