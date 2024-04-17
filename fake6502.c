@@ -364,8 +364,18 @@ static void SBX() {
 // ------------------ Unstable undocumented opcodes ---------------------------
 
 static void SHA() { putvalue(A & X & ((ea >> 8) + 1)); }
-static void SHX() { putvalue(X & ((ea >> 8) + 1)); }
-static void SHY() { putvalue(Y & ((ea >> 8) + 1)); }
+static void SHX() {
+    uint8_t value = X & (((ea - Y) >> 8) + 1);
+    if (((ea - Y) & 0xff) + Y > 0xff)
+        ea = ea & 0xff | value << 8;
+    putvalue(value);
+}
+static void SHY() {
+    uint8_t value = Y & (((ea-X) >> 8) + 1);
+    if (((ea - X) & 0xff) + X > 0xff)
+        ea = ea & 0xff | value << 8;
+    putvalue(value);
+}
 static void TAS() { SP = A & X; putvalue(SP & ((ea >> 8) + 1));
 }
 
