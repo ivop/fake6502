@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include "fake6502.h"
 
+#define FAIL "\x1b[1;31mFAIL!\x1b[0m"
+#define PASS "\x1b[1;32mpass\x1b[0m"
+
 uint8_t memory[65536];
 
 uint8_t read6502(uint16_t address) {
@@ -14,7 +17,7 @@ void write6502(uint16_t address, uint8_t value) {
     memory[address] = value;
 }
 
-void test(const char *filename, uint16_t success, bool trace) {
+void load_file(const char *filename) {
     printf("%s -- ", filename);
     FILE *f = fopen(filename,"rb");
     if (!f) {
@@ -26,6 +29,10 @@ void test(const char *filename, uint16_t success, bool trace) {
         return;
     }
     fflush(stdout);
+}
+
+void test(const char *filename, uint16_t success, bool trace) {
+    load_file(filename);
     reset6502();
     while (1) {
         uint16_t save = PC;
@@ -37,13 +44,43 @@ void test(const char *filename, uint16_t success, bool trace) {
             printf("P=%02X\n", getP());
         }
         if (save == PC) {
-            printf("%s -- ", PC != success ? "\x1b[1;31mFAIL!\x1b[0m" :
-                                             "\x1b[1;32mpass\x1b[0m");
+            printf("%s -- ", PC != success ? FAIL : PASS);
             printf("PC=%04x ", PC);
             printf("A=%02x X=%02x Y=%02x SP=%02x P=%02x\n", A, X, Y, SP, getP());
             return;
         }
     }
+}
+
+// expected cycles in program order, starting at timing:
+uint8_t exp_cycles[] = {
+    7,6,6,3,5,3,2,
+    3
+};
+
+void test_cycles(void) {
+    printf("\nTest cycles per instruction.\n");
+    bool do_compare = false;
+    int idx = 0;
+    load_file("tests/cycles.bin");
+    reset6502();
+    while (1) {
+        uint16_t save = PC;
+        uint8_t instr = read6502(PC);
+        if (PC == 0x3000) do_compare = true;
+        int spent = step6502();
+        if (do_compare) {
+            if (exp_cycles[idx++] != spent) {
+                printf("PC: %04X instr: $%02x spent: %d\n", save, instr, spent);
+                goto errout;
+            }
+        }
+        if (PC == 0x2008) break;
+    }
+    printf("%s\n", PASS);
+    return;
+errout:
+    printf("%s\n", FAIL);
 }
 
 int main(void) {
@@ -129,6 +166,10 @@ int main(void) {
     test("tests/avery.bin", 0x20db, false);
     test("tests/avery2.bin", 0x20fa, false);
     test("tests/avery3.bin", 0x209d, false);
+    printf("\nHCM6502 tests.\n");
+    test("tests/AllSuiteA.bin", 0x45c0, false);
 #endif
+
+    test_cycles();
     return 0;
 }

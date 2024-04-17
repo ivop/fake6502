@@ -1,0 +1,67 @@
+mads 2.1.7
+Source: cycles.s
+     1 				;
+     2 				; Test number of cycles per instruction
+     3 				; by Ivo van Poorten
+     4 				;
+     5
+     6 				.ifndef ATARI
+     7 				    opt h-
+     8 				    opt f+
+     9 				    org 0
+    10 0000 00			    dta 0
+    11 				.endif
+    12
+    13 0001			    org $80
+    14
+    15 0080 12 34 56 78		    dta $12, $34, $56, $78
+    16
+    17 0084			    org $2000
+    18
+    19 2000			main:
+    20
+    21 				    ; INIT
+    22
+    23 				.ifdef ATARI
+    24 				    sei
+    25 				    mva #0 $d20e
+    26 				    sta $d40e
+    27 				    mva #$fe $d301
+    28 				    mwa #nmi $fffa
+    29 				    mwa #irq $fffe
+    30 				.endif
+    31 2000 A2 00		    ldx #0      ; init to zero
+    32 2002 A0 00		    ldy #0
+    33
+    34 2004 4C 00 30		    jmp timing
+    35
+    36 2007			nmi:
+    37 2007			irq:
+    38 2007 40			    rti         ; $40 [6]
+    39
+    40 2008			endless:
+    41 2008 4C 08 20		    jmp *       ;     [3]
+    42
+    43 200B			    org $3000
+    44
+    45 3000			timing:
+    46 3000 00 00		    dta 0,0     ; $00 [7] brk is a two byte instruction!
+    47 				                ; $40 [6] rti
+    48 3002 01 80		    ora ($80,x) ; $01 [6]
+    49 3004 05 80		    ora $80     ; $05 [3]
+    50 3006 06 80		    asl $80     ; $06 [5]
+    51 3008 08			    php         ; $08 [3]
+    52 3009 09 FF		    ora #$ff    ; $09 [2]
+    53
+    54 300B 4C 08 20		    jmp endless ;     [3]
+    55
+    56 				.ifndef ATARI
+    57 300E			    org $fffa
+    58 FFFA 07 20 00 20 07 20	    dta a(nmi),a(main),a(irq)
+    59 				.else
+    60 				    run main
+    61 				.endif
+    62
+    63 				    .print "endless = ",endless
+    63 				endless = $2008
+    64
