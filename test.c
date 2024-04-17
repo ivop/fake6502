@@ -129,6 +129,7 @@ int main(void) {
     printf("\nAvery Lee tests.\n");
     test("tests/avery.bin", 0x20db, false);
     test("tests/avery2.bin", 0x20fa, false);
+    test("tests/avery3.bin", 0x209d, false);
 #endif
     return 0;
 }
