@@ -323,6 +323,109 @@ land_here:
     ldx $1000,y ; $be [4]
     lda $1001,y ; $be [5]
 
+                ; $c0-$cf, documented opcodes --------------------------------
+
+    cpy #$5a    ; $c0 [2]
+    cmp ($80,x) ; $c1 [6]
+    cpy $80     ; $c4 [3]
+    cmp $80     ; $c5 [3]
+    dec $80     ; $c6 [5]
+    iny         ; $c8 [2]
+    cmp #$5a    ; $c9 [2]
+    dex         ; $ca [2]
+    cpy $1000   ; $cc [4]
+    cmp $1000   ; $cd [4]
+    dec $1000   ; $ce [6]
+
+                ; $d0-$df, documented opcodes --------------------------------
+
+    ldx #0      ;     [2]
+    bne @+      ; $d0 [2] not taken
+@:
+    dex         ;     [2]
+    bne @+      ; $d0 [3] taken
+    .align $3690,$ea
+@:
+    bne @+      ; $d0 [4] taken, page cross
+    .align $3700,$ea
+@:
+    ldy #0      ;     [2]
+    cmp ($90),y ; $d1 [5]
+    dey         ;     [2]
+    cmp ($90),y ; $d1 [6]
+    cmp $80,x   ; $d5 [4]
+    dec $80,x   ; $d6 [6]
+    cld         ; $d8 [2]
+    cmp $1000,y ; $d9 [4]
+    cmp $1080,y ; $d9 [5]
+    cmp $1000,x ; $dd [4]
+    cmp $1080,x ; $dd [5]
+    dec $1000,x ; $de [7]
+
+                ; $e0-$ef, documented opcodes --------------------------------
+
+    cpx #$ff    ; $e0 [2]
+    cld         ;     [2]
+    sbc ($80,x) ; $e1 [6]
+    sbc $80     ; $e5 [3]
+    sbc #$ff    ; $e9 [2]
+    sbc $1000   ; $ed [4]
+
+    sed         ;     [2] same in decimal mode
+    sbc ($80,x) ; $e1 [7]
+    sbc $80     ; $e5 [4]
+    sbc #$ff    ; $e9 [3]
+    sbc $1000   ; $ed [5]
+
+    cpx $80     ; $e4 [3]
+    inc $80     ; $e6 [5]
+    inx         ; $e8 [2]
+    nop         ; $ea [2]
+    cpx $1000   ; $ec [4]
+    inc $1000   ; $ee [6]
+
+                ; $f0-$ff, documented opcodes --------------------------------
+
+    ldx #$ff    ;     [2]
+    beq @+      ; $f0 [2] not taken
+@:
+    inx         ;     [2]
+    beq @+      ; $f0 [3] taken
+    .align $3790,$ea
+@:
+    beq @+      ; $f0 [4] taken, page cross
+    .align $3800,$ea
+@:
+    cld         ;     [2]
+    ldy #0      ;     [2]
+    sbc ($90),y ; $f1 [5]
+    dey         ;     [2]
+    sbc ($90),y ; $f1 [6]
+    sbc $80,x   ; $f5 [4]
+    sbc $1000,y ; $f9 [4]
+    sbc $1080,y ; $f9 [5]
+    ldx #0      ;     [2]
+    sbc $1080,x ; $fd [4]
+    dex         ;     [2]
+    sbc $1080,x ; $fd [5]
+
+    sed         ;     [2] same, BCD
+    ldy #0      ;     [2]
+    sbc ($90),y ; $f1 [6]
+    dey         ;     [2]
+    sbc ($90),y ; $f1 [7]
+    sbc $80,x   ; $f5 [5]
+    sbc $1000,y ; $f9 [5]
+    sbc $1080,y ; $f9 [6]
+    ldx #0      ;     [2]
+    sbc $1080,x ; $fd [5]
+    dex         ;     [2]
+    sbc $1080,x ; $fd [6]
+
+    inc $80,x   ; $f6 [6]
+    sed         ; $f8 [2]
+    inc $1000,x ; $fe [7]
+
     jmp endless ;     [3]
 
 .ifndef ATARI

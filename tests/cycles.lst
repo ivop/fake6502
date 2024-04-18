@@ -325,15 +325,118 @@ Source: cycles.s
    323 3625 BE 00 10		    ldx $1000,y ; $be [4]
    324 3628 B9 01 10		    lda $1001,y ; $be [5]
    325
-   326 362B 4C 0A 20		    jmp endless ;     [3]
+   326 				                ; $c0-$cf, documented opcodes --------------------------------
    327
-   328 				.ifndef ATARI
-   329 362E			    org $fffa
-   330 FFFA 09 20 00 20 09 20	    dta a(nmi),a(main),a(irq)
-   331 				.else
-   332 				    run main
-   333 				.endif
-   334
-   335 				    .print "endless = ",endless
-   335 				endless = $200A
-   336
+   328 362B C0 5A		    cpy #$5a    ; $c0 [2]
+   329 362D C1 80		    cmp ($80,x) ; $c1 [6]
+   330 362F C4 80		    cpy $80     ; $c4 [3]
+   331 3631 C5 80		    cmp $80     ; $c5 [3]
+   332 3633 C6 80		    dec $80     ; $c6 [5]
+   333 3635 C8			    iny         ; $c8 [2]
+   334 3636 C9 5A		    cmp #$5a    ; $c9 [2]
+   335 3638 CA			    dex         ; $ca [2]
+   336 3639 CC 00 10		    cpy $1000   ; $cc [4]
+   337 363C CD 00 10		    cmp $1000   ; $cd [4]
+   338 363F CE 00 10		    dec $1000   ; $ce [6]
+   339
+   340 				                ; $d0-$df, documented opcodes --------------------------------
+   341
+   342 3642 A2 00		    ldx #0      ;     [2]
+   343 3644 D0 00		    bne @+      ; $d0 [2] not taken
+   344 				@:
+   345 3646 CA			    dex         ;     [2]
+   346 3647 D0 47		    bne @+      ; $d0 [3] taken
+   347 3649 EA EA EA EA EA EA +     .align $3690,$ea
+   348 				@:
+   349 3690 D0 6E		    bne @+      ; $d0 [4] taken, page cross
+   350 3692 EA EA EA EA EA EA +     .align $3700,$ea
+   351 				@:
+   352 3700 A0 00		    ldy #0      ;     [2]
+   353 3702 D1 90		    cmp ($90),y ; $d1 [5]
+   354 3704 88			    dey         ;     [2]
+   355 3705 D1 90		    cmp ($90),y ; $d1 [6]
+   356 3707 D5 80		    cmp $80,x   ; $d5 [4]
+   357 3709 D6 80		    dec $80,x   ; $d6 [6]
+   358 370B D8			    cld         ; $d8 [2]
+   359 370C D9 00 10		    cmp $1000,y ; $d9 [4]
+   360 370F D9 80 10		    cmp $1080,y ; $d9 [5]
+   361 3712 DD 00 10		    cmp $1000,x ; $dd [4]
+   362 3715 DD 80 10		    cmp $1080,x ; $dd [5]
+   363 3718 DE 00 10		    dec $1000,x ; $de [7]
+   364
+   365 				                ; $e0-$ef, documented opcodes --------------------------------
+   366
+   367 371B E0 FF		    cpx #$ff    ; $e0 [2]
+   368 371D D8			    cld         ;     [2]
+   369 371E E1 80		    sbc ($80,x) ; $e1 [6]
+   370 3720 E5 80		    sbc $80     ; $e5 [3]
+   371 3722 E9 FF		    sbc #$ff    ; $e9 [2]
+   372 3724 ED 00 10		    sbc $1000   ; $ed [4]
+   373
+   374 3727 F8			    sed         ;     [2] same in decimal mode
+   375 3728 E1 80		    sbc ($80,x) ; $e1 [7]
+   376 372A E5 80		    sbc $80     ; $e5 [4]
+   377 372C E9 FF		    sbc #$ff    ; $e9 [3]
+   378 372E ED 00 10		    sbc $1000   ; $ed [5]
+   379
+   380 3731 E4 80		    cpx $80     ; $e4 [3]
+   381 3733 E6 80		    inc $80     ; $e6 [5]
+   382 3735 E8			    inx         ; $e8 [2]
+   383 3736 EA			    nop         ; $ea [2]
+   384 3737 EC 00 10		    cpx $1000   ; $ec [4]
+   385 373A EE 00 10		    inc $1000   ; $ee [6]
+   386
+   387 				                ; $f0-$ff, documented opcodes --------------------------------
+   388
+   389 373D A2 FF		    ldx #$ff    ;     [2]
+   390 373F F0 00		    beq @+      ; $f0 [2] not taken
+   391 				@:
+   392 3741 E8			    inx         ;     [2]
+   393 3742 F0 4C		    beq @+      ; $f0 [3] taken
+   394 3744 EA EA EA EA EA EA +     .align $3790,$ea
+   395 				@:
+   396 3790 F0 6E		    beq @+      ; $f0 [4] taken, page cross
+   397 3792 EA EA EA EA EA EA +     .align $3800,$ea
+   398 				@:
+   399 3800 D8			    cld         ;     [2]
+   400 3801 A0 00		    ldy #0      ;     [2]
+   401 3803 F1 90		    sbc ($90),y ; $f1 [5]
+   402 3805 88			    dey         ;     [2]
+   403 3806 F1 90		    sbc ($90),y ; $f1 [6]
+   404 3808 F5 80		    sbc $80,x   ; $f5 [4]
+   405 380A F9 00 10		    sbc $1000,y ; $f9 [4]
+   406 380D F9 80 10		    sbc $1080,y ; $f9 [5]
+   407 3810 A2 00		    ldx #0      ;     [2]
+   408 3812 FD 80 10		    sbc $1080,x ; $fd [4]
+   409 3815 CA			    dex         ;     [2]
+   410 3816 FD 80 10		    sbc $1080,x ; $fd [5]
+   411
+   412 3819 F8			    sed         ;     [2] same, BCD
+   413 381A A0 00		    ldy #0      ;     [2]
+   414 381C F1 90		    sbc ($90),y ; $f1 [6]
+   415 381E 88			    dey         ;     [2]
+   416 381F F1 90		    sbc ($90),y ; $f1 [7]
+   417 3821 F5 80		    sbc $80,x   ; $f5 [5]
+   418 3823 F9 00 10		    sbc $1000,y ; $f9 [5]
+   419 3826 F9 80 10		    sbc $1080,y ; $f9 [6]
+   420 3829 A2 00		    ldx #0      ;     [2]
+   421 382B FD 80 10		    sbc $1080,x ; $fd [5]
+   422 382E CA			    dex         ;     [2]
+   423 382F FD 80 10		    sbc $1080,x ; $fd [6]
+   424
+   425 3832 F6 80		    inc $80,x   ; $f6 [6]
+   426 3834 F8			    sed         ; $f8 [2]
+   427 3835 FE 00 10		    inc $1000,x ; $fe [7]
+   428
+   429 3838 4C 0A 20		    jmp endless ;     [3]
+   430
+   431 				.ifndef ATARI
+   432 383B			    org $fffa
+   433 FFFA 09 20 00 20 09 20	    dta a(nmi),a(main),a(irq)
+   434 				.else
+   435 				    run main
+   436 				.endif
+   437
+   438 				    .print "endless = ",endless
+   438 				endless = $200A
+   439
