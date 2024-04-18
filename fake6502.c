@@ -310,7 +310,7 @@ static void sbc() {
 // ------------------ Stable undocumented opcodes -----------------------------
 
 static void SLO() { asl(); ora(); }
-static void RLA() { rol(); and(); }
+static void RLA() { rol(); and(); penaltyop=0; }
 static void SRE() { lsr(); eor(); }
 static void RRA() { ror(); adc(); }
 static void SAX() { putvalue(A & X); }
