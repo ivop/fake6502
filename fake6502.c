@@ -312,7 +312,7 @@ static void sbc() {
 static void SLO() { asl(); ora(); }
 static void RLA() { rol(); and(); penaltyop = 0; }
 static void SRE() { lsr(); eor(); penaltyop = 0; }
-static void RRA() { ror(); adc(); }
+static void RRA() { ror(); adc(); penaltyop = 0; if (D) clockticks6502--; }
 static void SAX() { putvalue(A & X); }
 static void LAX() { penaltyop = 1; lda(); ldx(); }
 static void DCP() { dec(); cmp(); }
