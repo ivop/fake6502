@@ -41,7 +41,7 @@ static inline void calcV(uint16_t result, uint8_t accu, uint16_t value) {
 }
 
 static void splitP(uint8_t x) {
-    N=(x)&0x80, V=(x)&0x40, D=(x)&8, I=(x)&4, Z=(x)&2, C=(x)&1;
+    N=x&0x80, V=x&0x40, D=x&8, I=x&4, Z=x&2, C=x&1;
 }
 
 uint8_t getP(void){ return (N<<7)|(V<<6)|(1<<5)|(0<<4)|(D<<3)|(I<<2)|(Z<<1)|C;}
@@ -54,18 +54,13 @@ static void push16(uint16_t pushval) {
     SP -= 2;
 }
 
-static void push8(uint8_t pushval) {
-    write6502(BASE_STACK + SP--, pushval);
-}
+static void push8(uint8_t pushval) { write6502(BASE_STACK + SP--, pushval); }
+static uint8_t pull8() { return read6502(BASE_STACK + ++SP); }
 
 static uint16_t pull16() {
     SP += 2;
     return read6502(BASE_STACK + ((SP - 1) & 0xFF)) | \
           (read6502(BASE_STACK + ((SP    ) & 0xFF)) << 8);
-}
-
-static uint8_t pull8() {
-    return read6502(BASE_STACK + ++SP);
 }
 
 static uint16_t read6502word(uint16_t addr) {
@@ -455,8 +450,7 @@ int nmi6502() {
 
 int reset6502() {
     PC = read6502word(0xfffc);
-    A = X = Y = 0;
-    C = Z = I = D = V = N = 0;
+    A = X = Y = C = Z = I = D = V = N = 0;
     SP = 0xFD;
     return 7;
 }

@@ -104,7 +104,7 @@ errout:
 }
 
 int main(void) {
-#if 0
+#if 1
     printf("Klaus Dormann test suite.\n");
     test("tests/6502_functional_test.bin", 0x3469, false);
     test("tests/6502_decimal_test.bin", 0x044b, false);
