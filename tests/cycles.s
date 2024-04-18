@@ -12,7 +12,7 @@
 
     org $80
 
-    dta $12, $34, $56, $78
+    dta $12, $80, $56, $78
 
     org $90
     dta a($1ff0)
@@ -234,6 +234,94 @@ land_here:
     ror $80,x   ; $76 [6]
     sei         ; $78 [2]
     ror $1000,x ; $7e [7]
+
+                ; $80-$8f, documented opcodes --------------------------------
+
+    ldx #0      ;     [2]
+    sta ($80,x) ; $81 [6]
+    sty $a0     ; $84 [3]
+    sta $a0     ; $85 [3]
+    stx $a0     ; $86 [3]
+    dey         ; $88 [2]
+    txa         ; $8a [2]
+    sty $1000   ; $8c [4]
+    sta $1000   ; $8d [4]
+    stx $1000   ; $8e [4]
+
+                ; $90-$9f, documented opcodes --------------------------------
+
+    sec         ;     [2]
+    bcc @+      ; $90 [2] not taken
+@:
+    clc         ;     [2]
+    bcc @+      ; $90 [3] taken
+    .align $3490,$ea
+@:
+    bcc @+      ; $90 [4] taken, page cross
+    .align $3500,$ea
+@:
+    ldy #0      ;     [2]
+    sta ($80),y ; $91 [6] no page cross
+    dey         ;     [2]
+    sty $80     ;     [3]
+    sta ($80),y ; $91 [6] page cross, but still 6(!)
+    ldx #0      ;     [2]
+    sty $80,x   ; $94 [4]
+    sta $80,x   ; $95 [4]
+    stx $80,y   ; $96 [4]
+    tya         ; $98 [2]
+    sta $1000,y ; $99 [5]
+    sta $10ff,y ; $99 [5]
+    txs         ; $9a [2]
+    sta $1000,x ; $9d [5]
+    sta $10ff,x ; $9d [5]
+
+                ; $a0-$af, documented opcodes --------------------------------
+
+    ldy #0      ; $a0 [2]
+    lda ($80,x) ; $a1 [6]
+    ldx #0      ; $a2 [2]
+    ldy $80     ; $a4 [3]
+    lda $80     ; $a5 [3]
+    ldx $80     ; $a6 [3]
+    tay         ; $a8 [2]
+    lda #0      ; $a9 [2]
+    tax         ; $aa [2]
+    ldy $1000   ; $ac [4]
+    lda $1000   ; $ad [4]
+    ldx $1000   ; $ae [4]
+
+                ; $b0-$bf, documented opcodes --------------------------------
+
+    clc         ;     [2]
+    bcs @+      ; $b0 [2] not taken
+@:
+    sec         ;     [2]
+    bcs @+      ; $b0 [3] taken
+    .align $3590,$ea
+@:
+    bcs @+      ; $b0 [4] taken, page cross
+    .align $3600,$ea
+@:
+    ldy #0      ;     [2]
+    lda ($90),y ; $b1 [5]
+    dey         ;     [2]
+    lda ($90),y ; $b1 [6]
+    ldy $80,x   ; $b4 [4]
+    lda $80,x   ; $b5 [4]
+    ldx $80,y   ; $b6 [4]
+    clv         ; $b8 [2]
+    ldy #$ff    ;     [2]
+    lda $1000,y ; $b9 [4]
+    lda $1080,y ; $b9 [5]
+    tsx         ; $ba [2]
+    ldx #$ff    ;     [2]
+    ldy $1000,x ; $bc [4]
+    ldy $1001,x ; $bc [5]
+    lda $1000,x ; $bd [4]
+    lda $1001,x ; $bd [5]
+    ldx $1000,y ; $be [4]
+    lda $1001,y ; $be [5]
 
     jmp endless ;     [3]
 
