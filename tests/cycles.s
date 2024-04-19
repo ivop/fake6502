@@ -426,6 +426,163 @@ land_here:
     sed         ; $f8 [2]
     inc $1000,x ; $fe [7]
 
+    ; UNDOCUMENTED OPCODES
+
+    ; nops
+    dta $1a     ;     [2]
+    dta $3a     ;     [2]
+    dta $5a     ;     [2]
+    dta $7a     ;     [2]
+    dta $da     ;     [2]
+    dta $fa     ;     [2]
+
+    dta $80,0   ;     [2]
+    dta $82,0   ;     [2]
+    dta $c2,0   ;     [2]
+    dta $e2,0   ;     [2]
+    dta $89,0   ;     [2]
+
+    dta $04,0   ;     [3]
+    dta $44,0   ;     [3]
+    dta $64,0   ;     [3]
+
+    dta $14,0   ;     [4]
+    dta $34,0   ;     [4]
+    dta $54,0   ;     [4]
+    dta $74,0   ;     [4]
+    dta $d4,0   ;     [4]
+    dta $f4,0   ;     [4]
+
+    dta $0c,0,0 ;     [4]
+
+    ldx #$ff    ;     [2]
+    dta $1c,0,8 ;     [4]
+    dta $3c,0,8 ;     [4]
+    dta $5c,0,8 ;     [4]
+    dta $7c,0,8 ;     [4]
+    dta $dc,0,8 ;     [4]
+    dta $fc,0,8 ;     [4]
+    dta $1c,1,8 ;     [5]
+    dta $3c,1,8 ;     [5]
+    dta $5c,1,8 ;     [5]
+    dta $7c,1,8 ;     [5]
+    dta $dc,1,8 ;     [5]
+    dta $fc,1,8 ;     [5]
+
+    ; SLO
+    dta $07,0   ;     [5]
+    dta $17,0   ;     [6]
+    dta $03,0   ;     [8]
+    dta $13,0   ;     [8]
+    dta $0f,0,0 ;     [6]
+    dta $1f,0,0 ;     [7]
+    dta $1b,0,0 ;     [7]
+
+    ; RLA
+    dta $27,0   ;     [5]
+    dta $37,0   ;     [6]
+    dta $23,0   ;     [8]
+    dta $33,0   ;     [8]
+    dta $2f,0,0 ;     [6]
+    dta $3f,0,0 ;     [7]
+    dta $3b,0,0 ;     [7]
+
+    ; SRE
+    dta $47,0   ;     [5]
+    dta $57,0   ;     [6]
+    dta $43,0   ;     [8]
+    dta $53,0   ;     [8]
+    dta $4f,0,0 ;     [6]
+    dta $5f,0,0 ;     [7]
+    dta $5b,0,0 ;     [7]
+
+    ; RRA
+    dta $67,0   ;     [5]
+    dta $77,0   ;     [6]
+    dta $63,0   ;     [8]
+    dta $73,0   ;     [8]
+    dta $6f,0,0 ;     [6]
+    dta $7f,0,0 ;     [7]
+    dta $7b,0,0 ;     [7]
+
+    ; SAX
+    dta $87,0   ;     [3]
+    dta $97,0   ;     [4]
+    dta $83,0   ;     [6]
+    dta $8f,0,0 ;     [4]
+
+    ; LAX
+    dta $a7,0   ;     [3]
+    dta $b7,0   ;     [4]
+    dta $a3,0   ;     [6]
+    dta $af,0,0 ;     [4]
+    ldy #0      ;     [2]
+    dta $b3,0   ;     [5]
+    dta $bf,$90,0 ;   [4]
+    dey         ;     [2]
+    dta $b3,0   ;     [6]
+    dta $bf,$90,0 ;   [5]
+
+    ; DCP
+    dta $c7,0   ;     [5]
+    dta $d7,0   ;     [6]
+    dta $c3,0   ;     [8]
+    dta $d3,0   ;     [8]
+    dta $cf,0,0 ;     [6]
+    dta $df,0,0 ;     [7]
+    dta $db,0,0 ;     [7]
+
+    ; ISC
+    dta $e7,0   ;     [5]
+    dta $f7,0   ;     [6]
+    dta $e3,0   ;     [8]
+    dta $f3,0   ;     [8]
+    dta $ef,0,0 ;     [6]
+    dta $ff,0,0 ;     [7]
+    dta $fb,0,0 ;     [7]
+
+    ; ANC
+    dta $0b,0   ;     [2]
+    dta $2b,0   ;     [2]
+
+    ; ALR
+    dta $4b,0   ;     [2]
+
+    ; ARR
+    dta $6b,0   ;     [2]
+
+    ; SBX
+    dta $cb,0   ;     [2]
+
+    ; LAS
+    ldy #$ff    ;     [2]
+    dta $bb,0,8 ;     [4]
+    dta $bb,1,8 ;     [5]
+
+    ; SHA
+    dta $93,$90 ;     [6]
+    dta $9f,0,8 ;     [5]
+    dta $9f,1,8 ;     [5]
+
+    ; SHX
+    dta $9e,0,8 ;     [5]
+    dta $9e,1,8 ;     [5]
+
+    ; SHY
+    ldx #$ff    ;     [2]
+    dta $9c,0,8 ;     [5]
+    dta $9c,1,8 ;     [5]
+
+    ; TAS
+    dta $9b,0,8 ;     [5]
+    dta $9b,1,8 ;     [5]
+
+    ; ANE
+    dta $8b,0   ;     [2]
+
+    ; LXA
+    dta $ab,0   ;     [2]
+
     jmp endless ;     [3]
 
 .ifndef ATARI

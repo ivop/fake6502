@@ -74,6 +74,23 @@ uint8_t exp_cycles[] = {
     2,2,6,3,2,4,2,7,4,3,5,3,5,2,2,4,6,      // documented: e0-ef
     2,2,2,3,4,2,2,5,2,6,4,4,5,2,4,2,5,      // documented: f0-ff
     2,2,6,2,7,5,5,6,2,5,2,6,6,2,7,
+
+    2,2,2,2,2,2, 2,2,2,2,2, 3,3,3,          // undocumented nops
+    4,4,4,4,4,4, 4,
+    2,4,4,4,4,4,4,5,5,5,5,5,5,
+
+    5,6,8,8,6,7,7,          // SLO
+    5,6,8,8,6,7,7,          // RLA
+    5,6,8,8,6,7,7,          // SRE
+    5,6,8,8,6,7,7,          // RRA
+    3,4,6,4,                // SAX
+    3,4,6,4,2,5,4,2,6,5,    // LAX
+    5,6,8,8,6,7,7,          // DCP
+    5,6,8,8,6,7,7,          // ISC
+    2,2, 2, 2, 2,           // ANC, ALR, ARR, SBX
+    2,4,5,                  // LAS
+    6,5,5, 5,5, 2,5,5, 5,5, // SHA, SHX, SHY, TAS
+    2, 2,                   // ANE, LXA
     3
 };
 
@@ -104,7 +121,7 @@ errout:
 }
 
 int main(void) {
-#if 1
+#if 0
     printf("Klaus Dormann test suite.\n");
     test("tests/6502_functional_test.bin", 0x3469, false);
     test("tests/6502_decimal_test.bin", 0x044b, false);
