@@ -315,7 +315,7 @@ static void SRE() { lsr(); eor(); penaltyop = 0; }
 static void RRA() { ror(); adc(); penaltyop = 0; if (D) clockticks6502--; }
 static void SAX() { putvalue(A & X); }
 static void LAX() { penaltyop = 1; lda(); ldx(); }
-static void DCP() { dec(); cmp(); }
+static void DCP() { dec(); cmp(); penaltyop = 0; }
 static void ISC() { inc(); sbc(); }
 static void ANC() { and(); C = A & 0x80; }
 static void ALR() { and(); C = A & 1; A >>= 1; calcZN(A); }
