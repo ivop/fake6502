@@ -15,7 +15,7 @@
 
 static void (*addrtable[256])();
 static void (*optable[256])();
-static uint8_t penaltyop, penaltyaddr, callexternal;
+static uint8_t penaltyop, penaltyaddr;
 static uint64_t clockticks6502;
 
 uint16_t PC;
