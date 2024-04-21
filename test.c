@@ -46,7 +46,8 @@ void test(const char *filename, uint16_t success, bool trace) {
         if (save == PC) {
             printf("%s -- ", PC != success ? FAIL : PASS);
             printf("PC=%04x ", PC);
-            printf("A=%02x X=%02x Y=%02x SP=%02x P=%02x\n", A, X, Y, SP, getP());
+            printf("A=%02x X=%02x Y=%02x SP=%02x ", A, X, Y, SP);
+            printf("P=%02x\n", getP());
             return;
         }
     }
@@ -121,7 +122,6 @@ errout:
 }
 
 int main(void) {
-#if 1
     printf("Klaus Dormann test suite.\n");
     test("tests/6502_functional_test.bin", 0x3469, false);
     test("tests/6502_decimal_test.bin", 0x044b, false);
@@ -205,7 +205,6 @@ int main(void) {
     test("tests/avery3.bin", 0x209d, false);
     printf("\nHCM6502 tests.\n");
     test("tests/AllSuiteA.bin", 0x45c0, false);
-#endif
     test_cycles();
     return 0;
 }
