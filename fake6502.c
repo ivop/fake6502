@@ -18,10 +18,6 @@ static void (*optable[256])();
 static uint8_t penaltyop, penaltyaddr, callexternal;
 static uint64_t clockticks6502;
 
-#define FLAG_BREAK     0x10
-#define FLAG_CONSTANT  0x20
-#define BASE_STACK     0x100
-
 uint16_t PC;
 uint8_t SP, A, X, Y;
 bool C, Z, I, D, V, N;
@@ -49,18 +45,18 @@ uint8_t getP(void){ return (N<<7)|(V<<6)|(1<<5)|(0<<4)|(D<<3)|(I<<2)|(Z<<1)|C;}
 // ----------------------------------------------------------------------------
 
 static void push16(uint16_t pushval) {
-    write6502(BASE_STACK + SP, (pushval >> 8) & 0xFF);
-    write6502(BASE_STACK + ((SP - 1) & 0xFF), pushval & 0xFF);
+    write6502(0x0100 + SP, (pushval >> 8) & 0xFF);
+    write6502(0x0100 + ((SP - 1) & 0xFF), pushval & 0xFF);
     SP -= 2;
 }
 
-static void push8(uint8_t pushval) { write6502(BASE_STACK + SP--, pushval); }
-static uint8_t pull8() { return read6502(BASE_STACK + ++SP); }
+static void push8(uint8_t pushval) { write6502(0x0100 + SP--, pushval); }
+static uint8_t pull8() { return read6502(0x0100 + ++SP); }
 
 static uint16_t pull16() {
     SP += 2;
-    return read6502(BASE_STACK + ((SP - 1) & 0xFF)) | \
-          (read6502(BASE_STACK + ((SP    ) & 0xFF)) << 8);
+    return read6502(0x0100 + ((SP - 1) & 0xFF)) | \
+          (read6502(0x0100 + ((SP    ) & 0xFF)) << 8);
 }
 
 static uint16_t read6502word(uint16_t addr) {
@@ -181,7 +177,7 @@ static void cpx() { compare(X, getvalue()); }
 static void cpy() { compare(Y, getvalue()); }
 
 static void pha() { push8(A); }
-static void php() { push8(getP() | FLAG_BREAK); }
+static void php() { push8(getP() | 0x10); }
 static void pla() { A = pull8(); calcZN(A); }
 static void plp() { uint8_t P = pull8(); splitP(P); }
 
@@ -204,7 +200,7 @@ static void bit() {
 
 static void brk() {
     push16(++PC);                 // address before next instruction
-    push8(getP() | FLAG_BREAK);
+    php();
     I = 1;
     PC = read6502word(0xfffe);
 }
