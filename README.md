@@ -13,7 +13,7 @@ MOS 6502 Emulator in C.
 * Ruud Baltissen ttl6502 test suite.
 * Lorenz test suite for undocumented opcodes.
 * Visual6502 test for adc/sbc in decimal mode with invalid arguments.
-* Piots Fusik tests.
+* Piotr Fusik tests.
 * Avery Lee tests.
 * hcm6502 tests.
 
