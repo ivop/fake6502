@@ -72,7 +72,7 @@ static void zp()   { ea = read6502(PC++); }
 static void zpx()  { ea = (read6502(PC++) + X) & 0xff; }
 static void zpy()  { ea = (read6502(PC++) + Y) & 0xff; }
 static void abso() { ea = read6502word(PC); PC += 2; }
-static void rel()  { ea = PC + (int8_t) read6502(PC++); }
+static void rel()  { ea = PC+1; ea += (int8_t )read6502(PC++); }
 
 static void absx() {
     ea = read6502word(PC);
