@@ -169,8 +169,8 @@ static void sty() { putvalue(Y); }
 
 static inline void compare(uint8_t reg, uint8_t value) {
     calcN(reg - value);
-    C = reg >= value & 0xff;
-    Z = reg == value & 0xff;
+    C = reg >= value;
+    Z = reg == value;
 }
 static void cmp() { compare(A, getvalue()); penaltyop = 1; }
 static void cpx() { compare(X, getvalue()); }
