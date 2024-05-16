@@ -4,6 +4,7 @@
 
 extern uint16_t PC;
 extern uint8_t SP, A, X, Y, status;
+void setP(uint8_t x);
 uint8_t getP(void);
 
 extern uint8_t read6502(uint16_t address);

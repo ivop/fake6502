@@ -20,7 +20,7 @@ static uint64_t clockticks6502;
 
 uint16_t PC;
 uint8_t SP, A, X, Y;
-bool C, Z, I, D, V, N;
+static bool C, Z, I, D, V, N;
 static uint16_t ea;
 static uint8_t opcode;
 
@@ -36,7 +36,7 @@ static inline void calcV(uint16_t result, uint8_t accu, uint16_t value) {
     V = (result ^ accu) & (result ^ value) & 0x80;
 }
 
-static void splitP(uint8_t x) {
+void setP(uint8_t x) {
     N=x&0x80, V=x&0x40, D=x&8, I=x&4, Z=x&2, C=x&1;
 }
 
@@ -179,9 +179,9 @@ static void cpy() { compare(Y, getvalue()); }
 static void pha() { push8(A); }
 static void php() { push8(getP() | 0x10); }
 static void pla() { A = pull8(); calcZN(A); }
-static void plp() { uint8_t P = pull8(); splitP(P); }
+static void plp() { uint8_t P = pull8(); setP(P); }
 
-static void rti() { uint8_t P = pull8(); splitP(P); PC = pull16(); }
+static void rti() { uint8_t P = pull8(); setP(P); PC = pull16(); }
 static void rts() { PC = pull16() + 1; }
 
 static void tax() { X = A; calcZN(X); }
